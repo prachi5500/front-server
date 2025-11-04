@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Hero } from "@/components/Hero";
 import { BusinessCardForm, BusinessCardData } from "@/components/BusinessCardForm";
 import { TemplateSelector } from "@/components/TemplateSelector";
@@ -7,6 +7,9 @@ import { FontSelector } from "@/components/FontSelector";
 import { CustomizationPanel } from "@/components/CustomizationPanel";
 import { DynamicCard } from "@/components/templates/DynamicCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import { downloadAsImage } from "@/lib/utils";
 
 const Index = () => {
   const [businessData, setBusinessData] = useState<BusinessCardData>({
@@ -17,6 +20,7 @@ const Index = () => {
     phone: "",
     website: "",
     address: "",
+    logo: "",
   });
 
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
@@ -24,6 +28,7 @@ const Index = () => {
   const [fontSize, setFontSize] = useState<number>(16);
   const [textColor, setTextColor] = useState<string>("#000000");
   const [accentColor, setAccentColor] = useState<string>("#0ea5e9");
+  const cardRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,19 +44,32 @@ const Index = () => {
             {selectedDesign ? (
               <div className="space-y-6">
                 <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-scale-in">
-                  <h2 className="text-2xl font-bold mb-4 text-foreground">Selected Design Preview</h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold text-foreground">Selected Design Preview</h2>
+                    <Button
+                      onClick={() => cardRef.current && downloadAsImage(cardRef.current, selectedDesign.name)}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </Button>
+                  </div>
                   <div className="bg-gradient-to-br from-muted to-background p-8 rounded-lg">
                     <div className="max-w-md mx-auto">
-                      <DynamicCard
-                        data={businessData}
-                        designConfig={{
-                          ...selectedDesign,
-                          fontFamily: selectedFont,
-                          fontSize,
-                          textColor,
-                          accentColor
-                        }}
-                      />
+                      <div ref={cardRef}>
+                        <DynamicCard
+                          data={businessData}
+                          designConfig={{
+                            ...selectedDesign,
+                            fontFamily: selectedFont,
+                            fontSize,
+                            textColor,
+                            accentColor
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

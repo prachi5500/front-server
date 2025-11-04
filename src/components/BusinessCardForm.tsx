@@ -11,6 +11,7 @@ export interface BusinessCardData {
   phone: string;
   website: string;
   address: string;
+  logo?: string; // data URL for company logo
 }
 
 interface BusinessCardFormProps {
@@ -21,6 +22,16 @@ interface BusinessCardFormProps {
 export const BusinessCardForm = ({ data, onChange }: BusinessCardFormProps) => {
   const handleChange = (field: keyof BusinessCardData, value: string) => {
     onChange({ ...data, [field]: value });
+  };
+
+  const handleLogoUpload = (file: File | null) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      onChange({ ...data, logo: result });
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -98,6 +109,29 @@ export const BusinessCardForm = ({ data, onChange }: BusinessCardFormProps) => {
             className="mt-1 resize-none transition-all focus:scale-[1.02]"
             rows={3}
           />
+        </div>
+
+        <div className="group">
+          <Label htmlFor="logo">Company Logo</Label>
+          <Input
+            id="logo"
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleLogoUpload(e.target.files?.[0] || null)}
+            className="mt-1"
+          />
+          {data.logo && (
+            <div className="mt-2 flex items-center gap-3">
+              <img src={data.logo} alt="Logo preview" className="h-10 w-10 object-contain rounded" />
+              <button
+                type="button"
+                className="text-xs text-red-600 underline"
+                onClick={() => onChange({ ...data, logo: "" })}
+              >
+                Remove logo
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

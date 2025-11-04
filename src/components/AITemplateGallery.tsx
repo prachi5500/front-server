@@ -1,10 +1,50 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BusinessCardData } from "./BusinessCardForm";
 import { DynamicCard } from "./templates/DynamicCard";
 import { Button } from "./ui/button";
-import { Loader2, Sparkles, Check } from "lucide-react";
+import { Loader2, Sparkles, Check, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateDesigns } from "@/services/designService";
+import { downloadAsImage } from "@/lib/utils";
+
+interface TemplateCardProps {
+  design: any;
+  index: number;
+  selectedDesignId?: string;
+  onSelectTemplate: (designConfig: any) => void;
+  data: BusinessCardData;
+}
+
+const TemplateCard = ({ design, index, selectedDesignId, onSelectTemplate, data }: TemplateCardProps): JSX.Element => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (cardRef.current) {
+      downloadAsImage(cardRef.current, `business-card-${design.id}.png`);
+    }
+  };
+
+  return (
+    <div className="relative group cursor-pointer" onClick={() => onSelectTemplate(design)}>
+      <div ref={cardRef} className="aspect-[1.75/1]">
+        <DynamicCard data={data} designConfig={design} />
+      </div>
+      {selectedDesignId === design.id && (
+        <>
+          <div className="absolute top-2 left-2">
+            <Check className="w-4 h-4 text-green-500 bg-white rounded-full p-1" />
+          </div>
+          <div className="absolute top-2 right-2">
+            <Button size="sm" onClick={handleDownload} variant="secondary">
+              <Download className="w-4 h-4" />
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
 
 interface AITemplateGalleryProps {
   data: BusinessCardData;
@@ -105,31 +145,14 @@ export const AITemplateGallery = ({ data, onSelectTemplate, selectedDesignId }: 
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {designs.map((design, index) => (
-            <button
+            <TemplateCard
               key={design.id}
-              onClick={() => onSelectTemplate(design)}
-              className={`relative rounded-lg overflow-hidden transition-all border-2 group hover:scale-105 animate-fade-in ${
-                selectedDesignId === design.id
-                  ? "border-primary shadow-[var(--shadow-hover)] scale-105"
-                  : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
-              }`}
-              style={{
-                animationDelay: `${index * 0.05}s`,
-                animationFillMode: "backwards",
-              }}
-            >
-              {selectedDesignId === design.id && (
-                <div className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground rounded-full p-1 animate-scale-in">
-                  <Check className="w-4 h-4" />
-                </div>
-              )}
-              <div className="transform scale-[0.45] origin-top-left pointer-events-none">
-                <DynamicCard data={data} designConfig={design} />
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <p className="text-white font-medium text-xs truncate">{design.name}</p>
-              </div>
-            </button>
+              design={design}
+              index={index}
+              selectedDesignId={selectedDesignId}
+              onSelectTemplate={onSelectTemplate}
+              data={data}
+            />
           ))}
         </div>
       )}

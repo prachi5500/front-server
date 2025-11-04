@@ -92,6 +92,11 @@ END:VCARD`;
         fontSize: designConfig.fontSize ? `${designConfig.fontSize}px` : '16px',
       }}
     >
+      {data.logo && (
+        <div className="absolute top-4 right-4 z-20 bg-white/80 backdrop-blur-sm rounded-md p-2 shadow">
+          <img src={data.logo} alt="Company logo" className="h-10 w-10 object-contain" crossOrigin="anonymous" />
+        </div>
+      )}
       {getDecoration()}
       
       <div className={`relative z-10 ${getLayoutStyle()}`}>
