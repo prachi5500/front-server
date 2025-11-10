@@ -28,7 +28,7 @@ const TemplateCard = ({
 
   // Safety: fallback to design if .front missing
   const front = design.front || design;
-  const isPremium = index % 3 === 0;
+  const isPremium = false;
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -59,13 +59,6 @@ const TemplateCard = ({
           <DynamicCard data={data} designConfig={front} />
         )}
       </div>
-
-      {/* Premium Badge */}
-      {isPremium && (
-        <div className="absolute top-2 left-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1 shadow-lg z-20">
-          <span>Premium</span>
-        </div>
-      )}
 
       {/* Flip Button */}
       <div className="absolute top-2 left-2 z-10">
@@ -98,8 +91,8 @@ const TemplateCard = ({
       {/* Hover Overlay with Price */}
       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center rounded-lg z-10">
         <div className="text-center text-white">
-          <p className="text-lg font-semibold mb-1">{isPremium ? "$2.99" : "Free"}</p>
-          <p className="text-xs">{isPremium ? "Premium Design" : "Basic Design"}</p>
+          <p className="text-lg font-semibold mb-1">Free</p>
+          <p className="text-xs">Basic Design</p>
         </div>
       </div>
     </div>

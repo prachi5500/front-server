@@ -8,6 +8,7 @@ import { classicTemplates } from "@/lib/classicTemplates";
 import { BackSideCard } from "./templates/BackSideCard";
 import { QRCodeSVG } from "qrcode.react";
 import { listPublishedTemplates, Template } from "@/services/templates";
+import { PaymentModal } from "@/components/PaymentModal";
 
 interface TemplateSelectorProps {
   data: BusinessCardData;
@@ -32,13 +33,15 @@ export const TemplateSelector = ({
   const previewRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
   const selectedConfig = templates.find((t) => t.id === selectedTemplate) || templates[0];
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [pendingDownload, setPendingDownload] = useState<"front" | "back" | null>(null);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         const data = await listPublishedTemplates();
-        if (mounted) setSbTemplates(data);
+        if (mounted) setSbTemplates(Array.isArray(data) ? data : []);
       } catch {}
     })();
     return () => { mounted = false; };
@@ -46,11 +49,12 @@ export const TemplateSelector = ({
 
   // If admin-created templates exist, default select the first one
   useEffect(() => {
-    if (sbTemplates.length > 0 && !selectedTemplate.startsWith("sb:")) {
-      setSelectedTemplate(`sb:${sbTemplates[0].id}`);
+    const list = Array.isArray(sbTemplates) ? sbTemplates : [];
+    if (list.length > 0 && !selectedTemplate.startsWith("sb:")) {
+      setSelectedTemplate(`sb:${list[0].id}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sbTemplates.length]);
+  }, [Array.isArray(sbTemplates) ? sbTemplates.length : 0]);
 
   const defaultFont = "Arial, sans-serif";
   const defaultFontSize = 16;
@@ -62,6 +66,12 @@ export const TemplateSelector = ({
     textColor !== defaultText ||
     accentColor !== defaultAccent;
 
+  const selectedIsSb = selectedTemplate.startsWith("sb:");
+  const selectedSbId = selectedIsSb ? selectedTemplate.slice(3) : "";
+  const selectedSb = (Array.isArray(sbTemplates) ? sbTemplates : []).find(x => x.id === selectedSbId);
+  const isSelectedPremium = !!selectedSb?.config?.premium;
+  const selectedPrice = (selectedSb as any)?.config?.price || "$2.99";
+
   return (
     <div className="space-y-6">
       <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.1s] opacity-0 [animation-fill-mode:forwards]">
@@ -69,7 +79,14 @@ export const TemplateSelector = ({
           <h2 className="text-2xl font-bold text-foreground">Selected Design Preview</h2>
           <div className="flex items-center gap-2">
             <Button
-              onClick={() => previewRef.current && downloadAsImage(previewRef.current, `${selectedTemplate}-front`)}
+              onClick={() => {
+                if (selectedIsSb && isSelectedPremium) {
+                  setPendingDownload("front");
+                  setIsPaymentOpen(true);
+                  return;
+                }
+                previewRef.current && downloadAsImage(previewRef.current, `${selectedTemplate}-front`);
+              }}
               variant="outline"
               size="sm"
               className="gap-2"
@@ -78,7 +95,14 @@ export const TemplateSelector = ({
               Download Front
             </Button>
             <Button
-              onClick={() => backRef.current && downloadAsImage(backRef.current, `${selectedTemplate}-back`)}
+              onClick={() => {
+                if (selectedIsSb && isSelectedPremium) {
+                  setPendingDownload("back");
+                  setIsPaymentOpen(true);
+                  return;
+                }
+                backRef.current && downloadAsImage(backRef.current, `${selectedTemplate}-back`);
+              }}
               variant="outline"
               size="sm"
               className="gap-2"
@@ -95,7 +119,7 @@ export const TemplateSelector = ({
                 <div ref={previewRef} className="w-full">
                   {(() => {
                     const id = selectedTemplate.slice(3);
-                    const t = sbTemplates.find(x => x.id === id);
+                    const t = (Array.isArray(sbTemplates) ? sbTemplates : []).find(x => x.id === id);
                     const bg = t?.background_url || undefined;
                     const cfg: any = t?.config || {};
                     const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
@@ -104,7 +128,7 @@ export const TemplateSelector = ({
                     const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
                     return (
                       <div
-                        className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4"
+                        className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
                         style={{
                           backgroundColor: bg ? undefined : "#f3f4f6",
                           backgroundImage: bg ? `url(${bg})` : undefined,
@@ -115,6 +139,15 @@ export const TemplateSelector = ({
                           fontSize: `${fs}px`,
                         }}
                       >
+                        {t?.config?.premium ? (
+                          <div className="absolute top-2 left-2 z-20 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-2 py-1 rounded-md text-xs font-semibold shadow">
+                            Premium
+                          </div>
+                        ) : (
+                          <div className="absolute top-2 left-2 z-20 bg-black/60 text-white px-2 py-1 rounded-md text-xs font-semibold shadow">
+                            Free
+                          </div>
+                        )}
                         <div className="w-full h-full flex items-center justify-between gap-4">
                           {data.logo ? (
                             <div className="flex-shrink-0">
@@ -134,7 +167,7 @@ export const TemplateSelector = ({
                 <div ref={backRef} className="w-full">
                   {(() => {
                     const id = selectedTemplate.slice(3);
-                    const t = sbTemplates.find(x => x.id === id);
+                    const t = (Array.isArray(sbTemplates) ? sbTemplates : []).find(x => x.id === id);
                     const backBg = t?.back_background_url || t?.background_url || undefined;
                     const cfg: any = t?.config || {};
                     const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
@@ -204,11 +237,14 @@ export const TemplateSelector = ({
 
       <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
         <h2 className="text-2xl font-bold mb-4 text-foreground">Classic Templates</h2>
-        {templates.length === 0 && sbTemplates.length === 0 ? (
+        {templates.length === 0 && (Array.isArray(sbTemplates) ? sbTemplates.length : 0) === 0 ? (
           <div className="text-sm text-muted-foreground">No classic templates available.</div>
         ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          {[...sbTemplates.map((t) => ({ kind: "sb" as const, t })), ...templates.map((template) => ({ kind: "classic" as const, template }))].map((item) => {
+          {[
+            ...(Array.isArray(sbTemplates) ? sbTemplates.map((t) => ({ kind: "sb" as const, t })) : []),
+            ...templates.map((template) => ({ kind: "classic" as const, template })),
+          ].map((item) => {
             if (item.kind === "classic") {
               const template = item.template;
               return (
@@ -274,6 +310,17 @@ export const TemplateSelector = ({
                         <Check className="w-4 h-4" />
                       </div>
                     )}
+                    <div className="absolute top-2 left-2 z-10">
+                      {t?.config?.premium ? (
+                        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-2 py-1 rounded-md text-xs font-semibold shadow">
+                          Premium
+                        </div>
+                      ) : (
+                        <div className="bg-black/60 text-white px-2 py-1 rounded-md text-xs font-semibold shadow">
+                          Free
+                        </div>
+                      )}
+                    </div>
                     <div
                       className="pointer-events-none aspect-[1.75/1] w-full flex items-center justify-center"
                       style={{
@@ -304,6 +351,22 @@ export const TemplateSelector = ({
         </div>
         )}
       </div>
+      {selectedIsSb && isSelectedPremium && (
+        <PaymentModal
+          isOpen={isPaymentOpen}
+          onClose={() => setIsPaymentOpen(false)}
+          itemName={selectedSb?.name || "Premium Template"}
+          price={selectedPrice}
+          onPaymentComplete={() => {
+            if (pendingDownload === "front") {
+              previewRef.current && downloadAsImage(previewRef.current, `${selectedTemplate}-front`);
+            } else if (pendingDownload === "back") {
+              backRef.current && downloadAsImage(backRef.current, `${selectedTemplate}-back`);
+            }
+            setPendingDownload(null);
+          }}
+        />
+      )}
     </div>
   );
 };

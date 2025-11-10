@@ -24,6 +24,7 @@ const EditTemplate = () => {
   const [error, setError] = useState<string | null>(null);
   const [showBack, setShowBack] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isPremium, setIsPremium] = useState(false);
   const [previewData, setPreviewData] = useState<BusinessCardData>({
     name: "Your Name",
     title: "Job Title",
@@ -51,6 +52,7 @@ const EditTemplate = () => {
         setFontSize(cfg.fontSize ?? 16);
         setAccentColor(cfg.accentColor ?? "#0ea5e9");
         setFontFamily(cfg.fontFamily ?? "Inter, Arial, sans-serif");
+        setIsPremium(!!cfg.premium);
       } catch (e: any) {
         setError(e.message ?? "Failed to load");
       } finally {
@@ -73,7 +75,7 @@ const EditTemplate = () => {
       if (bgFile) background_url = await uploadTemplateAsset(bgFile, `backgrounds/${ts}-${bgFile.name}`);
       if (backBgFile) back_background_url = await uploadTemplateAsset(backBgFile, `backgrounds/${ts}-back-${backBgFile.name}`);
       if (thumbFile) thumbnail_url = await uploadTemplateAsset(thumbFile, `thumbnails/${ts}-${thumbFile.name}`);
-      const config = { fontColor, fontSize, accentColor, fontFamily };
+      const config = { fontColor, fontSize, accentColor, fontFamily, premium: isPremium };
       await updateTemplate(id, { name, status, config, background_url, back_background_url, thumbnail_url });
       navigate("/admin/templates", { replace: true });
     } catch (e: any) {
@@ -173,6 +175,10 @@ const EditTemplate = () => {
               <option>Georgia, serif</option>
               <option>Roboto, Arial, sans-serif</option>
             </select>
+          </div>
+          <div>
+            <label className="text-sm block">Premium</label>
+            <input type="checkbox" checked={isPremium} onChange={(e) => setIsPremium(e.target.checked)} />
           </div>
         </div>
         <div>

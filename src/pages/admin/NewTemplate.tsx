@@ -20,6 +20,7 @@ const NewTemplate = () => {
   const navigate = useNavigate();
   const [showBack, setShowBack] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isPremium, setIsPremium] = useState(false);
 
   const [previewData, setPreviewData] = useState<BusinessCardData>({
     name: "Your Name",
@@ -53,7 +54,7 @@ const NewTemplate = () => {
       if (thumbFile) {
         thumbnail_url = await uploadTemplateAsset(thumbFile, `thumbnails/${ts}-${thumbFile.name}`);
       }
-      const config = { fontColor, fontSize, accentColor, fontFamily };
+      const config = { fontColor, fontSize, accentColor, fontFamily, premium: isPremium };
       const created = await createTemplate({ name, status, config, background_url, back_background_url, thumbnail_url });
       navigate(`/admin/templates/${created.id}/edit`, { replace: true });
     } catch (e: any) {
@@ -145,6 +146,10 @@ const NewTemplate = () => {
               <option>Georgia, serif</option>
               <option>Roboto, Arial, sans-serif</option>
             </select>
+          </div>
+          <div>
+            <label className="text-sm block">Premium</label>
+            <input type="checkbox" checked={isPremium} onChange={(e) => setIsPremium(e.target.checked)} />
           </div>
         </div>
         <div>
