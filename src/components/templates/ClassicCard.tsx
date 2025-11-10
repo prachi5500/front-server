@@ -49,6 +49,9 @@ export const ClassicCard: React.FC<ClassicCardProps> = ({
         fontSize: `${fontSize || 15}px`,
       }}
     >
+      <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-2 py-1 rounded-md text-xs font-semibold shadow">
+        Premium
+      </div>
       {data.logo && (
         <div className="absolute top-3 right-3 z-20 bg-white/80 backdrop-blur-sm rounded-full p-1 shadow">
           <div className="rounded-full overflow-hidden border border-white/70" style={{ width: 48, height: 48 }}>
