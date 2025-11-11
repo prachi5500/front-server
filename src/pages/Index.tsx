@@ -178,11 +178,7 @@ const Index = () => {
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border text-center text-muted-foreground py-12">
-                Select a template below to start designing.
-              </div>
-            )}
+            ) : null}
 
             {/* Customization Panel */}
             <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
