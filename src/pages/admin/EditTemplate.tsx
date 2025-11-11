@@ -25,6 +25,7 @@ const EditTemplate = () => {
   const [showBack, setShowBack] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [price, setPrice] = useState<string>("$2.99");
   const [previewData, setPreviewData] = useState<BusinessCardData>({
     name: "Your Name",
     title: "Job Title",
@@ -53,6 +54,7 @@ const EditTemplate = () => {
         setAccentColor(cfg.accentColor ?? "#0ea5e9");
         setFontFamily(cfg.fontFamily ?? "Inter, Arial, sans-serif");
         setIsPremium(!!cfg.premium);
+        setPrice(cfg.price ?? "$2.99");
       } catch (e: any) {
         setError(e.message ?? "Failed to load");
       } finally {
@@ -75,7 +77,7 @@ const EditTemplate = () => {
       if (bgFile) background_url = await uploadTemplateAsset(bgFile, `backgrounds/${ts}-${bgFile.name}`);
       if (backBgFile) back_background_url = await uploadTemplateAsset(backBgFile, `backgrounds/${ts}-back-${backBgFile.name}`);
       if (thumbFile) thumbnail_url = await uploadTemplateAsset(thumbFile, `thumbnails/${ts}-${thumbFile.name}`);
-      const config = { fontColor, fontSize, accentColor, fontFamily, premium: isPremium };
+      const config = { fontColor, fontSize, accentColor, fontFamily, premium: isPremium, price };
       await updateTemplate(id, { name, status, config, background_url, back_background_url, thumbnail_url });
       navigate("/admin/templates", { replace: true });
     } catch (e: any) {
@@ -179,6 +181,10 @@ const EditTemplate = () => {
           <div>
             <label className="text-sm block">Premium</label>
             <input type="checkbox" checked={isPremium} onChange={(e) => setIsPremium(e.target.checked)} />
+          </div>
+          <div>
+            <label className="text-sm block">Price</label>
+            <input className="border rounded px-2 py-1 w-28" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="$2.99" />
           </div>
         </div>
         <div>
