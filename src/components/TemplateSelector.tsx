@@ -358,6 +358,29 @@ export const TemplateSelector = ({
           itemName={selectedSb?.name || "Premium Template"}
           price={selectedPrice}
           onPaymentComplete={() => {
+            // Save payment record to localStorage (UI-only admin log)
+            try {
+              const STORAGE_KEY = "admin_payments";
+              const raw = localStorage.getItem(STORAGE_KEY);
+              const list = raw ? (JSON.parse(raw) as any[]) : [];
+              const now = new Date().toISOString();
+              list.unshift({
+                id: (crypto as any).randomUUID ? (crypto as any).randomUUID() : `${Date.now()}-${Math.random()}`,
+                created_at: now,
+                customer_name: data?.name || "",
+                customer_email: data?.email || "",
+                customer_phone: data?.phone || "",
+                order_template_id: selectedSb?.id || "",
+                order_template_name: selectedSb?.name || "Premium Template",
+                order_notes: "",
+                amount: selectedPrice,
+                currency: undefined,
+                payment_method: "card",
+                payment_status: "paid",
+                transaction_id: `SIM-${Math.floor(Math.random()*1e9).toString(36)}`,
+              });
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+            } catch {}
             if (pendingDownload === "front") {
               previewRef.current && downloadAsImage(previewRef.current, `${selectedTemplate}-front`);
             } else if (pendingDownload === "back") {

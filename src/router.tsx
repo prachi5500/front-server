@@ -4,6 +4,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { RequireAuth, RequireAdmin } from "./components/RouteGuards";
 import AdminLayout from "./pages/admin/AdminLayout";
+import Payments from "./pages/admin/Payments";
 import TemplatesList from "./pages/admin/TemplatesList";
 import NewTemplate from "./pages/admin/NewTemplate";
 import EditTemplate from "./pages/admin/EditTemplate";
@@ -32,6 +33,7 @@ export const router = createBrowserRouter(
                 { path: "templates", element: <TemplatesList /> },
                 { path: "templates/new", element: <NewTemplate /> },
                 { path: "templates/:id/edit", element: <EditTemplate /> },
+                { path: "payments", element: <Payments /> },
               ],
             },
           ],
