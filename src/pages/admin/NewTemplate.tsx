@@ -21,6 +21,7 @@ const NewTemplate = () => {
   const [showBack, setShowBack] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [price, setPrice] = useState<string>("$2.99");
 
   const [previewData, setPreviewData] = useState<BusinessCardData>({
     name: "Your Name",
@@ -54,7 +55,7 @@ const NewTemplate = () => {
       if (thumbFile) {
         thumbnail_url = await uploadTemplateAsset(thumbFile, `thumbnails/${ts}-${thumbFile.name}`);
       }
-      const config = { fontColor, fontSize, accentColor, fontFamily, premium: isPremium };
+      const config = { fontColor, fontSize, accentColor, fontFamily, premium: isPremium, price };
       const created = await createTemplate({ name, status, config, background_url, back_background_url, thumbnail_url });
       navigate(`/admin/templates/${created.id}/edit`, { replace: true });
     } catch (e: any) {
@@ -150,6 +151,10 @@ const NewTemplate = () => {
           <div>
             <label className="text-sm block">Premium</label>
             <input type="checkbox" checked={isPremium} onChange={(e) => setIsPremium(e.target.checked)} />
+          </div>
+          <div>
+            <label className="text-sm block">Price</label>
+            <input className="border rounded px-2 py-1 w-28" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="$2.99" />
           </div>
         </div>
         <div>
