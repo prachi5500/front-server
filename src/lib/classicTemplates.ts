@@ -319,5 +319,7 @@ export const classicTemplates: ClassicDesignConfig[] = (() => {
       description: `Layout ${layout} • Theme ${themeIdx + 1} • variant ${variant + 1}`,
     });
   }
+
+  // Return full classic set like before (no curation/limiting)
   return out;
 })();
