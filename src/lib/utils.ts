@@ -12,6 +12,15 @@ export const downloadAsImage = async (element: HTMLElement, filename: string) =>
       backgroundColor: null,
       scale: 2, // Higher resolution
       useCORS: true,
+      ignoreElements: (el: Element) => {
+        if (!(el instanceof HTMLElement)) return false;
+        // Skip screen-only watermarks/overlays from the exported image
+        return (
+          el.dataset.watermark === "screen-only" ||
+          el.classList.contains("wm-screen-only") ||
+          el.id === "anti-capture-overlay"
+        );
+      },
     });
     const link = document.createElement('a');
     link.download = `${filename}.png`;

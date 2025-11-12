@@ -113,3 +113,50 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  html, body {
+    display: none !important;
+  }
+}
+
+/* Blur the entire UI when anti-capture is toggled */
+html.anti-capture-blur body {
+  filter: blur(8px) saturate(0.7) brightness(0.85);
+  transition: filter 150ms ease;
+}
+
+/* Fullscreen overlay that applies backdrop blur above app content */
+.anti-capture-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2147483646; /* top-most */
+  backdrop-filter: blur(12px) saturate(0.6);
+  -webkit-backdrop-filter: blur(12px) saturate(0.6);
+  /* A tiny translucent background is required for backdrop-filter to render */
+  background: rgba(255, 255, 255, 0.01);
+}
+
+/* Screen-only watermark overlay for template previews */
+.wm-screen-only {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+.wm-screen-only::before {
+  content: ' Business Card Creater';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  font-size: clamp(12px, 2.5vw, 28px);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: rgba(84, 84, 84, 0.1);
+  text-transform: uppercase;
+  white-space: nowrap;
+  max-width: 90%;
+  text-align: center;
+}

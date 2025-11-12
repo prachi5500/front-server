@@ -16,6 +16,8 @@ import { Download, RotateCcw, CreditCard, Facebook, Twitter, Instagram, Linkedin
 import { downloadAsImage } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { apiFetch } from "@/services/api";
+import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
   const { user, profile, signOut } = useAuth();
@@ -40,6 +42,12 @@ const Index = () => {
   const [showBack, setShowBack] = useState<boolean>(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
+  // Contact form state
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   const cardRef = useRef<HTMLDivElement>(null);
   const selectedPreviewRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +65,29 @@ const Index = () => {
   };
 
   const isPremiumDesign = selectedDesign && (selectedDesign.index ?? 0) % 3 === 0;
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contactName || !contactEmail || !contactMessage) {
+      toast("Please fill in all fields.");
+      return;
+    }
+    try {
+      setSubmitting(true);
+      await apiFetch("/contact", {
+        method: "POST",
+        body: JSON.stringify({ name: contactName, email: contactEmail, message: contactMessage }),
+      });
+      toast("Thanks! We'll get back to you soon.");
+      setContactName("");
+      setContactEmail("");
+      setContactMessage("");
+    } catch (err: any) {
+      toast(err?.message || "Failed to send message");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -148,7 +179,8 @@ const Index = () => {
 
                 <div className="bg-gradient-to-br from-muted to-background p-8 rounded-lg">
                   <div className="max-w-md mx-auto">
-                    <div ref={selectedPreviewRef}>
+                    <div ref={selectedPreviewRef} className="relative">
+                      <div className="wm-screen-only" data-watermark="screen-only" />
                       {showBack ? (
                         <BackSideCard
                           data={businessData}
@@ -237,6 +269,35 @@ const Index = () => {
 
       {/* Pricing Section */}
       <PricingSection />
+
+      {/* Contact Section */}
+      <section id="contact" className="border-t border-border bg-background">
+        <div className="container mx-auto max-w-7xl px-4 py-16 grid md:grid-cols-2 gap-10">
+          <div>
+            <h2 className="text-3xl font-bold mb-2">Contact Us</h2>
+            <p className="text-muted-foreground">Have questions or feature requests? Send us a message and we’ll respond shortly.</p>
+          </div>
+          <form onSubmit={handleContactSubmit} className="space-y-4 bg-card p-6 rounded-xl border border-border shadow-[var(--shadow-card)]">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contact-name">Name</Label>
+                <Input id="contact-name" placeholder="Your name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contact-email">Email</Label>
+                <Input id="contact-email" type="email" placeholder="you@example.com" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact-message">Message</Label>
+              <Textarea id="contact-message" placeholder="How can we help?" value={contactMessage} onChange={(e) => setContactMessage(e.target.value)} rows={5} />
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={submitting}>{submitting ? "Sending..." : "Send Message"}</Button>
+            </div>
+          </form>
+        </div>
+      </section>
 
       {/* Payment Modal */}
       <PaymentModal

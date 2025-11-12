@@ -43,7 +43,7 @@ const TemplateCard = ({
       onClick={() => onSelectTemplate(design)}
     >
       {/* Card Preview (Front or Back) */}
-      <div ref={cardRef} className="aspect-[1.75/1] overflow-hidden rounded-lg">
+      <div ref={cardRef} className="aspect-[1.75/1] overflow-hidden rounded-lg relative">
         {showBack ? (
           <BackSideCard
             data={data}
@@ -236,7 +236,7 @@ export const AITemplateGallery = ({
           </div>
 
           <div className="bg-gradient-to-br from-muted/50 to-background p-6 rounded-lg">
-            <div className="max-w-md mx-auto" ref={selectedPreviewRef}>
+            <div className="max-w-md mx-auto relative" ref={selectedPreviewRef}>
               {showBackSelected ? (
                 <BackSideCard
                   data={data}

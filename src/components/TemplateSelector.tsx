@@ -116,7 +116,8 @@ export const TemplateSelector = ({
           <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
             {selectedTemplate.startsWith("sb:") ? (
               <>
-                <div ref={previewRef} className="w-full">
+                <div ref={previewRef} className="w-full relative">
+                  <div className="wm-screen-only" data-watermark="screen-only" />
                   {(() => {
                     const id = selectedTemplate.slice(3);
                     const t = (Array.isArray(sbTemplates) ? sbTemplates : []).find(x => x.id === id);
@@ -164,7 +165,8 @@ export const TemplateSelector = ({
                     );
                   })()}
                 </div>
-                <div ref={backRef} className="w-full">
+                <div ref={backRef} className="w-full relative">
+                  <div className="wm-screen-only" data-watermark="screen-only" />
                   {(() => {
                     const id = selectedTemplate.slice(3);
                     const t = (Array.isArray(sbTemplates) ? sbTemplates : []).find(x => x.id === id);
@@ -202,7 +204,8 @@ export const TemplateSelector = ({
               </>
             ) : (
               <>
-                <div ref={previewRef}>
+                <div ref={previewRef} className="relative">
+                  <div className="wm-screen-only" data-watermark="screen-only" />
                   {selectedConfig && (
                     <ClassicCard
                       data={data}
@@ -214,7 +217,8 @@ export const TemplateSelector = ({
                     />
                   )}
                 </div>
-                <div ref={backRef}>
+                <div ref={backRef} className="relative">
+                  <div className="wm-screen-only" data-watermark="screen-only" />
                   {selectedConfig && (
                     <BackSideCard
                       data={data}
@@ -266,7 +270,7 @@ export const TemplateSelector = ({
                       ref={(el) => {
                         cardRefs.current[template.id] = el;
                       }}
-                      className="pointer-events-none aspect-[1.75/1] w-full"
+                      className="pointer-events-none aspect-[1.75/1] w-full relative"
                     >
                       <ClassicCard
                         data={data}

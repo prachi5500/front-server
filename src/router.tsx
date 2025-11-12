@@ -13,6 +13,7 @@ import Payments from "./pages/admin/Payments";
 import TemplatesList from "./pages/admin/TemplatesList";
 import NewTemplate from "./pages/admin/NewTemplate";
 import EditTemplate from "./pages/admin/EditTemplate";
+import ContactMessages from "./pages/admin/ContactMessages";
 
 export const router = createBrowserRouter(
   [
