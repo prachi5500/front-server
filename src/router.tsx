@@ -14,6 +14,9 @@ import TemplatesList from "./pages/admin/TemplatesList";
 import NewTemplate from "./pages/admin/NewTemplate";
 import EditTemplate from "./pages/admin/EditTemplate";
 import ContactMessages from "./pages/admin/ContactMessages";
+import Contact from "./pages/Contact";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 
 export const router = createBrowserRouter(
   [
@@ -40,6 +43,18 @@ export const router = createBrowserRouter(
     {
       path: "/terms",
       element: <TermsOfUse />,
+    },
+    {
+      path: "/contact",
+      element: <Contact />,
+    },
+    {
+      path: "/cart",
+      element: <Cart />,
+    },
+    {
+      path: "/checkout",
+      element: <Checkout />,
     },
     {
       path: "/faq",

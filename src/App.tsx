@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { AuthProvider } from "./contexts/AuthContext";
+import { CartProvider } from "./contexts/CartContext";
 
 // import TemplateRenderer from "./components/TemplateRenderer";
 // import { photoFrameTemplate } from "./components/templates/photoFrameTemplate";
@@ -19,7 +20,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <RouterProvider router={router} />
+        <CartProvider>
+          <RouterProvider router={router} />
+        </CartProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

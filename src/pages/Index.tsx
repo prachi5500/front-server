@@ -2,18 +2,15 @@ import { useState, useRef } from "react";
 import { Hero } from "@/components/Hero";
 import { BusinessCardForm, BusinessCardData } from "@/components/BusinessCardForm";
 import { TemplateSelector } from "@/components/TemplateSelector";
-import { AITemplateGallery } from "@/components/AITemplateGallery";
 import { CustomizationPanel } from "@/components/CustomizationPanel";
-import { DynamicCard } from "@/components/templates/DynamicCard";
-import { BackSideCard } from "@/components/templates/BackSideCard";
 import { PricingSection } from "@/components/PricingSection";
-import { PaymentModal } from "@/components/PaymentModal";
 import { PaymentBanner } from "@/components/PaymentBanner";
 import { PaymentFeatures } from "@/components/PaymentFeatures";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Download, RotateCcw, CreditCard, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
-import { downloadAsImage } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/services/api";
@@ -34,37 +31,16 @@ const Index = () => {
     logo: "",
   });
 
-  const [selectedDesign, setSelectedDesign] = useState<any>(null);
   const [selectedFont, setSelectedFont] = useState<string>("Arial, sans-serif");
   const [fontSize, setFontSize] = useState<number>(16);
   const [textColor, setTextColor] = useState<string>("#000000");
   const [accentColor, setAccentColor] = useState<string>("#0ea5e9");
-  const [showBack, setShowBack] = useState<boolean>(false);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   // Contact form state
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactMessage, setContactMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const cardRef = useRef<HTMLDivElement>(null);
-  const selectedPreviewRef = useRef<HTMLDivElement>(null);
-
-  const frontConfig = selectedDesign?.front || selectedDesign;
-
-  const handleDownload = () => {
-    const ref = selectedPreviewRef.current || cardRef.current;
-    if (ref) {
-      downloadAsImage(ref, `${selectedDesign?.name || "business-card"}.png`);
-    }
-  };
-
-  const handlePurchaseAndDownload = () => {
-    setIsPaymentModalOpen(true);
-  };
-
-  const isPremiumDesign = selectedDesign && (selectedDesign.index ?? 0) % 3 === 0;
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +72,7 @@ const Index = () => {
         <div className="container mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <Link to="/" className="font-semibold text-lg">Business Card Creator</Link>
           <div className="flex items-center gap-2">
+            <Link to="/cart" className="border rounded px-3 py-1 text-sm">Cart</Link>
             {user ? (
               <>
                 {profile?.role === "admin" && (
@@ -134,84 +111,13 @@ const Index = () => {
       <PaymentBanner />
 
       <main className="container mx-auto max-w-7xl px-4 py-12">
-        {/* Form + Preview */}
+        {/* Form + Customization */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           <div>
             <BusinessCardForm data={businessData} onChange={setBusinessData} />
           </div>
 
           <div className="space-y-6">
-            {/* Selected Design Preview */}
-            {selectedDesign ? (
-              <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-scale-in">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-foreground">Selected Design Preview</h2>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => setShowBack((prev) => !prev)}
-                      variant="outline"
-                      size="sm"
-                      className="gap-2"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      {showBack ? "Front" : "Back"}
-                    </Button>
-                    <Button
-                      onClick={handlePurchaseAndDownload}
-                      variant={isPremiumDesign ? "default" : "outline"}
-                      size="sm"
-                      className="gap-2"
-                    >
-                      {isPremiumDesign ? (
-                        <>
-                          <CreditCard className="w-4 h-4" />
-                          Purchase ($2.99)
-                        </>
-                      ) : (
-                        <>
-                          <Download className="w-4 h-4" />
-                          Download Free
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-muted to-background p-8 rounded-lg">
-                  <div className="max-w-md mx-auto">
-                    <div ref={selectedPreviewRef} className="relative">
-                      <div className="wm-screen-only" data-watermark="screen-only" />
-                      {showBack ? (
-                        <BackSideCard
-                          data={businessData}
-                          background={{
-                            style: frontConfig?.bgStyle || "gradient",
-                            colors: frontConfig?.bgColors || ["#ffffff", "#f0f0f0"],
-                          }}
-                          textColor={textColor || frontConfig?.textColor}
-                          accentColor={accentColor || frontConfig?.accentColor}
-                          fontFamily={selectedFont || frontConfig?.fontFamily}
-                          fontSize={fontSize}
-                          showLargeQR={true}
-                        />
-                      ) : (
-                        <DynamicCard
-                          data={businessData}
-                          designConfig={{
-                            ...(frontConfig || {}),
-                            fontFamily: selectedFont,
-                            fontSize,
-                            textColor,
-                            accentColor,
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-
             {/* Customization Panel */}
             <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
               <CustomizationPanel
@@ -228,39 +134,17 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Template Tabs */}
+        {/* Classic Templates Only */}
         <div className="animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
-          <Tabs defaultValue="ai" className="w-full">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
-              <TabsTrigger value="ai" className="gap-2">
-                AI Templates (100+)
-              </TabsTrigger>
-              <TabsTrigger value="classic">Classic Templates</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="ai" className="space-y-6">
-              <AITemplateGallery
-                data={businessData}
-                onSelectTemplate={(design) => {
-                  setSelectedDesign(design);
-                  setShowBack(false);
-                }}
-                selectedDesignId={selectedDesign?.id}
-              />
-            </TabsContent>
-
-            <TabsContent value="classic" className="space-y-6">
-              <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border">
-                <TemplateSelector
-                  data={businessData}
-                  selectedFont={selectedFont}
-                  fontSize={fontSize}
-                  textColor={textColor}
-                  accentColor={accentColor}
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border">
+            <TemplateSelector
+              data={businessData}
+              selectedFont={selectedFont}
+              fontSize={fontSize}
+              textColor={textColor}
+              accentColor={accentColor}
+            />
+          </div>
         </div>
       </main>
 
@@ -298,18 +182,6 @@ const Index = () => {
           </form>
         </div>
       </section>
-
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
-        itemName={selectedDesign?.name || "Premium Business Card Design"}
-        price={isPremiumDesign ? "$2.99" : "Free"}
-        onPaymentComplete={() => {
-          handleDownload();
-          setIsPaymentModalOpen(false);
-        }}
-      />
 
       {/* Footer */}
       <footer className="border-t border-neutral-800 bg-neutral-900 py-8 mt-16 text-neutral-300">
