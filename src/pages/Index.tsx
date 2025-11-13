@@ -3,7 +3,6 @@ import { Hero } from "@/components/Hero";
 import { BusinessCardForm, BusinessCardData } from "@/components/BusinessCardForm";
 import { TemplateSelector } from "@/components/TemplateSelector";
 import { CustomizationPanel } from "@/components/CustomizationPanel";
-import { PricingSection } from "@/components/PricingSection";
 import { PaymentBanner } from "@/components/PaymentBanner";
 import { PaymentFeatures } from "@/components/PaymentFeatures";
 import { Button } from "@/components/ui/button";
@@ -135,7 +134,7 @@ const Index = () => {
         </div>
 
         {/* Classic Templates Only */}
-        <div className="animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
+        <div id="classic-templates" className="animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
           <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border">
             <TemplateSelector
               data={businessData}
@@ -151,8 +150,6 @@ const Index = () => {
       {/* Payment Features */}
       <PaymentFeatures />
 
-      {/* Pricing Section */}
-      <PricingSection />
 
       {/* Contact Section */}
       <section id="contact" className="border-t border-border bg-background">

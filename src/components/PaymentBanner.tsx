@@ -32,9 +32,9 @@ export const PaymentBanner = () => {
                             </div >
                         </div >
                         <Button asChild size="sm" className="gap-2 shadow-lg">
-                            <a href="#pricing">
+                            <a href="#classic-templates">
                                 < CreditCard className="w-4 h-4" />
-                                View Plans
+                                View Cards
                             </a>
                         </Button >
                     </div >
