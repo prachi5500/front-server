@@ -1,4 +1,4 @@
-# Logs
+git commit -m "Remove node_modules from git"# Logs
 logs
 *.log
 npm-debug.log*
