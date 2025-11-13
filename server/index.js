@@ -8,11 +8,10 @@ import templateRoutes from './routes/templates.js';
 import uploadRoutes from './routes/upload.js';
 import contactRoutes from './routes/contact.js';
 import helmet from 'helmet';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 const app = express();
 
+// Allow requests from your specific Frontend URL (or all if comma-separated list fails)
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*' }));
 app.use(express.json());
 app.use(morgan('dev'));
@@ -30,28 +29,30 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-await mongoose.connect(MONGO_URI);
-console.log('Connected to MongoDB');
+// Connect to MongoDB
+try {
+  await mongoose.connect(MONGO_URI);
+  console.log('Connected to MongoDB');
+} catch (err) {
+  console.error('MongoDB Connection Error:', err);
+  process.exit(1);
+}
 
+// Simple Health Check
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
+// API Routes
 app.use('/auth', authRoutes);
 app.use('/templates', templateRoutes);
 app.use('/upload', uploadRoutes);
 app.use('/contact', contactRoutes);
 
-// Serve built frontend in production only
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-if (process.env.NODE_ENV === 'production') {
-  const distPath = path.resolve(__dirname, '..', 'dist');
-  app.use(express.static(distPath, { index: false, redirect: false, fallthrough: true }));
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
+// ✅ NEW: Root route to verify backend is working without crashing
+app.get('/', (req, res) => {
+  res.send("Backend is running successfully. Please use the Frontend URL to view the application.");
+});
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
-  console.log(`API listening on http://localhost:${PORT}`);
+  console.log(`API listening on port ${PORT}`);
 });
