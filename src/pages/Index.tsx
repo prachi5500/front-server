@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/services/api";
@@ -67,41 +67,50 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border">
-        <div className="container mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="font-semibold text-lg">Business Card Creator</Link>
-          <div className="flex items-center gap-2">
-            <Link to="/cart" className="border rounded px-3 py-1 text-sm">Cart</Link>
-            {user ? (
-              <>
-                {profile?.role === "admin" && (
-                  <Link to="/admin/templates" className="border rounded px-3 py-1 text-sm">
-                    Admin
-                  </Link>
-                )}
-                <button
-                  onClick={async () => {
-                    await signOut();
-                    navigate("/");
-                  }}
-                  className="border rounded px-3 py-1 text-sm"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <div className="flex flex-col items-end gap-1">
-                <Link to="/login" className="border rounded px-3 py-1 text-sm w-full text-center">
-                  Login
-                </Link>
-                <div className="text-xs text-muted-foreground">
-                  Don’t have an account?{" "}
-                  <Link to="/login?signup=1" className="underline">
-                    Sign up
+      <header className="sticky top-0 z-50 bg-transparent">
+        <div className="container mx-auto max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 dark:bg-neutral-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.12)] px-4 py-2">
+            <Link to="/" className="flex items-center gap-2">
+              <img src="/ChatGPT Image Nov 14, 2025, 10_52_55 AM.png" alt="BusinessCard" className="h-14 w-auto select-none" />
+            </Link>
+            <div className="hidden md:flex flex-1 justify-center px-4">
+              <div className="relative w-full max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
+                <Input
+                  type="search"
+                  placeholder="Search templates..."
+                  aria-label="Search"
+                  className="pl-10 rounded-full bg-white/10 border-white/20 placeholder-white/60 focus-visible:ring-0 focus:bg-white/15"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link to="/cart" className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md">Cart</Link>
+              {user ? (
+                <>
+                  {profile?.role === "admin" && (
+                    <Link to="/admin/templates" className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md">
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    onClick={async () => {
+                      await signOut();
+                      navigate("/");
+                    }}
+                    className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Link to="/login" className="rounded-full px-4 py-2 text-sm w-full text-center bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md">
+                    Login
                   </Link>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </header>

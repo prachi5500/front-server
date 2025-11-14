@@ -146,6 +146,7 @@ export default function CartPage() {
                 }
                 clear();
                 setIsPaymentOpen(false);
+                navigate("/");
               }}
             />
           </div>
