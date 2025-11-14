@@ -311,7 +311,7 @@ const NewTemplate = () => {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Font Family</label>
-                      <select className="w-full border rounded-md px-3 py-2 text-sm" value={fontFamily} onChange={(e) => setFontFamily(e.targe.value)}>
+                      <select className="w-full border rounded-md px-3 py-2 text-sm" value={fontFamily} onChange={(e) => setFontFamily(e.target.value)}>
                         <option value="Inter, Arial, sans-serif">Inter (Clean)</option>
                         <option value="Playfair Display, serif">Playfair (Elegant)</option>
                         <option value="Georgia, serif">Georgia (Classic)</option>
