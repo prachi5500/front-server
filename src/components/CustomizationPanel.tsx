@@ -19,7 +19,21 @@ interface CustomizationPanelProps {
 const colorPresets = [
   "#000000", "#ffffff", "#374151", "#6b7280", "#9ca3af",
   "#0ea5e9", "#3b82f6", "#6366f1", "#8b5cf6", "#ec4899",
-  "#f59e0b", "#ef4444", "#10b981", "#059669", "#84cc16"
+  "#f59e0b", "#ef4444", "#10b981", "#059669", "#84cc16",
+  // additional 13 colors
+  "#8B4513", // saddle brown
+  "#D2691E", // chocolate
+  "#FF7F50", // coral
+  "#FF6347", // tomato
+  "#FFA07A", // light salmon
+  "#FFD700", // gold
+  "#C0C0C0", // silver
+  "#708090", // slate gray
+  "#00CED1", // dark turquoise
+  "#40E0D0", // turquoise
+  "#7B68EE", // medium slate blue
+  "#BA55D3", // medium orchid
+  "#FF1493"  // deep pink
 ];
 
 export const CustomizationPanel = ({

@@ -58,11 +58,11 @@ export const ClassicCard: React.FC<ClassicCardProps> = ({
       )}
       <div className="relative z-10 flex flex-col justify-between h-full">
         <div>
-          <h3 className="text-2xl font-semibold">{data.name || "Your Name"}</h3>
-          <p className="text-sm mt-1" style={{ color: appliedAccent }}>
+          <h3 className="font-semibold" style={{ fontSize: (fontSize || 15) + 6 }}>{data.name || "Your Name"}</h3>
+          <p className="mt-1" style={{ color: appliedAccent, fontSize: (fontSize || 15) + 2 }}>
             {data.title || "Job Title"}
           </p>
-          <p className="text-xs mt-1 opacity-80">{data.company || "Company Name"}</p>
+          <p className="mt-1 opacity-80" style={{ fontSize: Math.max(12, (fontSize || 15)) }}>{data.company || "Company Name"}</p>
         </div>
         {data.name && data.email && (
           <div className="bg-white p-2 rounded-lg shadow-md self-end">

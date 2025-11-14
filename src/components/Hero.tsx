@@ -3,12 +3,27 @@ import { Sparkles, ArrowLeft, ArrowRight } from "lucide-react";
 
 // SLIDES
 const slides = [
-  { img: "https://images.unsplash.com/photo-1522199710521-72d69614c702?q=80&w=1920", text: "Design Stunning Business Cards in Minutes" },
-  { img: "https://images.unsplash.com/photo-1589571894960-20bbe2828d0a?q=80&w=1920", text: "Choose from 100+ AI-Generated Templates" },
-  { img: "https://images.unsplash.com/photo-1607082349566-187aea0b30c5?q=80&w=1920", text: "Customize Colors, Fonts & Layouts Easily" },
-  { img: "https://images.unsplash.com/photo-1520975918319-440f1f77f008?q=80&w=1920", text: "Add QR Codes, Logos & Social Profiles" },
-  { img: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1920", text: "Powered by Smart AI Tools" },
+  {
+    img: "https://plus.unsplash.com/premium_photo-1752231847575-3ac4e0dda918?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    text: "Create Stunning Business Cards With Ease",
+  },
+  {
+    img: "https://plus.unsplash.com/premium_photo-1755994149244-d7887690b774?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    text: "Design Your Brand Identity Effortlessly",
+  },
+  {
+    img: "https://plus.unsplash.com/premium_photo-1661661374846-23e8f44be169?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDh8fHxlbnwwfHx8fHw%3D",
+  },
+  {
+    img: "https://res.cloudinary.com/vistaprint/images/f_auto,q_auto/v1702621824/ideas-and-advice-prod/en-us/en-au-2/en-au-2.png?_i=AA",
+    text: "Professional & Print-Ready Card Designs",
+  },
+  {
+    img: "https://plus.unsplash.com/premium_photo-1661385603150-e2317488f5fc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDEwMHx8fGVufDB8fHx8fA%3D%3D",
+    text: "Smart Digital Business Cards With QR Codes",
+  },
 ];
+
 
 export const Hero = () => {
   const [index, setIndex] = useState(0);
