@@ -88,21 +88,7 @@ export const Hero = () => {
         </p>
 
         {/* STAGGERED BUTTONS */}
-        <div className="flex flex-col md:flex-row gap-4 animate-fade-in-up [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
-          <button
-            className="px-8 py-4 bg-white text-black text-lg font-semibold rounded-full shadow-xl hover:bg-white/90 active:scale-95 transition-all duration-300"
-            onClick={() => window.location.href = '/admin/templates'}
-          >
-            Explore
-          </button>
-
-          <button
-            className="px-8 py-3 bg-transparent border border-white text-white text-lg font-semibold rounded-full shadow-xl hover:bg-white/20 transition-all duration-300"
-            onClick={() => window.location.href = '/admin/templates'}
-          >
-            Show Templates
-          </button>
-        </div>
+        
 
         {/* SLIDE TEXT */}
         <div
