@@ -8,6 +8,7 @@ export type Template = {
   background_url: string | null;
   back_background_url?: string | null;
   thumbnail_url: string | null;
+  price?: number;          
   created_by?: string;
   created_at?: string;
   updated_at?: string;

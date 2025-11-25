@@ -34,6 +34,10 @@ interface TemplateSelectorProps {
 }
 
 const templates = classicTemplates;
+}
+
+const templates = classicTemplates;
+const DEFAULT_PRICE = 2.99;
 
 export const TemplateSelector = ({
   data,
@@ -313,7 +317,12 @@ export const TemplateSelector = ({
       // Server/client template info
       const isServer = selectedTemplate.startsWith("sb:");
       const serverId = isServer ? selectedTemplate.slice(3) : "";
-      const st = isServer ? sbTemplates.find((x) => x.id === serverId) : undefined;
+      const st = isServer
+        ? sbTemplates.find((x) => x.id === serverId)
+        : undefined;
+
+      const price =
+        (isServer ? st?.price : undefined) ?? DEFAULT_PRICE;
 
       // Current template ko cart me add karo (agar pehle se nahi hai)
       cartCtx.add({
@@ -324,8 +333,15 @@ export const TemplateSelector = ({
         fontSize,
         textColor,
         accentColor,
-        price: pricePerItem,
-        serverMeta: isServer ? { name: st?.name, background_url: st?.background_url, back_background_url: st?.back_background_url, config: st?.config } : undefined,
+        price,
+        serverMeta: isServer
+          ? {
+              name: st?.name,
+              background_url: st?.background_url,
+              back_background_url: st?.back_background_url,
+              config: st?.config,
+            }
+          : undefined,
       });
 
       // Ab alag page pe customer details + payment ke liye bhejo
@@ -488,6 +504,7 @@ export const TemplateSelector = ({
             </div>
           )}
         </div>
+
         <div className="bg-gradient-to-br from-muted to-background p-4 sm:p-6 md:p-8 rounded-lg overflow-x-hidden">
           <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-4 sm:p-6">
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1057,6 +1074,160 @@ export const TemplateSelector = ({
               Page {page + 1} of {totalPages}
             </div>
             <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}>
+              Next
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
+        <h2 className="text-2xl font-bold mb-4 text-foreground">
+          Classic Templates
+        </h2>
+        {combined.length === 0 ? (
+          <div className="text-sm text-muted-foreground">
+            No classic templates available.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            {pagedTemplates.map((item) => (
+              <div key={item.id} className="relative">
+                <button
+                  onClick={() => setSelectedTemplate(item.id)}
+                  className={`group relative rounded-lg overflow-hidden transition-all duration-300 border-2 ${
+                    selectedTemplate === item.id
+                      ? "border-primary shadow-[var(--shadow-hover)]"
+                      : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
+                  }`}
+                >
+                  {selectedTemplate === item.id && (
+                    <div className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground rounded-full p-1">
+                      <Check className="w-4 h-4" />
+                    </div>
+                  )}
+                  {item.kind === "classic" ? (
+                    <>
+                      <div
+                        ref={(el) => {
+                          cardRefs.current[item.id] = el;
+                        }}
+                        className="pointer-events-none aspect-[1.75/1] w-full relative"
+                      >
+                        <ClassicCard
+                          data={data}
+                          config={item.classic}
+                          fontFamily={
+                            hasOverrides ? selectedFont : undefined
+                          }
+                          fontSize={hasOverrides ? fontSize : undefined}
+                          textColor={hasOverrides ? textColor : undefined}
+                          accentColor={hasOverrides ? accentColor : undefined}
+                        />
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                        <p className="text-white font-medium text-sm">
+                          {item.classic.name}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {(() => {
+                        const t = item.server;
+                        const bg = t?.thumbnail_url || t?.background_url || undefined;
+                        const cfg: any = t?.config || {};
+                        const fc = cfg.fontColor || "#000000";
+                        const fs = cfg.fontSize || 16;
+                        const accent = cfg.accentColor || "#0ea5e9";
+                        const ff =
+                          cfg.fontFamily || "Inter, Arial, sans-serif";
+                        const nameSize = Math.max(18, fs + 4);
+                        const titleSize = Math.max(16, fs + 2);
+                        return (
+                          <div
+                            className="pointer-events-none aspect-[1.75/1] w-full relative"
+                            style={{
+                              backgroundColor: bg ? undefined : "#f3f4f6",
+                              backgroundImage: bg ? `url(${bg})` : undefined,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              color: fc,
+                              fontFamily: ff,
+                            }}
+                          >
+                            <div className="w-full h-full px-5 py-4 flex items-center justify-between gap-4">
+                              {data.logo ? (
+                                <div className="flex-shrink-0">
+                                  <img
+                                    src={data.logo}
+                                    alt="Logo"
+                                    className="w-16 h-16 object-cover rounded-full border border-white/50 shadow"
+                                  />
+                                </div>
+                              ) : (
+                                <div />
+                              )}
+                              <div className="flex flex-col text-right leading-snug">
+                                <div
+                                  className="font-semibold"
+                                  style={{ fontFamily: ff, fontSize: nameSize }}
+                                >
+                                  {data.name || "Your Name"}
+                                </div>
+                                <div
+                                  style={{
+                                    color: accent,
+                                    fontSize: titleSize,
+                                  }}
+                                >
+                                  {data.title || "Job Title"}
+                                </div>
+                                <div
+                                  className="opacity-80"
+                                  style={{ fontSize: Math.max(14, fs) }}
+                                >
+                                  {data.company || "Company"}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                        <p className="text-white font-medium text-sm">
+                          {item.server?.name || "Template"}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </button>
+                {/* tile quick download removed in commerce flow */}
+              </div>
+            ))}
+          </div>
+        )}
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+            >
+              Prev
+            </Button>
+            <div className="text-sm text-muted-foreground">
+              Page {page + 1} of {totalPages}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setPage((p) => Math.min(totalPages - 1, p + 1))
+              }
+              disabled={page >= totalPages - 1}
+            >
               Next
             </Button>
           </div>

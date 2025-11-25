@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { classicTemplates } from "@/lib/classicTemplates";
 import { ClassicCard } from "@/components/templates/ClassicCard";
 import { BackSideCard } from "@/components/templates/BackSideCard";
-import { downloadAsImage } from "@/lib/utils";
+import { captureElementAndUpload } from "@/lib/utils";
 import { apiFetch } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -138,6 +138,42 @@ export default function CheckoutPage() {
         },
         handler: async (response: any) => {
           try {
+            // 1) Pehle har cart item ke front/back ko capture + upload karo
+            const itemsWithImages = [];
+            for (const it of items) {
+              const fid = it.id;
+              const frontEl = frontRefs.current[fid];
+              const backEl = backRefs.current[fid];
+
+              let frontImageUrl: string | null = null;
+              let backImageUrl: string | null = null;
+
+              if (frontEl) {
+                frontImageUrl =
+                  (await captureElementAndUpload(
+                    frontEl,
+                    `${fid}-front`
+                  )) || null;
+              }
+              if (backEl) {
+                backImageUrl =
+                  (await captureElementAndUpload(
+                    backEl,
+                    `${fid}-back`
+                  )) || null;
+              }
+
+              itemsWithImages.push({
+                templateId: it.id,
+                title: it.data?.name || "Business Card",
+                price: it.price,
+                templateName: byId[it.id]?.name || null,
+                frontImageUrl,
+                backImageUrl,
+              });
+            }
+
+            // 2) Ab verify ko ye URLs ke saath bhejo
             const verifyRes = await apiFetch("/payments/verify", {
               method: "POST",
               body: JSON.stringify({
@@ -154,23 +190,12 @@ export default function CheckoutPage() {
                 state,
                 pincode,
                 // yahan se admin ke liye order items save honge
-                items: items.map((it) => ({
-                  templateId: it.id,
-                  title: it.data?.name || "Business Card",
-                  price: it.price,
-                  templateName: byId[it.id]?.name || null,
-                })),
+                items: itemsWithImages,
               }),
             });
 
             if ((verifyRes as any).success) {
-              for (const it of items) {
-                const fid = it.id;
-                const f = frontRefs.current[fid];
-                const b = backRefs.current[fid];
-                if (f) await downloadAsImage(f, `${fid}-front`);
-                if (b) await downloadAsImage(b, `${fid}-back`);
-              }
+              // images already upload ho chuki hain, local download ki zarurat nahi
               clear();
               navigate("/my-orders");
             } else {
@@ -391,9 +416,13 @@ export default function CheckoutPage() {
                         <option value="Uttarakhand">Uttarakhand</option>
                         <option value="West Bengal">West Bengal</option>
                         {/* Union Territories */}
-                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                        <option value="Andaman and Nicobar Islands">
+                          Andaman and Nicobar Islands
+                        </option>
                         <option value="Chandigarh">Chandigarh</option>
-                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                        <option value="Dadra and Nagar Haveli and Daman and Diu">
+                          Dadra and Nagar Haveli and Daman and Diu
+                        </option>
                         <option value="Delhi">Delhi</option>
                         <option value="Jammu and Kashmir">Jammu and Kashmir</option>
                         <option value="Ladakh">Ladakh</option>
@@ -498,6 +527,7 @@ export default function CheckoutPage() {
               </Button>
             </div>
 
+            {/* Hidden render for capture (front/back) */}
             <div
               style={{
                 position: "absolute",

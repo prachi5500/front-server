@@ -35,7 +35,11 @@ const paymentSchema = new mongoose.Schema(
         templateId: { type: String, required: true },
         title: { type: String, default: null },
         price: { type: Number, default: null },
-        templateName: { type: String, default: null }
+        templateName: { type: String, default: null },
+
+        // 👇 naya: user-edited card images
+        frontImageUrl: { type: String, default: null },
+        backImageUrl: { type: String, default: null },
       },
     ],
 

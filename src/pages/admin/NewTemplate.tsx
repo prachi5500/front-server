@@ -16,10 +16,11 @@ const NewTemplate = () => {
 
   // Template Config State
   const [name, setName] = useState("");
-  const [status, setStatus] = useState<"draft" | "published">("published");
+  const [status, setStatus] =
+    useState<"draft" | "published">("published");
   const [isPremium, setIsPremium] = useState(false);
-  const [price, setPrice] = useState<string>("$2.99");
-  
+  const [price, setPrice] = useState<string>("2.99");
+
   // Design State
   const [fontColor, setFontColor] = useState("#000000");
   const [fontSize, setFontSize] = useState(16);
@@ -59,43 +60,54 @@ const NewTemplate = () => {
       let background_url: string | null = bgUrlInput || null;
       let back_background_url: string | null = backBgUrlInput || null;
       let thumbnail_url: string | null = null;
-      
+
       const ts = Date.now();
-      
-      // If user selected a file, upload it and override the URL
+
       if (bgFile) {
-        background_url = await uploadTemplateAsset(bgFile, `backgrounds/${ts}-${bgFile.name}`);
+        background_url = await uploadTemplateAsset(
+          bgFile,
+          `backgrounds/${ts}-${bgFile.name}`,
+        );
       }
       if (backBgFile) {
-        back_background_url = await uploadTemplateAsset(backBgFile, `backgrounds/${ts}-back-${backBgFile.name}`);
+        back_background_url = await uploadTemplateAsset(
+          backBgFile,
+          `backgrounds/${ts}-back-${backBgFile.name}`,
+        );
       }
       if (thumbFile) {
-        thumbnail_url = await uploadTemplateAsset(thumbFile, `thumbnails/${ts}-${thumbFile.name}`);
+        thumbnail_url = await uploadTemplateAsset(
+          thumbFile,
+          `thumbnails/${ts}-${thumbFile.name}`,
+        );
       }
 
-      const config = { 
-        fontColor, 
-        fontSize, 
-        accentColor, 
-        fontFamily, 
-        premium: isPremium, 
+      const config = {
+        fontColor,
+        fontSize,
+        accentColor,
+        fontFamily,
+        premium: isPremium,
         price,
         qrColor,
-        qrLogoUrl
+        qrLogoUrl,
       };
 
-      const created = await createTemplate({ 
-        name, 
-        status, 
-        config, 
-        background_url, 
-        back_background_url, 
-        thumbnail_url 
+      const numericPrice =
+        parseFloat(price.replace(/[^0-9.]/g, "")) || 2.99;
+
+      const created = await createTemplate({
+        name,
+        status,
+        config,
+        background_url,
+        back_background_url,
+        thumbnail_url,
+        price: numericPrice,
       });
 
-      // Navigate to the edit page of the new template
+      // Naya template banne ke baad uske edit page pe bhejo
       navigate(`/admin/templates/${created.id}/edit`, { replace: true });
-
     } catch (e: any) {
       setError(e.message ?? "Create failed");
     } finally {
@@ -103,28 +115,45 @@ const NewTemplate = () => {
     }
   };
 
-  // Helpers for Preview Logic
   const getPreviewBg = () => {
     if (showBack) {
-      return backBgFile ? URL.createObjectURL(backBgFile) : (backBgUrlInput || null);
+      return backBgFile
+        ? URL.createObjectURL(backBgFile)
+        : backBgUrlInput || null;
     }
-    return bgFile ? URL.createObjectURL(bgFile) : (bgUrlInput || null);
+    return bgFile ? URL.createObjectURL(bgFile) : bgUrlInput || null;
   };
 
   return (
-    <form onSubmit={onSubmit} className="max-w-7xl mx-auto p-6 min-h-screen bg-gray-50/50">
-      
+    <form
+      onSubmit={onSubmit}
+      className="max-w-7xl mx-auto p-6 min-h-screen bg-gray-50/50"
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">New Template</h1>
-          <p className="text-sm text-gray-500">Create a new business card template from scratch.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+            New Template
+          </h1>
+          <p className="text-sm text-gray-500">
+            Create a new business card template from scratch.
+          </p>
         </div>
         <div className="flex gap-3">
-           <Button type="button" variant="outline" onClick={() => navigate(-1)}>Cancel</Button>
-           <Button type="submit" disabled={saving} className="min-w-[100px]">
-             {saving ? "Creating..." : "Create Template"}
-           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(-1)}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={saving}
+            className="min-w-[100px]"
+          >
+            {saving ? "Creating..." : "Create Template"}
+          </Button>
         </div>
       </div>
 
@@ -233,18 +262,45 @@ const NewTemplate = () => {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                     <div className="flex items-center gap-2">
-                       <input type="checkbox" id="prem" className="h-4 w-4 rounded border-gray-300" checked={isPremium} onChange={(e) => setIsPremium(e.target.checked)} />
-                       <label htmlFor="prem" className="text-sm font-medium">Premium Template</label>
-                     </div>
-                     <div className="space-y-2">
-                       <label className="text-sm font-medium">Price String</label>
-                       <input className="w-full border rounded-md px-3 py-2 text-sm" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="$2.99" />
-                     </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="prem"
+                        className="h-4 w-4 rounded border-gray-300"
+                        checked={isPremium}
+                        onChange={(e) => setIsPremium(e.target.checked)}
+                      />
+                      <label
+                        htmlFor="prem"
+                        className="text-sm font-medium"
+                      >
+                        Premium Template
+                      </label>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Price String
+                      </label>
+                      <input
+                        className="w-full border rounded-md px-3 py-2 text-sm"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="2.99"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2 pt-4 border-t">
-                    <label className="text-sm font-medium">Thumbnail Image (Required)</label>
-                    <input type="file" className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" accept="image/*" onChange={(e) => setThumbFile(e.target.files?.[0] ?? null)} />
+                    <label className="text-sm font-medium">
+                      Thumbnail Image (Required)
+                    </label>
+                    <input
+                      type="file"
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                      accept="image/*"
+                      onChange={(e) =>
+                        setThumbFile(e.target.files?.[0] ?? null)
+                      }
+                    />
                   </div>
                 </div>
               )}

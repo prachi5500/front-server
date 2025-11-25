@@ -105,36 +105,48 @@ const EditTemplate = () => {
       let thumbnail_url = item?.thumbnail_url ?? null;
 
       const ts = Date.now();
-      
-      // If user selected a file, upload it and override the URL
+
       if (bgFile) {
-        background_url = await uploadTemplateAsset(bgFile, `backgrounds/${ts}-${bgFile.name}`);
+        background_url = await uploadTemplateAsset(
+          bgFile,
+          `backgrounds/${ts}-${bgFile.name}`,
+        );
       }
       if (backBgFile) {
-        back_background_url = await uploadTemplateAsset(backBgFile, `backgrounds/${ts}-back-${backBgFile.name}`);
+        back_background_url = await uploadTemplateAsset(
+          backBgFile,
+          `backgrounds/${ts}-back-${backBgFile.name}`,
+        );
       }
       if (thumbFile) {
-        thumbnail_url = await uploadTemplateAsset(thumbFile, `thumbnails/${ts}-${thumbFile.name}`);
+        thumbnail_url = await uploadTemplateAsset(
+          thumbFile,
+          `thumbnails/${ts}-${thumbFile.name}`,
+        );
       }
 
-      const config = { 
-        fontColor, 
-        fontSize, 
-        accentColor, 
-        fontFamily, 
-        premium: isPremium, 
+      const config = {
+        fontColor,
+        fontSize,
+        accentColor,
+        fontFamily,
+        premium: isPremium,
         price,
         qrColor,
-        qrLogoUrl
+        qrLogoUrl,
       };
 
-      await updateTemplate(id, { 
-        name, 
-        status, 
-        config, 
-        background_url: background_url || null, 
-        back_background_url: back_background_url || null, 
-        thumbnail_url 
+      const numericPrice =
+        parseFloat(price.replace(/[^0-9.]/g, "")) || 2.99;
+
+      await updateTemplate(id, {
+        name,
+        status,
+        config,
+        background_url: background_url || null,
+        back_background_url: back_background_url || null,
+        thumbnail_url,
+        price: numericPrice,
       });
 
       navigate("/admin/templates", { replace: true });
@@ -273,19 +285,50 @@ const EditTemplate = () => {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                     <div className="flex items-center gap-2">
-                       <input type="checkbox" id="prem" className="h-4 w-4 rounded border-gray-300" checked={isPremium} onChange={(e) => setIsPremium(e.target.checked)} />
-                       <label htmlFor="prem" className="text-sm font-medium">Premium Template</label>
-                     </div>
-                     <div className="space-y-2">
-                       <label className="text-sm font-medium">Price String</label>
-                       <input className="w-full border rounded-md px-3 py-2 text-sm" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="$2.99" />
-                     </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="prem"
+                        className="h-4 w-4 rounded border-gray-300"
+                        checked={isPremium}
+                        onChange={(e) => setIsPremium(e.target.checked)}
+                      />
+                      <label
+                        htmlFor="prem"
+                        className="text-sm font-medium"
+                      >
+                        Premium Template
+                      </label>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Price String
+                      </label>
+                      <input
+                        className="w-full border rounded-md px-3 py-2 text-sm"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="2.99"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2 pt-4 border-t">
-                    <label className="text-sm font-medium">Thumbnail Image</label>
-                    <input type="file" className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" accept="image/*" onChange={(e) => setThumbFile(e.target.files?.[0] ?? null)} />
-                    {item.thumbnail_url && !thumbFile && <p className="text-xs text-gray-400">Current: {item.thumbnail_url.split('/').pop()}</p>}
+                    <label className="text-sm font-medium">
+                      Thumbnail Image
+                    </label>
+                    <input
+                      type="file"
+                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                      accept="image/*"
+                      onChange={(e) =>
+                        setThumbFile(e.target.files?.[0] ?? null)
+                      }
+                    />
+                    {item.thumbnail_url && !thumbFile && (
+                      <p className="text-xs text-gray-400">
+                        Current: {item.thumbnail_url.split("/").pop()}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

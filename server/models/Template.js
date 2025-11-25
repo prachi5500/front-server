@@ -7,6 +7,7 @@ const templateSchema = new mongoose.Schema({
   background_url: { type: String, default: null },
   back_background_url: { type: String, default: null },
   thumbnail_url: { type: String, default: null },
+  price: { type: Number, default: 2.99 },
   created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
