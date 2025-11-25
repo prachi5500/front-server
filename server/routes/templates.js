@@ -27,7 +27,7 @@ router.get('/all', authRequired, adminRequired, async (_req, res) => {
 // Admin: create
 router.post('/', authRequired, adminRequired, async (req, res) => {
   try {
-    const { name, status = 'draft', config = {}, background_url = null, back_background_url = null, thumbnail_url = null } = req.body || {};
+    const { name, status = 'draft', config = {}, background_url = null, back_background_url = null, thumbnail_url = null, price = 2.99, } = req.body || {};
     if (!name) return res.status(400).json({ error: 'name required' });
     const created = await Template.create({
       name,
@@ -36,6 +36,7 @@ router.post('/', authRequired, adminRequired, async (req, res) => {
       background_url,
       back_background_url,
       thumbnail_url,
+      price,
       created_by: req.user._id,
     });
     res.status(201).json({ id: created._id, ...created.toObject() });

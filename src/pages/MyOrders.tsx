@@ -9,6 +9,9 @@ interface OrderedItem {
   title?: string | null;
   price?: number | null;
   templateName?: string | null;
+  // backend me ho sakta hai par TS type optional rakh rahe
+  frontImageUrl?: string | null;
+  backImageUrl?: string | null;
 }
 
 interface Payment {
@@ -166,8 +169,7 @@ export default function MyOrders() {
                               };
                             } else {
                               previewStyle = {
-                                backgroundColor:
-                                  classicTemplate.bgColors[0],
+                                backgroundColor: classicTemplate.bgColors[0],
                               };
                             }
                           }
@@ -178,6 +180,16 @@ export default function MyOrders() {
                             classicTemplate?.name ||
                             rawId;
 
+                          const itemAny = item as any;
+
+                          // FRONT thumbnail in list: saved image -> thumbnail -> background -> back
+                          const listFrontSrc =
+                            itemAny.frontImageUrl ||
+                            serverTemplate?.thumbnail_url ||
+                            (serverTemplate as any)?.background_url ||
+                            serverTemplate?.back_background_url ||
+                            null;
+
                           return (
                             <div
                               key={idx}
@@ -187,13 +199,9 @@ export default function MyOrders() {
                               }
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                {serverTemplate?.thumbnail_url ||
-                                serverTemplate?.back_background_url ||
-                                (serverTemplate as any)?.background_url ? (
+                                {listFrontSrc ? (
                                   <img
-                                    src={(serverTemplate?.thumbnail_url ||
-                                      serverTemplate?.back_background_url ||
-                                      (serverTemplate as any)?.background_url) as string}
+                                    src={listFrontSrc}
                                     alt={displayName}
                                     className="h-14 w-24 object-cover rounded border"
                                   />
@@ -302,6 +310,24 @@ export default function MyOrders() {
                     .filter(Boolean)
                     .join(", ") || "-";
 
+                const itemAny = item as any;
+
+                // Front image in modal: saved URL -> template images
+                const modalFrontSrc =
+                  itemAny.frontImageUrl ||
+                  serverTemplate?.thumbnail_url ||
+                  (serverTemplate as any)?.background_url ||
+                  serverTemplate?.back_background_url ||
+                  null;
+
+                // Back image in modal: saved URL -> back template -> others
+                const modalBackSrc =
+                  itemAny.backImageUrl ||
+                  serverTemplate?.back_background_url ||
+                  serverTemplate?.thumbnail_url ||
+                  (serverTemplate as any)?.background_url ||
+                  null;
+
                 return (
                   <div className="space-y-4 text-sm">
                     <div>
@@ -317,18 +343,15 @@ export default function MyOrders() {
                     </div>
 
                     <div className="flex flex-col lg:flex-row gap-4">
+                      {/* FRONT */}
                       <div className="w-full lg:w-1/3 flex flex-col gap-2">
                         <div className="text-[11px] font-medium text-muted-foreground">
                           Front
                         </div>
                         <div className="flex items-center justify-center">
-                          {serverTemplate?.thumbnail_url ||
-                          serverTemplate?.back_background_url ||
-                          (serverTemplate as any)?.background_url ? (
+                          {modalFrontSrc ? (
                             <img
-                              src={(serverTemplate?.thumbnail_url ||
-                                serverTemplate?.back_background_url ||
-                                (serverTemplate as any)?.background_url) as string}
+                              src={modalFrontSrc}
                               alt={displayName}
                               className="w-full rounded-lg border object-cover"
                             />
@@ -345,19 +368,15 @@ export default function MyOrders() {
                         </div>
                       </div>
 
+                      {/* BACK */}
                       <div className="w-full lg:w-1/3 flex flex-col gap-4 mt-6 lg:mt-0">
                         <div className="text-[11px] font-medium text-muted-foreground">
                           Back
                         </div>
                         <div className="flex items-center justify-center">
-
-                          {serverTemplate?.back_background_url ||
-                          serverTemplate?.thumbnail_url ? (
+                          {modalBackSrc ? (
                             <img
-                              src={
-                                serverTemplate.back_background_url ||
-                                serverTemplate.thumbnail_url!
-                              }
+                              src={modalBackSrc}
                               alt={displayName}
                               className="w-full rounded-lg border object-cover"
                             />
@@ -374,6 +393,7 @@ export default function MyOrders() {
                         </div>
                       </div>
 
+                      {/* DETAILS */}
                       <div className="w-full lg:w-1/3 space-y-2 mt-6 lg:mt-0">
                         <div className="font-semibold text-sm">
                           {displayName}

@@ -12,7 +12,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-router.post('/', authRequired, adminRequired, upload.single('file'), async (req, res) => {
+router.post('/', authRequired, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file' });
     const b64 = Buffer.from(req.file.buffer).toString('base64');
