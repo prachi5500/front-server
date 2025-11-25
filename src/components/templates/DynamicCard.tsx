@@ -164,6 +164,7 @@ export const DynamicCard = ({
     layout = "centered",
     logoShape = "circle",
   } = designConfig;
+  const hasUserName = !!data.name?.trim();
 
   const bgStyleObj =
     bgStyle === "gradient" && bgColors.length >= 2
@@ -198,9 +199,15 @@ export const DynamicCard = ({
       )}
 
       <div className="flex flex-col text-right ml-4">
-        <h3 className="text-xl font-bold">{data.name || "Your Name"}</h3>
-        <p style={{ color: accentColor }}>{data.title || "Title"}</p>
-        <p className="text-sm opacity-80">{data.company || "Company"}</p>
+        <h3 className="text-xl font-bold">
+          {hasUserName ? (data.name || "") : (data.name || "Your Name")}
+        </h3>
+        {data.title?.trim() && (
+          <p style={{ color: accentColor }}>{data.title}</p>
+        )}
+        {data.company?.trim() && (
+          <p className="text-sm opacity-80">{data.company}</p>
+        )}
       </div>
     </div>
   );
