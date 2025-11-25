@@ -33,8 +33,7 @@ interface TemplateSelectorProps {
   onAccentColorChange?: (color: string) => void;
 }
 
-const templates = classicTemplates;
-}
+
 
 const templates = classicTemplates;
 const DEFAULT_PRICE = 2.99;

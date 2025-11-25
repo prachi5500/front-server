@@ -158,10 +158,6 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </main>
-
-      {/* Payment Features */}
-      <PaymentFeatures />
 
         {/* Classic Templates Only */}
         <div id="classic-templates" className="animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
