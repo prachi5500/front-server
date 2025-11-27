@@ -104,7 +104,7 @@ export const PricingSection = () => {
                                         plan.features.map((feature) => (
                                             <li key={feature} className="flex items-start gap-2">
                                                 < Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                                                < span className="text-sm text-foreground">{feature}</span>
+                                                <span className="text-sm text-foreground">{feature}</span>
                                             </li >
                                         ))
                                     }
