@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Facebook, Twitter, Instagram, Linkedin, Search } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Search, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/services/api";
@@ -18,6 +18,7 @@ import { toast } from "@/components/ui/sonner";
 const Index = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [businessData, setBusinessData] = useState<BusinessCardData>({
     name: "",
@@ -70,8 +71,8 @@ const Index = () => {
       <header className="sticky top-0 z-50 bg-transparent">
         <div className="container mx-auto max-w-7xl px-4 py-3">
           <div className="flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 dark:bg-neutral-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.12)] px-4 py-2">
-            <Link to="/" className="flex items-center gap-2">
-              <img src="/ChatGPT Image Nov 14, 2025, 10_52_55 AM.png" alt="BusinessCard" className="h-14 w-auto select-none" />
+            <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+              <img src="/ChatGPT Image Nov 14, 2025, 10_52_55 AM.png" alt="BusinessCard" className="h-10 sm:h-14 w-auto select-none" />
             </Link>
             <div className="hidden md:flex flex-1 justify-center px-4">
               <div className="relative w-full max-w-md">
@@ -84,10 +85,12 @@ const Index = () => {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            
+            {/* Desktop Menu */}
+            <div className="hidden sm:flex items-center gap-2">
               <Link
                 to="/cart"
-                className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
+                className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
               >
                 Cart
               </Link>
@@ -95,14 +98,14 @@ const Index = () => {
                 <>
                   <Link
                     to="/my-orders"
-                    className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
+                    className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
                   >
-                    My Orders
+                    Orders
                   </Link>
                   {profile?.role === "admin" && (
                     <Link
                       to="/admin/templates"
-                      className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
+                      className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
                     >
                       Admin
                     </Link>
@@ -112,23 +115,81 @@ const Index = () => {
                       await signOut();
                       navigate("/");
                     }}
-                    className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
+                    className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
                   >
                     Logout
                   </button>
                 </>
               ) : (
-                <div className="flex items-center gap-2">
-                  <Link
-                    to="/login"
-                    className="rounded-full px-4 py-2 text-sm w-full text-center bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
-                  >
-                    Login
-                  </Link>
-                </div>
+                <Link
+                  to="/login"
+                  className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
+                >
+                  Login
+                </Link>
               )}
             </div>
+
+            {/* Mobile Hamburger */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="sm:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden mt-3 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-4 space-y-2">
+              <Link
+                to="/cart"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block w-full px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-center"
+              >
+                Cart
+              </Link>
+              {user ? (
+                <>
+                  <Link
+                    to="/my-orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-center"
+                  >
+                    Orders
+                  </Link>
+                  {profile?.role === "admin" && (
+                    <Link
+                      to="/admin/templates"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-center"
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    onClick={async () => {
+                      await signOut();
+                      navigate("/");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition-all"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-center"
+                >
+                  Login
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -137,14 +198,13 @@ const Index = () => {
 
       <main className="container mx-auto max-w-7xl px-4 py-12">
         {/* Form + Customization */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+      
           <div>
             <BusinessCardForm data={businessData} onChange={setBusinessData} />
           </div>
 
-          <div className="space-y-6">
             {/* Customization Panel */}
-            <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
+            {/* <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
               <CustomizationPanel
                 selectedFont={selectedFont}
                 onFontSelect={setSelectedFont}
@@ -155,9 +215,9 @@ const Index = () => {
                 accentColor={accentColor}
                 onAccentColorChange={setAccentColor}
               />
-            </div>
-          </div>
-        </div>
+            </div> */}
+        
+      
 
         {/* Classic Templates Only */}
         <div id="classic-templates" className="animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">

@@ -58,6 +58,15 @@ export const BackSideCard: React.FC<Props> = ({
   qrColor = "#000000",
   qrLogoUrl,
 }) => {
+    // ---- FONT SCALE BASED ON fontSize ----
+  const scale = fontSize / 16;
+
+  const sizeEmail = 12 * scale;
+  const sizePhone = 12 * scale;
+  const sizeWebsite = 12 * scale;
+  const sizeAddress = 12 * scale;
+  const sizeQR = (qrSize ?? (showLargeQR ? 60 : 40)) * scale;
+
   const appliedAccent = accentColor ?? config?.accentColor ?? "#1f2937";
   const hasUserCoreInfo = !!(data.name && data.email && data.phone);
 
@@ -91,92 +100,49 @@ export const BackSideCard: React.FC<Props> = ({
   }, [qrLogoUrl]);
 
   const renderContent = () => (
-    <div className="relative z-10 flex items-center justify-center h-full w-full">
-      {compact ? (
-        <div className="w-full flex items-center justify-center gap-4 px-2" style={{ lineHeight: 1.2 }}>
-          <div className="text-sm space-y-1 text-center">
-            {hasUserCoreInfo ? (
-              <>
-                {data.email && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>✉</strong> {data.email}
-                  </div>
-                )}
-                {data.phone && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>✆</strong> {data.phone}
-                  </div>
-                )}
-                {data.website && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>⌂</strong> {data.website}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div><strong style={{ color: appliedAccent }}>✉</strong> {data.email || "email@example.com"}</div>
-                <div><strong style={{ color: appliedAccent }}>✆</strong> {data.phone || "+91 00000 00000"}</div>
-                <div><strong style={{ color: appliedAccent }}>⌂</strong> {data.website || "your-website.com"}</div>
-              </>
-            )}
-          </div>
-          {(data.name || data.email) && (
-            <div className="bg-white/90 p-1.5 rounded-lg shadow-sm">
-              <QRCodeSVG 
-                value={vCardData} 
-                size={qrSize ?? (showLargeQR ? 80 : 60)} 
-                fgColor={qrColor}
-                imageSettings={qrImageSettings}
-              />
-            </div>
+    <div className="relative z-10 flex items-center justify-between h-full w-full px-2 md:px-4 gap-3 md:gap-4">
+      {/* Left Side - Text Content (smaller) */}
+      <div className="flex-1 flex items-center justify-start">
+        <div className="space-y-1 md:space-y-2" style={{ lineHeight: 1.3 }}>
+          {hasUserCoreInfo ? (
+            <>
+              {data.email && (
+                <div style={{ fontSize: sizeEmail }}>
+  <strong style={{ color: appliedAccent }}>✉</strong> {data.email}
+</div>
+              )}
+              <div style={{ fontSize: sizePhone }}>
+  <strong style={{ color: appliedAccent }}>✆</strong> {data.phone}
+</div>
+
+              <div style={{ fontSize: sizeWebsite }}>
+  <strong style={{ color: appliedAccent }}>⌂</strong> {data.website}
+</div>
+
+             <div style={{ fontSize: sizeAddress }}>
+  <strong style={{ color: appliedAccent }}>📍</strong> {data.address}
+</div>
+
+            </>
+          ) : (
+            <>
+                <div style={{ fontSize: sizeAddress }}><strong style={{ color: appliedAccent }}>✆</strong> {data.phone || "+91 00000 00000"}</div>
+                <div style={{ fontSize: sizeAddress }}><strong style={{ color: appliedAccent }}>⌂</strong> {data.website || "your-website.com"}</div>
+                <div style={{ fontSize: sizeAddress }}><strong style={{ color: appliedAccent }}>📍</strong> {data.address || "Your Address, City"}</div>
+            </>
           )}
         </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center w-full space-y-3">
-          <div className="text-center space-y-1">
-            {hasUserCoreInfo ? (
-              <>
-                {data.email && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>✉</strong> {data.email}
-                  </div>
-                )}
-                {data.phone && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>✆</strong> {data.phone}
-                  </div>
-                )}
-                {data.website && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>⌂</strong> {data.website}
-                  </div>
-                )}
-                {data.address && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>📍</strong> {data.address}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div><strong style={{ color: appliedAccent }}>✉</strong> {data.email || "email@example.com"}</div>
-                <div><strong style={{ color: appliedAccent }}>✆</strong> {data.phone || "+91 00000 00000"}</div>
-                <div><strong style={{ color: appliedAccent }}>⌂</strong> {data.website || "your-website.com"}</div>
-                <div><strong style={{ color: appliedAccent }}>📍</strong> {data.address || "Your Address, City"}</div>
-              </>
-            )}
-          </div>
-          {(data.name || data.email) && (
-            <div className="bg-white/90 p-2 rounded-xl shadow-sm backdrop-blur-sm">
-              <QRCodeSVG 
-                value={vCardData} 
-                size={qrSize ?? (showLargeQR ? 100 : 64)} 
-                fgColor={qrColor}
-                imageSettings={qrImageSettings}
-              />
-            </div>
-          )}
+      </div>
+
+      {/* Right Side - QR Code */}
+      {(data.name || data.email) && (
+        <div className="flex-shrink-0 bg-white/90 p-2 md:p-3 rounded-lg shadow-sm backdrop-blur-sm">
+          <QRCodeSVG 
+            value={vCardData} 
+            size={sizeQR } 
+            fgColor={qrColor}
+            imageSettings={qrImageSettings}
+          />
         </div>
       )}
     </div>

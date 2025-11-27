@@ -139,11 +139,12 @@ const NewTemplate = () => {
             Create a new business card template from scratch.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 ">
           <Button
             type="button"
             variant="outline"
             onClick={() => navigate(-1)}
+            className="hidden sm:inline-flex"
           >
             Cancel
           </Button>
@@ -191,7 +192,7 @@ const NewTemplate = () => {
                 backgroundPosition: "center",
               }}
             >
-              <div className="w-full h-full">
+              <div className="w-full h-full ">
                 {showBack ? (
                   <BackSideCard
                     data={previewData}
@@ -207,9 +208,39 @@ const NewTemplate = () => {
                 ) : (
                   <div className="w-full h-full flex items-center justify-end p-8">
                     <div className="flex flex-col text-right z-10">
-                      <h3 className="text-2xl font-bold leading-tight mb-1" style={{ color: fontColor, fontFamily }}>{previewData.name}</h3>
-                      <p className="font-medium mb-2" style={{ color: accentColor, fontFamily }}>{previewData.title}</p>
-                      <p className="text-sm opacity-75" style={{ color: fontColor, fontFamily }}>{previewData.company}</p>
+                      <h3
+  className="font-bold leading-tight mb-1"
+  style={{
+    color: fontColor,
+    fontFamily,
+    fontSize: fontSize + 8, // Name largest
+  }}
+>
+  {previewData.name}
+</h3>
+
+<p
+  className="font-medium mb-2"
+  style={{
+    color: accentColor,
+    fontFamily,
+    fontSize: fontSize + 4, // Title medium
+  }}
+>
+  {previewData.title}
+</p>
+
+<p
+  className="opacity-75"
+  style={{
+    color: fontColor,
+    fontFamily,
+    fontSize: fontSize, // Company base size
+  }}
+>
+  {previewData.company}
+</p>
+
                     </div>
                   </div>
                 )}
