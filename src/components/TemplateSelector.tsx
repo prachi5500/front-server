@@ -15,6 +15,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { CustomizationPanel } from "./CustomizationPanel";
 
+
+
+
 declare global {
   interface Window {
     Razorpay: any;
@@ -31,10 +34,11 @@ interface TemplateSelectorProps {
   onFontSizeChange?: (size: number) => void;
   onTextColorChange?: (color: string) => void;
   onAccentColorChange?: (color: string) => void;
+  // When true, show the small customization panel inside the selector (optional)
+  showCustomizationPanel?: boolean;
 }
 
-const templates = classicTemplates;
-}
+
 
 const templates = classicTemplates;
 const DEFAULT_PRICE = 2.99;
@@ -49,7 +53,16 @@ export const TemplateSelector = ({
   onFontSizeChange,
   onTextColorChange,
   onAccentColorChange,
+  showCustomizationPanel = false,
 }: TemplateSelectorProps) => {
+  // for font scalling
+const [scale, setScale] = useState(1);
+const containerRefs = useRef<Record<string, HTMLDivElement | null>>({});
+// preview font scale
+const previewContainerRef = useRef<HTMLDivElement | null>(null);
+const [previewScale, setPreviewScale] = useState(1);
+
+
   const [selectedTemplate, setSelectedTemplate] = useState(templates[0]?.id ?? "classic-001");
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const previewRef = useRef<HTMLDivElement>(null);
@@ -265,6 +278,43 @@ export const TemplateSelector = ({
     textColor !== defaultText ||
     accentColor !== defaultAccent;
 
+
+// for font scalling
+useEffect(() => {
+  const updateScaleAll = () => {
+    Object.entries(containerRefs.current).forEach(([id, el]) => {
+      if (!el) return;
+      const w = el.getBoundingClientRect().width;
+      const cardWidth = 280; // FULL size card width
+      const scaleValue = w / cardWidth;
+      el.style.setProperty("--cardScale", String(scaleValue));
+    });
+  };
+
+  updateScaleAll();
+  window.addEventListener("resize", updateScaleAll);
+  return () => window.removeEventListener("resize", updateScaleAll);
+}, []);
+
+// for preview font scalling
+useEffect(() => {
+  const updatePreviewScale = () => {
+    if (!previewContainerRef.current) return;
+
+    const parentWidth = previewContainerRef.current.offsetWidth;
+    const fullWidth = 560; // original full preview width
+
+    const scale = parentWidth / fullWidth;
+    setPreviewScale(scale);
+  };
+
+  updatePreviewScale();
+  window.addEventListener("resize", updatePreviewScale);
+
+  return () => window.removeEventListener("resize", updatePreviewScale);
+}, []);
+
+
   // fetch admin/server templates
   useEffect(() => {
     let alive = true;
@@ -353,11 +403,12 @@ export const TemplateSelector = ({
 
   return (
     <div className="space-y-6 overflow-x-hidden">
-      <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.1s] opacity-0 [animation-fill-mode:forwards]">
+      <div className="bg-card rounded-xl p-4 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.1s] opacity-0 [animation-fill-mode:forwards]">
         <div className="flex flex-col gap-4 mb-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <h2 className="text-xl font-bold text-foreground">Preview</h2>
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="flex flex-nowrap items-center justify-end gap-2 w-full overflow-x-auto scrollbar-hide py-1">
+
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -387,17 +438,17 @@ export const TemplateSelector = ({
                   }
                 }}
                 disabled={isSaving}
-                className="gap-1.5"
+                className="gap-1.5  text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
               >
                 {isSaving ? 'Saving...' : 'Save Design'}
               </Button>
               
-              {isEditLayout ? (
+              {/* {isEditLayout ? (
                 <Button 
                   variant="default" 
                   size="sm" 
                   onClick={() => setIsEditLayout(false)}
-                  className="gap-1.5"
+                  className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
                 >
                   Exit 
                 </Button>
@@ -406,17 +457,17 @@ export const TemplateSelector = ({
                   variant="outline" 
                   size="sm" 
                   onClick={() => setIsEditLayout(true)}
-                  className="gap-1.5"
+                  className="gap-1.5  text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
                 >
                   Edit 
                 </Button>
               )}
-              
+               */}
               <Button 
                 onClick={buyCurrent} 
                 size="sm" 
                 variant="default"
-                className="gap-1.5"
+                className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
               >
                 Buy 
               </Button>
@@ -425,7 +476,7 @@ export const TemplateSelector = ({
                 onClick={addToCart} 
                 variant="outline" 
                 size="sm" 
-                className="gap-1.5"
+                className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
               >
                  Cart
               </Button>
@@ -505,15 +556,29 @@ export const TemplateSelector = ({
           )}
         </div>
 
-        <div className="bg-gradient-to-br from-muted to-background p-4 sm:p-6 md:p-8 rounded-lg overflow-x-hidden">
-          <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-4 sm:p-6">
-            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div className="bg-gradient-to-br from-muted to-background p-0 rounded-lg overflow-x-hidden">
+  <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-0 ">
+    <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-2">
+
               {(() => {
                 const isServer = selectedTemplate.startsWith("sb:");
                 if (!isServer) {
                   return (
                     <>
-                      <div ref={previewRef} className="relative w-full max-w-full overflow-hidden">
+                     <div
+  ref={previewContainerRef}
+  className="relative w-full max-w-full overflow-hidden"
+>
+  <div
+    className="origin-top-left"
+    style={{ transform: `scale(${previewScale})` }}
+  >
+    <div
+      ref={previewRef}
+      style={{ width: 560, height: 320 }}
+      className="relative"
+    >
+
                         <div className="wm-screen-only" data-watermark="screen-only" />
                         {!isEditLayout && selectedConfig && (
                           <ClassicCard
@@ -521,6 +586,7 @@ export const TemplateSelector = ({
                             config={selectedConfig}
                             fontFamily={hasOverrides ? selectedFont : undefined}
                             fontSize={hasOverrides ? fontSize : undefined}
+                            
                             textColor={hasOverrides ? textColor : undefined}
                             accentColor={hasOverrides ? accentColor : undefined}
                           />
@@ -583,7 +649,24 @@ export const TemplateSelector = ({
                           </div>
                         )}
                       </div>
-                      <div ref={backRef} className="relative w-full max-w-full overflow-hidden">
+                      </div>
+                      </div>
+
+                      
+                      <div
+  ref={previewContainerRef}
+  className="relative w-full max-w-full overflow-hidden"
+>
+  <div
+    className="origin-top-left"
+    style={{ transform: `scale(${previewScale})` }}
+  >
+    <div
+      ref={backRef}
+      style={{ width: 560, height: 320 }}
+      className="relative"
+    >
+
                         <div className="wm-screen-only" data-watermark="screen-only" />
                         {!isEditLayout && selectedConfig && (
                           <BackSideCard
@@ -686,6 +769,9 @@ export const TemplateSelector = ({
                           </div>
                         )}
                       </div>
+                      </div>
+                      </div>
+
                     </>
                   );
                 }
@@ -959,7 +1045,8 @@ export const TemplateSelector = ({
             </div>
           </div>
         </div>
-        <div className="mt-4">
+        
+        {/* <div className="mt-4">
           <CustomizationPanel
             selectedFont={selectedFont}
             onFontSelect={onFontSelect ?? (() => {})}
@@ -970,15 +1057,15 @@ export const TemplateSelector = ({
             accentColor={accentColor}
             onAccentColorChange={onAccentColorChange ?? (() => {})}
           />
-        </div>
+        </div> */}
       </div>
 
-      <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
+      {/* <div className="bg-card rounded-xl p-4 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
         <h2 className="text-2xl font-bold mb-4 text-foreground">Classic Templates</h2>
         {combined.length === 0 ? (
           <div className="text-sm text-muted-foreground">No classic templates available.</div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {pagedTemplates.map((item) => (
               <div key={item.id} className="relative">
                 <button
@@ -1058,14 +1145,14 @@ export const TemplateSelector = ({
                       </div>
                     </>
                   )}
-                </button>
+                </button> */}
                 {/* tile quick download removed in commerce flow */}
-              </div>
+              {/* </div>
             ))}
           </div>
-        )}
+        )} */}
         {/* Pagination controls */}
-        {totalPages > 1 && (
+        {/* {totalPages > 1 && (
           <div className="flex items-center justify-center gap-3 mt-6">
             <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}>
               Prev
@@ -1078,9 +1165,9 @@ export const TemplateSelector = ({
             </Button>
           </div>
         )}
-      </div>
+      </div> */}
 
-      <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
+      <div className="bg-card rounded-xl p-4 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
         <h2 className="text-2xl font-bold mb-4 text-foreground">
           Classic Templates
         </h2>
@@ -1089,122 +1176,122 @@ export const TemplateSelector = ({
             No classic templates available.
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            {pagedTemplates.map((item) => (
-              <div key={item.id} className="relative">
-                <button
-                  onClick={() => setSelectedTemplate(item.id)}
-                  className={`group relative rounded-lg overflow-hidden transition-all duration-300 border-2 ${
-                    selectedTemplate === item.id
-                      ? "border-primary shadow-[var(--shadow-hover)]"
-                      : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
-                  }`}
-                >
-                  {selectedTemplate === item.id && (
-                    <div className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground rounded-full p-1">
-                      <Check className="w-4 h-4" />
-                    </div>
-                  )}
-                  {item.kind === "classic" ? (
-                    <>
-                      <div
-                        ref={(el) => {
-                          cardRefs.current[item.id] = el;
-                        }}
-                        className="pointer-events-none aspect-[1.75/1] w-full relative"
-                      >
-                        <ClassicCard
-                          data={data}
-                          config={item.classic}
-                          fontFamily={
-                            hasOverrides ? selectedFont : undefined
-                          }
-                          fontSize={hasOverrides ? fontSize : undefined}
-                          textColor={hasOverrides ? textColor : undefined}
-                          accentColor={hasOverrides ? accentColor : undefined}
-                        />
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                        <p className="text-white font-medium text-sm">
-                          {item.classic.name}
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {(() => {
-                        const t = item.server;
-                        const bg = t?.thumbnail_url || t?.background_url || undefined;
-                        const cfg: any = t?.config || {};
-                        const fc = cfg.fontColor || "#000000";
-                        const fs = cfg.fontSize || 16;
-                        const accent = cfg.accentColor || "#0ea5e9";
-                        const ff =
-                          cfg.fontFamily || "Inter, Arial, sans-serif";
-                        const nameSize = Math.max(18, fs + 4);
-                        const titleSize = Math.max(16, fs + 2);
-                        return (
-                          <div
-                            className="pointer-events-none aspect-[1.75/1] w-full relative"
-                            style={{
-                              backgroundColor: bg ? undefined : "#f3f4f6",
-                              backgroundImage: bg ? `url(${bg})` : undefined,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                              color: fc,
-                              fontFamily: ff,
-                            }}
-                          >
-                            <div className="w-full h-full px-5 py-4 flex items-center justify-between gap-4">
-                              {data.logo ? (
-                                <div className="flex-shrink-0">
-                                  <img
-                                    src={data.logo}
-                                    alt="Logo"
-                                    className="w-16 h-16 object-cover rounded-full border border-white/50 shadow"
-                                  />
-                                </div>
-                              ) : (
-                                <div />
-                              )}
-                              <div className="flex flex-col text-right leading-snug">
-                                <div
-                                  className="font-semibold"
-                                  style={{ fontFamily: ff, fontSize: nameSize }}
-                                >
-                                  {data.name || "Your Name"}
-                                </div>
-                                <div
-                                  style={{
-                                    color: accent,
-                                    fontSize: titleSize,
-                                  }}
-                                >
-                                  {data.title || "Job Title"}
-                                </div>
-                                <div
-                                  className="opacity-80"
-                                  style={{ fontSize: Math.max(14, fs) }}
-                                >
-                                  {data.company || "Company"}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                        <p className="text-white font-medium text-sm">
-                          {item.server?.name || "Template"}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </button>
-                {/* tile quick download removed in commerce flow */}
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-center ">
+  {pagedTemplates.map((item) => (
+    <div
+      key={item.id}
+      ref={(el) => (containerRefs.current[item.id] = el)}
+      className="relative w-full max-w-[280px] aspect-[1.75/1] mx-auto"
+      style={{ ["--cardScale" as any]: 1 }}
+
+    >
+      <button
+        onClick={() => setSelectedTemplate(item.id)}
+        className={`group relative rounded-lg overflow-hidden transition-all duration-300 border-2 w-full h-full ${
+          selectedTemplate === item.id
+            ? "border-primary shadow-[var(--shadow-hover)]"
+            : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
+        }`}
+      >
+        {/* Selected checkmark */}
+        {selectedTemplate === item.id && (
+          <div className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground rounded-full p-1">
+            <Check className="w-4 h-4" />
           </div>
+        )}
+
+        {/* SCALE WRAPPER */}
+        <div
+          className="absolute inset-0 origin-top-left pointer-events-none"
+          style={{ transform: `scale(var(--cardScale))` }}
+        >
+          {/* FIXED SIZE CARD AREA */}
+          <div style={{ width: 280, height: 160 }}>
+
+            {/* CLASSIC TEMPLATE */}
+            {item.kind === "classic" ? (
+              <>
+                <div className="w-full h-full relative">
+                  <ClassicCard
+                    data={data}
+                    config={item.classic}
+                    fontFamily={hasOverrides ? selectedFont : undefined}
+                    fontSize={hasOverrides ? fontSize : undefined}
+                    textColor={hasOverrides ? textColor : undefined}
+                    accentColor={hasOverrides ? accentColor : undefined}
+                  />
+                </div>
+                {/* Template name gradient */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                  <p className="text-white font-medium text-sm">
+                    {item.classic.name}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* SERVER TEMPLATE */}
+                {(() => {
+                  const t = item.server;
+                  const bg = t?.thumbnail_url || t?.background_url || undefined;
+                  const cfg = t?.config || {};
+                  const fc = cfg.fontColor || "#000";
+                  const fs = cfg.fontSize || 16;
+                  const accent = cfg.accentColor || "#0ea5e9";
+                  const ff = cfg.fontFamily || "Inter, Arial";
+
+                  return (
+                    <div
+                      className="w-full h-full relative pointer-events-none"
+                      style={{
+                        backgroundImage: bg ? `url(${bg})` : undefined,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        color: fc,
+                        fontFamily: ff,
+                      }}
+                    >
+                      <div className="w-full h-full px-5 py-4 flex items-center justify-between gap-4">
+                        {data.logo ? (
+                          <img
+                            src={data.logo}
+                            alt="Logo"
+                            className="w-16 h-16 rounded-full object-cover border border-white/50 shadow"
+                          />
+                        ) : (
+                          <div />
+                        )}
+                        <div className="flex flex-col text-right">
+                          <div className="font-semibold" style={{ fontSize: fs + 4 }}>
+                            {data.name || "Your Name"}
+                          </div>
+                          <div style={{ fontSize: fs + 2, color: accent }}>
+                            {data.title || "Job Title"}
+                          </div>
+                          <div className="opacity-80" style={{ fontSize: fs }}>
+                            {data.company || "Company"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+                {/* Template name gradient */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                  <p className="text-white font-medium text-sm">
+                    {item.server?.name || "Template"}
+                  </p>
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+      </button>
+    </div>
+  ))}
+</div>
+
         )}
         {/* Pagination controls */}
         {totalPages > 1 && (
