@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "@/services/api";
 import { classicTemplates } from "@/lib/classicTemplates";
 import { listAllTemplates, type Template } from "@/services/templates";
+import Footer from "@/components/Footer";
 
 interface OrderedItem {
   templateId: string;
@@ -441,6 +442,9 @@ export default function MyOrders() {
           </div>
         )}
       </main>
+
+      {/* Import and use the Footer component */}
+      <Footer />
     </div>
   );
 }

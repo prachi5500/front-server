@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 
 export const PaymentBanner = () => {
     return (
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b border-border">
+        <div className=" transition-all duration-500 bg-black/0 border-b border-border">
             < div className="container mx-auto max-w-7xl px-4 py-4">
                 < div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     < div className="flex items-center gap-3">

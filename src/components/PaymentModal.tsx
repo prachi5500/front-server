@@ -178,7 +178,7 @@ export const PaymentModal = ({
                             <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-3">
                                 < p className="text-xs text-foreground flex items-start gap-2">
                                     < Check className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                                    < span > Scan QR code or enter UPI PIN to complete payment instantly</ span>
+                                    <span> Scan QR code or enter UPI PIN to complete payment instantly</span>
                                 </p >
                             </div >
                         </div >
@@ -202,7 +202,7 @@ export const PaymentModal = ({
                     {/* Security Badge */}
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         < Check className="w-4 h-4 text-green-500" />
-                        < span > Secured by 256 - bit SSL encryption</span >
+                        <span> Secured by 256 - bit SSL encryption</span>
                     </div >
                 </div >
 

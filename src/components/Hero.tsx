@@ -49,7 +49,7 @@ export const Hero = () => {
   const prev = () => setIndex((i) => (i - 1 + slides.length) % slides.length);
 
   return (
-    <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden select-none"
+    <section className="relative w-full h-[89vh] md:h-[92vh] pt-20 overflow-hidden select-none"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -103,7 +103,7 @@ export const Hero = () => {
         </p>
 
         {/* STAGGERED BUTTONS */}
-        
+
 
         {/* SLIDE TEXT */}
         <div
@@ -113,17 +113,20 @@ export const Hero = () => {
           {slides[index].text}
         </div>
 
-        {/* ARROWS */}
-        <button onClick={prev}
-          className="absolute left-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-xl transition shadow-2xl"
+        {/* NAVIGATION ARROWS - HIDDEN */}
+        <button
+          onClick={prev}
+          className="hidden absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 backdrop-blur-sm items-center justify-center text-white/90 hover:bg-white/20 transition-all duration-300 shadow-xl hover:shadow-2xl z-20"
+          aria-label="Previous slide"
         >
-          <ArrowLeft className="w-7 h-7" />
+          <ArrowLeft className="w-6 h-6" />
         </button>
-
-        <button onClick={next}
-          className="absolute right-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/30 text-white p-3 rounded-full backdrop-blur-xl transition shadow-2xl"
+        <button
+          onClick={next}
+          className="hidden absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 backdrop-blur-sm items-center justify-center text-white/90 hover:bg-white/20 transition-all duration-300 shadow-xl hover:shadow-2xl z-20"
+          aria-label="Next slide"
         >
-          <ArrowRight className="w-7 h-7" />
+          <ArrowRight className="w-6 h-6" />
         </button>
       </div>
     </section>

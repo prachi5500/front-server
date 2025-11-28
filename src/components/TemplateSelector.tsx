@@ -386,11 +386,11 @@ useEffect(() => {
         price,
         serverMeta: isServer
           ? {
-              name: st?.name,
-              background_url: st?.background_url,
-              back_background_url: st?.back_background_url,
-              config: st?.config,
-            }
+            name: st?.name,
+            background_url: st?.background_url,
+            back_background_url: st?.back_background_url,
+            config: st?.config,
+          }
           : undefined,
       });
 
@@ -450,16 +450,16 @@ useEffect(() => {
                   onClick={() => setIsEditLayout(false)}
                   className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
                 >
-                  Exit 
+                  Exit
                 </Button>
               ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setIsEditLayout(true)}
                   className="gap-1.5  text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
                 >
-                  Edit 
+                  Edit
                 </Button>
               )}
                */}
@@ -469,7 +469,7 @@ useEffect(() => {
                 variant="default"
                 className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
               >
-                Buy 
+                Buy
               </Button>
               
               <Button 
@@ -478,7 +478,7 @@ useEffect(() => {
                 size="sm" 
                 className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
               >
-                 Cart
+                Cart
               </Button>
             </div>
           </div>
@@ -880,43 +880,43 @@ useEffect(() => {
                               />
                             </div>
 
-                                {/* YAHAN LOGO BLOCK DAALNA HAI */}
-                                      {data.logo && (
-        <div
-          className="cursor-move select-none"
-          style={{
-            position: "absolute",
-            left: `${positions.logo.x}%`,
-            top: `${positions.logo.y}%`,
-            width: sizes.logo,
-            height: sizes.logo,
-            borderRadius: "9999px",
-            overflow: "hidden",
-            backgroundColor: "rgba(255,255,255,0.9)",
-          }}
-          onMouseDown={(e) => onDragStart("logo", e)}
-          onTouchStart={(e) => onDragStart("logo", e)}
-        >
-          <img
-            src={data.logo}
-            alt="logo"
-            className="w-full h-full object-cover"
-            crossOrigin="anonymous"
-          />
-          <span
-            className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-            style={{ right: -6, bottom: -6 }}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              onResizeStart("logo", e);
-            }}
-            onTouchStart={(e) => {
-              e.stopPropagation();
-              onResizeStart("logo", e);
-            }}
-          />
-        </div>
-      )}
+                            {/* YAHAN LOGO BLOCK DAALNA HAI */}
+                            {data.logo && (
+                              <div
+                                className="cursor-move select-none"
+                                style={{
+                                  position: "absolute",
+                                  left: `${positions.logo.x}%`,
+                                  top: `${positions.logo.y}%`,
+                                  width: sizes.logo,
+                                  height: sizes.logo,
+                                  borderRadius: "9999px",
+                                  overflow: "hidden",
+                                  backgroundColor: "rgba(255,255,255,0.9)",
+                                }}
+                                onMouseDown={(e) => onDragStart("logo", e)}
+                                onTouchStart={(e) => onDragStart("logo", e)}
+                              >
+                                <img
+                                  src={data.logo}
+                                  alt="logo"
+                                  className="w-full h-full object-cover"
+                                  crossOrigin="anonymous"
+                                />
+                                <span
+                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                                  style={{ right: -6, bottom: -6 }}
+                                  onMouseDown={(e) => {
+                                    e.stopPropagation();
+                                    onResizeStart("logo", e);
+                                  }}
+                                  onTouchStart={(e) => {
+                                    e.stopPropagation();
+                                    onResizeStart("logo", e);
+                                  }}
+                                />
+                              </div>
+                            )}
 
                           </div>
                         </div>
@@ -1049,13 +1049,13 @@ useEffect(() => {
         {/* <div className="mt-4">
           <CustomizationPanel
             selectedFont={selectedFont}
-            onFontSelect={onFontSelect ?? (() => {})}
+            onFontSelect={onFontSelect ?? (() => { })}
             fontSize={fontSize}
-            onFontSizeChange={onFontSizeChange ?? (() => {})}
+            onFontSizeChange={onFontSizeChange ?? (() => { })}
             textColor={textColor}
-            onTextColorChange={onTextColorChange ?? (() => {})}
+            onTextColorChange={onTextColorChange ?? (() => { })}
             accentColor={accentColor}
-            onAccentColorChange={onAccentColorChange ?? (() => {})}
+            onAccentColorChange={onAccentColorChange ?? (() => { })}
           />
         </div> */}
       </div>
@@ -1071,8 +1071,8 @@ useEffect(() => {
                 <button
                   onClick={() => setSelectedTemplate(item.id)}
                   className={`group relative rounded-lg overflow-hidden transition-all duration-300 border-2 ${selectedTemplate === item.id
-                      ? "border-primary shadow-[var(--shadow-hover)]"
-                      : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
+                    ? "border-primary shadow-[var(--shadow-hover)]"
+                    : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
                     }`}
                 >
                   {selectedTemplate === item.id && (
@@ -1323,3 +1323,5 @@ useEffect(() => {
     </div>
   );
 };
+
+
