@@ -7,6 +7,8 @@ const Login = () => {
   const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [isSignup, setIsSignup] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,7 @@ const Login = () => {
     setError(null);
     if (isSignup) {
       try {
-        const res = await apiFetch("/auth/signup", { method: "POST", body: JSON.stringify({ email, password }) });
+        const res = await apiFetch("/auth/signup", { method: "POST", body: JSON.stringify({ email, password, name, phone }) });
         localStorage.setItem("token", res.token);
         navigate(from, { replace: true });
       } catch (e: any) {
@@ -58,6 +60,30 @@ const Login = () => {
           </button>
         </div>
         {error && <p className="text-red-500 text-sm">{error}</p>}
+        {isSignup && (
+          <div className="space-y-1">
+            <label className="text-sm">Name</label>
+            <input
+              className="w-full border rounded px-3 py-2"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+        )}
+        {isSignup && (
+          <div className="space-y-1">
+            <label className="text-sm">Phone No.</label>
+            <input
+              className="w-full border rounded px-3 py-2"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+            />
+          </div>
+        )}
         <div className="space-y-1">
           <label className="text-sm">Email</label>
           <input
@@ -77,6 +103,21 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+
+
+
+
+{/* forgot psss */}
+{!isSignup && (
+  <p
+    className="text-sm text-blue-600 underline cursor-pointer"
+    onClick={() => navigate("/forgot-password")}
+  >
+    Forgot Password?
+  </p>
+)}
+
+
         </div>
         <button
           type="submit"

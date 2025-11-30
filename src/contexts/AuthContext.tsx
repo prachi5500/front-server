@@ -1,19 +1,30 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/services/api";
 
+type AuthUser = {
+  id: string;
+  email: string | null;
+  name?: string;
+  phone?: string;
+  role?: "user" | "admin";
+};
+
+
 type AuthContextType = {
-  user: { id: string; email: string | null } | null;
-  profile: { id: string; email: string | null; role: "user" | "admin" } | null;
+  user: AuthUser | null;
+  profile: AuthUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 };
 
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<{ id: string; email: string | null } | null>(null);
-  const [profile, setProfile] = useState<{ id: string; email: string | null; role: "user" | "admin" } | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+const [profile, setProfile] = useState<AuthUser | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,9 +36,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
         const me = await apiFetch("/auth/me");
-        const u = me.user as { id: string; email: string; role: "user" | "admin" };
-        setUser({ id: u.id, email: u.email });
-        setProfile({ id: u.id, email: u.email, role: u.role });
+        const u = me.user as AuthUser;
+setUser(u);
+setProfile(u);
+
       } catch {
       } finally {
         setLoading(false);
@@ -44,9 +56,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const res = await apiFetch("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
         localStorage.setItem("token", res.token);
-        const u = res.user as { id: string; email: string; role: "user" | "admin" };
-        setUser({ id: u.id, email: u.email });
-        setProfile({ id: u.id, email: u.email, role: u.role });
+        const u = res.user as AuthUser;
+setUser(u);
+setProfile(u);
+
         return { error: null };
       } catch (e: any) {
         return { error: e.message ?? "Login failed" };

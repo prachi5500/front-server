@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";      // ⬅️ ADD THIS
+import ResetPassword from "./pages/ResetPassword";  
 import ReturnPolicy from "./pages/ReturnPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -18,6 +20,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import PaymentsPage from "@/pages/admin/PaymentsPage";
 import MyOrders from "./pages/MyOrders";
+import MyAccount from "./pages/MyAccount";
 
 
 export const router = createBrowserRouter(
@@ -30,6 +33,15 @@ export const router = createBrowserRouter(
       path: "/login",
       element: <Login />,
     },
+    {
+  path: "/forgot-password",
+  element: <ForgotPassword />,
+},
+{
+  path: "/reset-password",
+  element: <ResetPassword />,
+},
+
     {
       path: "/return-policy",
       element: <ReturnPolicy />,
@@ -68,6 +80,10 @@ export const router = createBrowserRouter(
         {
           path: "/my-orders",
           element: <MyOrders />,
+        },
+        {
+          path: "/my-account",
+          element: <MyAccount />,
         },
         {
           element: <RequireAdmin />,

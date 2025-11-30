@@ -112,14 +112,41 @@ const Index = () => {
             <Link to="/cart" className={`px-5 py-2.5 ${isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white/90 hover:bg-white/10'} hover:text-gray-900 rounded-full transition-all text-sm font-medium cursor-pointer`}>
               Cart
             </Link>
-            {user ? (
-              <>
-                <Link to="/my-orders" className={`px-5 py-2.5 ${isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white/90 hover:bg-white/10'} hover:text-gray-900 rounded-full transition-all text-sm font-medium cursor-pointer`}>
-                  Orders
+            <div className="hidden md:flex flex-1 justify-center px-4">
+              <div className="relative w-full max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
+                <Input
+                  type="search"
+                  placeholder="Search templates..."
+                  aria-label="Search"
+                  className="pl-10 rounded-full bg-white/10 border-white/20 placeholder-white/60 focus-visible:ring-0 focus:bg-white/15"
+                />
+              </div>
+            </div>
+            
+            {/* Desktop Menu */}
+            <div className="hidden sm:flex items-center gap-2">
+              <Link
+                to="/cart"
+                className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
+              >
+                Cart
+              </Link>
+              {user && (
+                <Link
+                  to="/my-account"
+                  className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
+                >
+                  My Account
                 </Link>
-                {profile?.role === "admin" && (
-                  <Link to="/admin/templates" className="px-5 py-2.5 text-white/90 hover:text-white hover:bg-white/10 rounded-full transition-all text-sm font-medium">
-                    Admin
+              )}
+              {user ? (
+                <>
+                  <Link
+                    to="/my-orders"
+                    className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
+                  >
+                    Orders
                   </Link>
                 )}
                 <button
@@ -186,6 +213,13 @@ const Index = () => {
                 <>
                   <Link to="/my-orders" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white/90 hover:text-white text-lg">
                     Orders
+                  </Link>
+                  <Link
+                    to="/my-account"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-center"
+                  >
+                    My Account
                   </Link>
                   {profile?.role === "admin" && (
                     <Link to="/admin/templates" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white/90 hover:text-white text-lg">

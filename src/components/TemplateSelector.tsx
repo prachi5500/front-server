@@ -299,14 +299,13 @@ useEffect(() => {
 // for preview font scalling
 useEffect(() => {
   const updatePreviewScale = () => {
-    if (!previewContainerRef.current) return;
+  if (!previewContainerRef.current) return;
 
-    const parentWidth = previewContainerRef.current.offsetWidth;
-    const fullWidth = 560; // original full preview width
+  const parentWidth = previewContainerRef.current.offsetWidth;
+  const scale = Math.min(parentWidth / 560, 1); // avoid overscale
+  setPreviewScale(scale);
+};
 
-    const scale = parentWidth / fullWidth;
-    setPreviewScale(scale);
-  };
 
   updatePreviewScale();
   window.addEventListener("resize", updatePreviewScale);
@@ -402,10 +401,10 @@ useEffect(() => {
   };
 
   return (
-    <div className="space-y-6 overflow-x-hidden">
-      <div className="bg-card rounded-xl p-4 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.1s] opacity-0 [animation-fill-mode:forwards]">
-        <div className="flex flex-col gap-4 mb-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <div className="space-y-6 overflow-x-hidden ">
+      <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.1s] opacity-0 [animation-fill-mode:forwards]">
+        <div className="flex flex-col gap-4 mb-4 ">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-0">
             <h2 className="text-xl font-bold text-foreground">Preview</h2>
             <div className="flex flex-nowrap items-center justify-end gap-2 w-full overflow-x-auto scrollbar-hide py-1">
 
@@ -463,6 +462,7 @@ useEffect(() => {
                 </Button>
               )}
                */}
+               
               <Button 
                 onClick={buyCurrent} 
                 size="sm" 
@@ -565,17 +565,30 @@ useEffect(() => {
                 if (!isServer) {
                   return (
                     <>
-                     <div
+                     {/* <div
   ref={previewContainerRef}
   className="relative w-full max-w-full overflow-hidden"
+> */}
+<div 
+  ref={previewContainerRef} 
+  className="relative overflow-hidden mx-auto"
+  style={{ maxWidth: "450px" }} 
 >
-  <div
-    className="origin-top-left"
-    style={{ transform: `scale(${previewScale})` }}
-  >
+
+ <div
+  className="origin-top-left"
+  style={{
+    width: "560px",
+    transform: `scale(${previewScale})`,
+    transformOrigin: "top left",
+  }}
+>
+
+
     <div
       ref={previewRef}
-      style={{ width: 560, height: 320 }}
+      style={{  width: "100%",
+  aspectRatio: "1.75 / 1",}}
       className="relative"
     >
 
@@ -605,7 +618,7 @@ useEffect(() => {
                             <div className="absolute inset-0">
                               <div
                                 className="cursor-move select-none font-bold"
-                                style={{ position: 'absolute', left: `${positions.name.x}%`, top: `${positions.name.y}%`, fontSize: sizes.name }}
+                                style={{ position: 'absolute', left: `${positions.name.x}%`, top: `${positions.name.y}%`, fontSize:sizes.name* previewScale }}
                                 onMouseDown={(e) => onDragStart('name', e)}
                                 onTouchStart={(e) => onDragStart('name', e)}
                               >
@@ -619,7 +632,7 @@ useEffect(() => {
                               </div>
                               <div
                                 className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positions.title.x}%`, top: `${positions.title.y}%`, color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor, fontSize: sizes.title }}
+                                style={{ position: 'absolute', left: `${positions.title.x}%`, top: `${positions.title.y}%`, color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor, fontSize: sizes.title * previewScale }}
                                 onMouseDown={(e) => onDragStart('title', e)}
                                 onTouchStart={(e) => onDragStart('title', e)}
                               >
@@ -633,7 +646,7 @@ useEffect(() => {
                               </div>
                               <div
                                 className="cursor-move select-none opacity-80"
-                                style={{ position: 'absolute', left: `${positions.company.x}%`, top: `${positions.company.y}%`, fontSize: sizes.company }}
+                                style={{ position: 'absolute', left: `${positions.company.x}%`, top: `${positions.company.y}%`, fontSize: sizes.company* previewScale}}
                                 onMouseDown={(e) => onDragStart('company', e)}
                                 onTouchStart={(e) => onDragStart('company', e)}
                               >
@@ -653,17 +666,37 @@ useEffect(() => {
                       </div>
 
                       
-                      <div
+                      {/* <div
   ref={previewContainerRef}
   className="relative w-full max-w-full overflow-hidden"
 >
-  <div
-    className="origin-top-left"
-    style={{ transform: `scale(${previewScale})` }}
-  >
+<div
+  className="origin-top-left"
+  style={{
+    transform: `scale(${previewScale})`,
+    "--scale": previewScale
+  }as React.CSSProperties}
+> */}
+<div 
+  ref={previewContainerRef} 
+  className="relative overflow-hidden mx-auto"
+  style={{ maxWidth: "450px" }} 
+>
+
+ <div
+  className="origin-top-left"
+  style={{
+    width: "560px",
+    transform: `scale(${previewScale})`,
+    transformOrigin: "top left",
+  }}
+>
+
+
     <div
       ref={backRef}
-      style={{ width: 560, height: 320 }}
+      style={{ width: "100%",
+  aspectRatio: "1.75 / 1", }}
       className="relative"
     >
 
@@ -695,7 +728,7 @@ useEffect(() => {
                             <div className="absolute inset-0">
                               <div
                                 className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positionsBack.email.x}%`, top: `${positionsBack.email.y}%`, fontSize: backSizes.email }}
+                                style={{ position: 'absolute', left: `${positionsBack.email.x}%`, top: `${positionsBack.email.y}%` ,  fontSize: backSizes.email * previewScale}}
                                 onMouseDown={(e) => onBackDragStart('email', e)}
                                 onTouchStart={(e) => onBackDragStart('email', e)}
                               >
@@ -709,7 +742,7 @@ useEffect(() => {
                               </div>
                               <div
                                 className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positionsBack.phone.x}%`, top: `${positionsBack.phone.y}%`, fontSize: backSizes.phone }}
+                                style={{ position: 'absolute', left: `${positionsBack.phone.x}%`, top: `${positionsBack.phone.y}%`,   fontSize: backSizes.phone * previewScale }}
                                 onMouseDown={(e) => onBackDragStart('phone', e)}
                                 onTouchStart={(e) => onBackDragStart('phone', e)}
                               >
@@ -723,7 +756,8 @@ useEffect(() => {
                               </div>
                               <div
                                 className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positionsBack.website.x}%`, top: `${positionsBack.website.y}%`, fontSize: backSizes.website }}
+                                style={{ position: 'absolute', left: `${positionsBack.website.x}%`, top: `${positionsBack.website.y}%`,  fontSize: backSizes.website* previewScale
+}}
                                 onMouseDown={(e) => onBackDragStart('website', e)}
                                 onTouchStart={(e) => onBackDragStart('website', e)}
                               >
@@ -737,7 +771,7 @@ useEffect(() => {
                               </div>
                               <div
                                 className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positionsBack.address.x}%`, top: `${positionsBack.address.y}%`, fontSize: backSizes.address }}
+                                style={{ position: 'absolute', left: `${positionsBack.address.x}%`, top: `${positionsBack.address.y}%`,   fontSize: backSizes.address * previewScale }}
                                 onMouseDown={(e) => onBackDragStart('address', e)}
                                 onTouchStart={(e) => onBackDragStart('address', e)}
                               >
@@ -756,7 +790,7 @@ useEffect(() => {
                                 onTouchStart={(e) => onBackDragStart('qr', e)}
                               >
                                 <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                  <QRCodeSVG value={`BEGIN:VCARD\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`} size={backSizes.qr} />
+                                  <QRCodeSVG value={`BEGIN:VCARD\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`} size={backSizes.qr  * previewScale} />
                                 </div>
                                 <span
                                   className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
@@ -839,7 +873,7 @@ useEffect(() => {
                           <div className="absolute inset-0">
                             <div
                               className="cursor-move select-none font-bold"
-                              style={{ position: 'absolute', left: `${positions.name.x}%`, top: `${positions.name.y}%`, fontFamily: ff, fontSize: sizes.name }}
+                              style={{ position: 'absolute', left: `${positions.name.x}%`, top: `${positions.name.y}%`, fontFamily: ff, fontSize:  sizes.name * previewScale}}
                               onMouseDown={(e) => onDragStart('name', e)}
                               onTouchStart={(e) => onDragStart('name', e)}
                             >
@@ -853,7 +887,7 @@ useEffect(() => {
                             </div>
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positions.title.x}%`, top: `${positions.title.y}%`, color: accent, fontFamily: ff, fontSize: sizes.title }}
+                              style={{ position: 'absolute', left: `${positions.title.x}%`, top: `${positions.title.y}%`, color: accent, fontFamily: ff, fontSize:sizes.title* previewScale}}
                               onMouseDown={(e) => onDragStart('title', e)}
                               onTouchStart={(e) => onDragStart('title', e)}
                             >
@@ -867,7 +901,7 @@ useEffect(() => {
                             </div>
                             <div
                               className="cursor-move select-none opacity-80"
-                              style={{ position: 'absolute', left: `${positions.company.x}%`, top: `${positions.company.y}%`, fontFamily: ff, fontSize: sizes.company }}
+                              style={{ position: 'absolute', left: `${positions.company.x}%`, top: `${positions.company.y}%`, fontFamily: ff, fontSize:sizes.company * previewScale}}
                               onMouseDown={(e) => onDragStart('company', e)}
                               onTouchStart={(e) => onDragStart('company', e)}
                             >
@@ -965,7 +999,7 @@ useEffect(() => {
                           <div className="absolute inset-0">
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positionsBack.email.x}%`, top: `${positionsBack.email.y}%`, fontSize: backSizes.email }}
+                              style={{ position: 'absolute', left: `${positionsBack.email.x}%`, top: `${positionsBack.email.y}%`, fontSize: backSizes.email* previewScale }}
                               onMouseDown={(e) => onBackDragStart('email', e)}
                               onTouchStart={(e) => onBackDragStart('email', e)}
                             >
@@ -979,7 +1013,7 @@ useEffect(() => {
                             </div>
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positionsBack.phone.x}%`, top: `${positionsBack.phone.y}%`, fontSize: backSizes.phone }}
+                              style={{ position: 'absolute', left: `${positionsBack.phone.x}%`, top: `${positionsBack.phone.y}%`, fontSize: backSizes.phone* previewScale }}
                               onMouseDown={(e) => onBackDragStart('phone', e)}
                               onTouchStart={(e) => onBackDragStart('phone', e)}
                             >
@@ -993,7 +1027,7 @@ useEffect(() => {
                             </div>
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positionsBack.website.x}%`, top: `${positionsBack.website.y}%`, fontSize: backSizes.website }}
+                              style={{ position: 'absolute', left: `${positionsBack.website.x}%`, top: `${positionsBack.website.y}%`, fontSize: backSizes.website* previewScale }}
                               onMouseDown={(e) => onBackDragStart('website', e)}
                               onTouchStart={(e) => onBackDragStart('website', e)}
                             >
@@ -1007,7 +1041,7 @@ useEffect(() => {
                             </div>
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positionsBack.address.x}%`, top: `${positionsBack.address.y}%`, fontSize: backSizes.address }}
+                              style={{ position: 'absolute', left: `${positionsBack.address.x}%`, top: `${positionsBack.address.y}%`, fontSize: backSizes.address* previewScale }}
                               onMouseDown={(e) => onBackDragStart('address', e)}
                               onTouchStart={(e) => onBackDragStart('address', e)}
                             >
@@ -1026,7 +1060,7 @@ useEffect(() => {
                               onTouchStart={(e) => onBackDragStart('qr', e)}
                             >
                               <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                <QRCodeSVG value={`BEGIN:VCARD\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`} size={backSizes.qr} />
+                                <QRCodeSVG value={`BEGIN:VCARD\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`} size={backSizes.qr* previewScale} />
                               </div>
                               <span
                                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"

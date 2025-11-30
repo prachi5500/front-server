@@ -4,22 +4,25 @@ import { Sparkles, ArrowLeft, ArrowRight } from "lucide-react";
 // SLIDES
 const slides = [
   {
-    img: "https://plus.unsplash.com/premium_photo-1752231847575-3ac4e0dda918?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    img: "https://media.istockphoto.com/id/2171403320/photo/blank-black-cards-on-abstract-background.jpg?s=612x612&w=0&k=20&c=cDVo103-D3Hr3sCr2LTy1rkwVAsd2NAH04W5Chu6uWs=",
     text: "Create Stunning Business Cards With Ease",
   },
   {
-    img: "https://plus.unsplash.com/premium_photo-1755994149244-d7887690b774?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    img: "https://media.istockphoto.com/id/1137971080/photo/two-businessmen-exchanged-white-business-cards-on-a-wooden-table-in-office.jpg?s=612x612&w=0&k=20&c=y5Zc8NyyOnCAwg98Yf1-d-SHYZkOwKhP-ZrLb1tfTyU=",
     text: "Design Your Brand Identity Effortlessly",
   },
   {
-    img: "https://plus.unsplash.com/premium_photo-1661661374846-23e8f44be169?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDh8fHxlbnwwfHx8fHw%3D",
+    img:"https://media.istockphoto.com/id/984704774/photo/modern-office-interior.jpg?s=612x612&w=0&k=20&c=4kgy35WQx2nhnNxnsrd6_FofC9FP_A9ZG-akFQO4KLg="
+    // img: "https://plus.unsplash.com/premium_photo-1661661374846-23e8f44be169?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDh8fHxlbnwwfHx8fHw%3D",
   },
+
   {
     img: "https://res.cloudinary.com/vistaprint/images/f_auto,q_auto/v1702621824/ideas-and-advice-prod/en-us/en-au-2/en-au-2.png?_i=AA",
     text: "Professional & Print-Ready Card Designs",
   },
   {
-    img: "https://plus.unsplash.com/premium_photo-1661385603150-e2317488f5fc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDEwMHx8fGVufDB8fHx8fA%3D%3D",
+    img: "https://media.istockphoto.com/id/1143163675/photo/gift-cards-over-a-wine-cork-background.jpg?s=612x612&w=0&k=20&c=73cwb8hjRC4brYrRpWtGboRdgCACe8R1XAJy5T28Px0=",
+    // img: "https://plus.unsplash.com/premium_photo-1661385603150-e2317488f5fc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDEwMHx8fGVufDB8fHx8fA%3D%3D",
     text: "Smart Digital Business Cards With QR Codes",
   },
 ];
