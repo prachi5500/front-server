@@ -388,11 +388,7 @@ const Index = () => {
   };
 
   // Common nav link styles
-  const navLinkClass = `px-5 py-2.5 rounded-full transition-all text-sm font-medium ${
-    isScrolled 
-      ? 'text-gray-700 hover:bg-gray-100' 
-      : 'text-white/90 hover:bg-white/10'
-  }`;
+  const navLinkClass = `px-5 py-2.5 ${isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white/90 hover:bg-white/10'} hover:text-gray-900 rounded-full transition-all text-sm font-medium cursor-pointer`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -420,7 +416,7 @@ const Index = () => {
             </a>
 
             {/* Search Bar - Only Desktop */}
-            <div className="mx-4">
+            {/* <div className="mx-4">
               <div className="relative max-w-md w-80">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
                 <Input
@@ -429,24 +425,24 @@ const Index = () => {
                   className="pl-10 rounded-full bg-white/10 border-white/20 placeholder-white/60 focus-visible:ring-0 focus:bg-white/15 text-white"
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Right Side Buttons */}
             <div className="flex items-center gap-3">
-              <Link to="/cart" className="text-white/90 hover:text-white font-medium">
+              <Link to="/cart" className={navLinkClass}>
                 Cart
               </Link>
 
               {user ? (
                 <>
-                  <Link to="/my-orders" className="text-white/90 hover:text-white font-medium">
+                  <Link to="/my-orders" className={navLinkClass}>
                     Orders
                   </Link>
-                  <Link to="/my-account" className="text-white/90 hover:text-white font-medium">
+                  <Link to="/my-account" className={navLinkClass}>
                     Account
                   </Link>
                   {profile?.role === "admin" && (
-                    <Link to="/admin/templates" className="text-white/90 hover:text-white font-medium">
+                    <Link to="/admin/templates" className={navLinkClass}>
                       Admin
                     </Link>
                   )}
