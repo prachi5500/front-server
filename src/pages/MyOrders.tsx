@@ -71,7 +71,7 @@ export default function MyOrders() {
       // Download front image
       const frontResponse = await fetch(item.frontImageUrl);
       const frontBlob = await frontResponse.blob();
-      
+
       // Download back image
       const backResponse = await fetch(item.backImageUrl);
       const backBlob = await backResponse.blob();
@@ -79,12 +79,12 @@ export default function MyOrders() {
       // Create a zip file containing both images
       const zip = new JSZip();
       const folder = zip.folder("business-card");
-      
+
       if (folder) {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         folder.file(`front-${timestamp}.png`, frontBlob);
         folder.file(`back-${timestamp}.png`, backBlob);
-        
+
         // Generate zip file
         const content = await zip.generateAsync({ type: "blob" });
         saveAs(content, `business-card-${item.templateId || 'download'}.zip`);
@@ -458,7 +458,7 @@ export default function MyOrders() {
                             <h4 className="text-xs font-medium mb-2 text-muted-foreground">
                               Front Side Details
                             </h4>
-                            {Object.entries(item.data.frontData).map(([key, value]) => 
+                            {Object.entries(item.data.frontData).map(([key, value]) =>
                               value && renderCardField(
                                 key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim(),
                                 value
@@ -497,7 +497,7 @@ export default function MyOrders() {
                             <h4 className="text-xs font-medium mb-2 text-muted-foreground">
                               Back Side Details
                             </h4>
-                            {Object.entries(item.data.backData).map(([key, value]) => 
+                            {Object.entries(item.data.backData).map(([key, value]) =>
                               value && renderCardField(
                                 key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim(),
                                 value
@@ -542,14 +542,13 @@ export default function MyOrders() {
                             <div className="pt-2 mt-2 border-t text-xs">
                               <div className="font-medium">Status:</div>
                               <span
-                                className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase ${
-                                  (payment.status || "").toLowerCase() === "captured" ||
-                                  (payment.status || "").toLowerCase() === "success"
+                                className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase ${(payment.status || "").toLowerCase() === "captured" ||
+                                    (payment.status || "").toLowerCase() === "success"
                                     ? "bg-green-100 text-green-800"
                                     : (payment.status || "").toLowerCase() === "failed"
-                                    ? "bg-red-100 text-red-800"
-                                    : "bg-yellow-100 text-yellow-800"
-                                }`}
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-yellow-100 text-yellow-800"
+                                  }`}
                               >
                                 {payment.status || "-"}
                               </span>

@@ -19,7 +19,7 @@ const Index = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ const Index = () => {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
-            <a 
+            <a
               href="#services"
               onClick={(e) => {
                 e.preventDefault();
@@ -98,8 +98,8 @@ const Index = () => {
             >
               Services
             </a>
-            <a 
-              href="#contact" 
+            <a
+              href="#contact"
               onClick={(e) => {
                 e.preventDefault();
                 document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
@@ -156,7 +156,7 @@ const Index = () => {
           <div className="md:hidden absolute top-full left-0 right-0 bg-black/70 backdrop-blur-2xl border-t border-white/10">
             <div className="px-6 py-6 space-y-3">
               <div className="flex flex-col gap-4 mt-6">
-                <a 
+                <a
                   href="#services"
                   onClick={(e) => {
                     e.preventDefault();
@@ -167,7 +167,7 @@ const Index = () => {
                 >
                   Services
                 </a>
-                <a 
+                <a
                   href="#contact"
                   onClick={(e) => {
                     e.preventDefault();

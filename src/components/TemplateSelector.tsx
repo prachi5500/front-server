@@ -56,11 +56,11 @@ export const TemplateSelector = ({
   showCustomizationPanel = false,
 }: TemplateSelectorProps) => {
   // for font scalling
-const [scale, setScale] = useState(1);
-const containerRefs = useRef<Record<string, HTMLDivElement | null>>({});
-// preview font scale
-const previewContainerRef = useRef<HTMLDivElement | null>(null);
-const [previewScale, setPreviewScale] = useState(1);
+  const [scale, setScale] = useState(1);
+  const containerRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  // preview font scale
+  const previewContainerRef = useRef<HTMLDivElement | null>(null);
+  const [previewScale, setPreviewScale] = useState(1);
 
 
   const [selectedTemplate, setSelectedTemplate] = useState(templates[0]?.id ?? "classic-001");
@@ -279,40 +279,40 @@ const [previewScale, setPreviewScale] = useState(1);
     accentColor !== defaultAccent;
 
 
-// for font scalling
-useEffect(() => {
-  const updateScaleAll = () => {
-    Object.entries(containerRefs.current).forEach(([id, el]) => {
-      if (!el) return;
-      const w = el.getBoundingClientRect().width;
-      const cardWidth = 280; // FULL size card width
-      const scaleValue = w / cardWidth;
-      el.style.setProperty("--cardScale", String(scaleValue));
-    });
-  };
+  // for font scalling
+  useEffect(() => {
+    const updateScaleAll = () => {
+      Object.entries(containerRefs.current).forEach(([id, el]) => {
+        if (!el) return;
+        const w = el.getBoundingClientRect().width;
+        const cardWidth = 280; // FULL size card width
+        const scaleValue = w / cardWidth;
+        el.style.setProperty("--cardScale", String(scaleValue));
+      });
+    };
 
-  updateScaleAll();
-  window.addEventListener("resize", updateScaleAll);
-  return () => window.removeEventListener("resize", updateScaleAll);
-}, []);
+    updateScaleAll();
+    window.addEventListener("resize", updateScaleAll);
+    return () => window.removeEventListener("resize", updateScaleAll);
+  }, []);
 
-// for preview font scalling
-useEffect(() => {
-  const updatePreviewScale = () => {
-    if (!previewContainerRef.current) return;
+  // for preview font scalling
+  useEffect(() => {
+    const updatePreviewScale = () => {
+      if (!previewContainerRef.current) return;
 
-    const parentWidth = previewContainerRef.current.offsetWidth;
-    const fullWidth = 560; // original full preview width
+      const parentWidth = previewContainerRef.current.offsetWidth;
+      const fullWidth = 560; // original full preview width
 
-    const scale = parentWidth / fullWidth;
-    setPreviewScale(scale);
-  };
+      const scale = parentWidth / fullWidth;
+      setPreviewScale(scale);
+    };
 
-  updatePreviewScale();
-  window.addEventListener("resize", updatePreviewScale);
+    updatePreviewScale();
+    window.addEventListener("resize", updatePreviewScale);
 
-  return () => window.removeEventListener("resize", updatePreviewScale);
-}, []);
+    return () => window.removeEventListener("resize", updatePreviewScale);
+  }, []);
 
 
   // fetch admin/server templates
@@ -409,9 +409,9 @@ useEffect(() => {
             <h2 className="text-xl font-bold text-foreground">Preview</h2>
             <div className="flex flex-nowrap items-center justify-end gap-2 w-full overflow-x-auto scrollbar-hide py-1">
 
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={async () => {
                   try {
                     setIsSaving(true);
@@ -442,7 +442,7 @@ useEffect(() => {
               >
                 {isSaving ? 'Saving...' : 'Save Design'}
               </Button>
-              
+
               {/* {isEditLayout ? (
                 <Button 
                   variant="default" 
@@ -463,19 +463,19 @@ useEffect(() => {
                 </Button>
               )}
                */}
-              <Button 
-                onClick={buyCurrent} 
-                size="sm" 
+              <Button
+                onClick={buyCurrent}
+                size="sm"
                 variant="default"
                 className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
               >
                 Buy
               </Button>
-              
-              <Button 
-                onClick={addToCart} 
-                variant="outline" 
-                size="sm" 
+
+              <Button
+                onClick={addToCart}
+                variant="outline"
+                size="sm"
                 className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
               >
                 Cart
@@ -556,220 +556,220 @@ useEffect(() => {
           )}
         </div>
 
-       <div className="bg-gradient-to-br from-muted to-background p-0 rounded-lg overflow-x-hidden">
-  <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-0 ">
-    <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="bg-gradient-to-br from-muted to-background p-0 rounded-lg overflow-x-hidden">
+          <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-0 ">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-2">
 
               {(() => {
                 const isServer = selectedTemplate.startsWith("sb:");
                 if (!isServer) {
                   return (
                     <>
-                     <div
-  ref={previewContainerRef}
-  className="relative w-full max-w-full overflow-hidden"
->
-  <div
-    className="origin-top-left"
-    style={{ transform: `scale(${previewScale})` }}
-  >
-    <div
-      ref={previewRef}
-      style={{ width: 560, height: 320 }}
-      className="relative"
-    >
-
-                        <div className="wm-screen-only" data-watermark="screen-only" />
-                        {!isEditLayout && selectedConfig && (
-                          <ClassicCard
-                            data={data}
-                            config={selectedConfig}
-                            fontFamily={hasOverrides ? selectedFont : undefined}
-                            fontSize={hasOverrides ? fontSize : undefined}
-                            
-                            textColor={hasOverrides ? textColor : undefined}
-                            accentColor={hasOverrides ? accentColor : undefined}
-                          />
-                        )}
-                        {isEditLayout && selectedConfig && (
-                          <div
-                            className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
-                            style={{
-                              background: selectedConfig.bgStyle === 'gradient' ? `linear-gradient(135deg, ${selectedConfig.bgColors[0]}, ${selectedConfig.bgColors[1]})` : undefined,
-                              backgroundColor: selectedConfig.bgStyle === 'solid' ? selectedConfig.bgColors[0] : undefined,
-                              color: hasOverrides ? (textColor ?? selectedConfig.textColor) : selectedConfig.textColor,
-                              fontFamily: hasOverrides ? selectedFont : undefined,
-                              fontSize: `${hasOverrides ? fontSize : 16}px`,
-                            }}
-                          >
-                            <div className="absolute inset-0">
-                              <div
-                                className="cursor-move select-none font-bold"
-                                style={{ position: 'absolute', left: `${positions.name.x}%`, top: `${positions.name.y}%`, fontSize: sizes.name }}
-                                onMouseDown={(e) => onDragStart('name', e)}
-                                onTouchStart={(e) => onDragStart('name', e)}
-                              >
-                                {data.name || 'Your Name'}
-                                <span
-                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                  style={{ right: -6, bottom: -6 }}
-                                  onMouseDown={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
-                                  onTouchStart={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
-                                />
-                              </div>
-                              <div
-                                className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positions.title.x}%`, top: `${positions.title.y}%`, color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor, fontSize: sizes.title }}
-                                onMouseDown={(e) => onDragStart('title', e)}
-                                onTouchStart={(e) => onDragStart('title', e)}
-                              >
-                                {data.title || 'Job Title'}
-                                <span
-                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                  style={{ right: -6, bottom: -6 }}
-                                  onMouseDown={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
-                                  onTouchStart={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
-                                />
-                              </div>
-                              <div
-                                className="cursor-move select-none opacity-80"
-                                style={{ position: 'absolute', left: `${positions.company.x}%`, top: `${positions.company.y}%`, fontSize: sizes.company }}
-                                onMouseDown={(e) => onDragStart('company', e)}
-                                onTouchStart={(e) => onDragStart('company', e)}
-                              >
-                                {data.company || 'Company'}
-                                <span
-                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                  style={{ right: -6, bottom: -6 }}
-                                  onMouseDown={(e) => { e.stopPropagation(); onResizeStart('company', e); }}
-                                  onTouchStart={(e) => { e.stopPropagation(); onResizeStart('company', e); }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      </div>
-                      </div>
-
-                      
                       <div
-  ref={previewContainerRef}
-  className="relative w-full max-w-full overflow-hidden"
->
-  <div
-    className="origin-top-left"
-    style={{ transform: `scale(${previewScale})` }}
-  >
-    <div
-      ref={backRef}
-      style={{ width: 560, height: 320 }}
-      className="relative"
-    >
-
-                        <div className="wm-screen-only" data-watermark="screen-only" />
-                        {!isEditLayout && selectedConfig && (
-                          <BackSideCard
-                            data={data}
-                            background={{
-                              style: selectedConfig.bgStyle === "solid" ? "solid" : "gradient",
-                              colors: selectedConfig.bgColors,
-                            }}
-                            textColor={hasOverrides ? (textColor ?? selectedConfig.textColor) : selectedConfig.textColor}
-                            accentColor={hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor}
-                            fontFamily={hasOverrides ? selectedFont : undefined}
-                            fontSize={hasOverrides ? fontSize : undefined}
-                          />
-                        )}
-                        {isEditLayout && selectedConfig && (
+                        ref={previewContainerRef}
+                        className="relative w-full max-w-full overflow-hidden"
+                      >
+                        <div
+                          className="origin-top-left"
+                          style={{ transform: `scale(${previewScale})` }}
+                        >
                           <div
-                            className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative"
-                            style={{
-                              background: selectedConfig.bgStyle === 'gradient' ? `linear-gradient(135deg, ${selectedConfig.bgColors[0]}, ${selectedConfig.bgColors[1]})` : undefined,
-                              backgroundColor: selectedConfig.bgStyle === 'solid' ? selectedConfig.bgColors[0] : undefined,
-                              color: hasOverrides ? (textColor ?? selectedConfig.textColor) : selectedConfig.textColor,
-                              fontFamily: hasOverrides ? selectedFont : undefined,
-                              fontSize: `${hasOverrides ? fontSize : 16}px`,
-                            }}
+                            ref={previewRef}
+                            style={{ width: 560, height: 320 }}
+                            className="relative"
                           >
-                            <div className="absolute inset-0">
+
+                            <div className="wm-screen-only" data-watermark="screen-only" />
+                            {!isEditLayout && selectedConfig && (
+                              <ClassicCard
+                                data={data}
+                                config={selectedConfig}
+                                fontFamily={hasOverrides ? selectedFont : undefined}
+                                fontSize={hasOverrides ? fontSize : undefined}
+
+                                textColor={hasOverrides ? textColor : undefined}
+                                accentColor={hasOverrides ? accentColor : undefined}
+                              />
+                            )}
+                            {isEditLayout && selectedConfig && (
                               <div
-                                className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positionsBack.email.x}%`, top: `${positionsBack.email.y}%`, fontSize: backSizes.email }}
-                                onMouseDown={(e) => onBackDragStart('email', e)}
-                                onTouchStart={(e) => onBackDragStart('email', e)}
+                                className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
+                                style={{
+                                  background: selectedConfig.bgStyle === 'gradient' ? `linear-gradient(135deg, ${selectedConfig.bgColors[0]}, ${selectedConfig.bgColors[1]})` : undefined,
+                                  backgroundColor: selectedConfig.bgStyle === 'solid' ? selectedConfig.bgColors[0] : undefined,
+                                  color: hasOverrides ? (textColor ?? selectedConfig.textColor) : selectedConfig.textColor,
+                                  fontFamily: hasOverrides ? selectedFont : undefined,
+                                  fontSize: `${hasOverrides ? fontSize : 16}px`,
+                                }}
                               >
-                                <strong style={{ color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor }}>✉</strong> {data.email || 'email@example.com'}
-                                <span
-                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                  style={{ right: -6, bottom: -6 }}
-                                  onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
-                                  onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
-                                />
-                              </div>
-                              <div
-                                className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positionsBack.phone.x}%`, top: `${positionsBack.phone.y}%`, fontSize: backSizes.phone }}
-                                onMouseDown={(e) => onBackDragStart('phone', e)}
-                                onTouchStart={(e) => onBackDragStart('phone', e)}
-                              >
-                                <strong style={{ color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor }}>✆</strong> {data.phone || '+91 00000 00000'}
-                                <span
-                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                  style={{ right: -6, bottom: -6 }}
-                                  onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
-                                  onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
-                                />
-                              </div>
-                              <div
-                                className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positionsBack.website.x}%`, top: `${positionsBack.website.y}%`, fontSize: backSizes.website }}
-                                onMouseDown={(e) => onBackDragStart('website', e)}
-                                onTouchStart={(e) => onBackDragStart('website', e)}
-                              >
-                                <strong style={{ color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor }}>⌂</strong> {data.website || 'your-website.com'}
-                                <span
-                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                  style={{ right: -6, bottom: -6 }}
-                                  onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
-                                  onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
-                                />
-                              </div>
-                              <div
-                                className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positionsBack.address.x}%`, top: `${positionsBack.address.y}%`, fontSize: backSizes.address }}
-                                onMouseDown={(e) => onBackDragStart('address', e)}
-                                onTouchStart={(e) => onBackDragStart('address', e)}
-                              >
-                                <strong style={{ color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor }}>📍</strong> {data.address || 'Your Address, City'}
-                                <span
-                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                  style={{ right: -6, bottom: -6 }}
-                                  onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
-                                  onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
-                                />
-                              </div>
-                              <div
-                                className="cursor-move select-none"
-                                style={{ position: 'absolute', left: `${positionsBack.qr.x}%`, top: `${positionsBack.qr.y}%` }}
-                                onMouseDown={(e) => onBackDragStart('qr', e)}
-                                onTouchStart={(e) => onBackDragStart('qr', e)}
-                              >
-                                <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                  <QRCodeSVG value={`BEGIN:VCARD\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`} size={backSizes.qr} />
+                                <div className="absolute inset-0">
+                                  <div
+                                    className="cursor-move select-none font-bold"
+                                    style={{ position: 'absolute', left: `${positions.name.x}%`, top: `${positions.name.y}%`, fontSize: sizes.name }}
+                                    onMouseDown={(e) => onDragStart('name', e)}
+                                    onTouchStart={(e) => onDragStart('name', e)}
+                                  >
+                                    {data.name || 'Your Name'}
+                                    <span
+                                      className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                                      style={{ right: -6, bottom: -6 }}
+                                      onMouseDown={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
+                                      onTouchStart={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
+                                    />
+                                  </div>
+                                  <div
+                                    className="cursor-move select-none"
+                                    style={{ position: 'absolute', left: `${positions.title.x}%`, top: `${positions.title.y}%`, color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor, fontSize: sizes.title }}
+                                    onMouseDown={(e) => onDragStart('title', e)}
+                                    onTouchStart={(e) => onDragStart('title', e)}
+                                  >
+                                    {data.title || 'Job Title'}
+                                    <span
+                                      className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                                      style={{ right: -6, bottom: -6 }}
+                                      onMouseDown={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
+                                      onTouchStart={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
+                                    />
+                                  </div>
+                                  <div
+                                    className="cursor-move select-none opacity-80"
+                                    style={{ position: 'absolute', left: `${positions.company.x}%`, top: `${positions.company.y}%`, fontSize: sizes.company }}
+                                    onMouseDown={(e) => onDragStart('company', e)}
+                                    onTouchStart={(e) => onDragStart('company', e)}
+                                  >
+                                    {data.company || 'Company'}
+                                    <span
+                                      className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                                      style={{ right: -6, bottom: -6 }}
+                                      onMouseDown={(e) => { e.stopPropagation(); onResizeStart('company', e); }}
+                                      onTouchStart={(e) => { e.stopPropagation(); onResizeStart('company', e); }}
+                                    />
+                                  </div>
                                 </div>
-                                <span
-                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                  style={{ right: -6, bottom: -6 }}
-                                  onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('qr', e); }}
-                                  onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('qr', e); }}
-                                />
                               </div>
-                            </div>
+                            )}
                           </div>
-                        )}
+                        </div>
                       </div>
-                      </div>
+
+
+                      <div
+                        ref={previewContainerRef}
+                        className="relative w-full max-w-full overflow-hidden"
+                      >
+                        <div
+                          className="origin-top-left"
+                          style={{ transform: `scale(${previewScale})` }}
+                        >
+                          <div
+                            ref={backRef}
+                            style={{ width: 560, height: 320 }}
+                            className="relative"
+                          >
+
+                            <div className="wm-screen-only" data-watermark="screen-only" />
+                            {!isEditLayout && selectedConfig && (
+                              <BackSideCard
+                                data={data}
+                                background={{
+                                  style: selectedConfig.bgStyle === "solid" ? "solid" : "gradient",
+                                  colors: selectedConfig.bgColors,
+                                }}
+                                textColor={hasOverrides ? (textColor ?? selectedConfig.textColor) : selectedConfig.textColor}
+                                accentColor={hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor}
+                                fontFamily={hasOverrides ? selectedFont : undefined}
+                                fontSize={hasOverrides ? fontSize : undefined}
+                              />
+                            )}
+                            {isEditLayout && selectedConfig && (
+                              <div
+                                className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative"
+                                style={{
+                                  background: selectedConfig.bgStyle === 'gradient' ? `linear-gradient(135deg, ${selectedConfig.bgColors[0]}, ${selectedConfig.bgColors[1]})` : undefined,
+                                  backgroundColor: selectedConfig.bgStyle === 'solid' ? selectedConfig.bgColors[0] : undefined,
+                                  color: hasOverrides ? (textColor ?? selectedConfig.textColor) : selectedConfig.textColor,
+                                  fontFamily: hasOverrides ? selectedFont : undefined,
+                                  fontSize: `${hasOverrides ? fontSize : 16}px`,
+                                }}
+                              >
+                                <div className="absolute inset-0">
+                                  <div
+                                    className="cursor-move select-none"
+                                    style={{ position: 'absolute', left: `${positionsBack.email.x}%`, top: `${positionsBack.email.y}%`, fontSize: backSizes.email }}
+                                    onMouseDown={(e) => onBackDragStart('email', e)}
+                                    onTouchStart={(e) => onBackDragStart('email', e)}
+                                  >
+                                    <strong style={{ color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor }}>✉</strong> {data.email || 'email@example.com'}
+                                    <span
+                                      className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                                      style={{ right: -6, bottom: -6 }}
+                                      onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
+                                      onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
+                                    />
+                                  </div>
+                                  <div
+                                    className="cursor-move select-none"
+                                    style={{ position: 'absolute', left: `${positionsBack.phone.x}%`, top: `${positionsBack.phone.y}%`, fontSize: backSizes.phone }}
+                                    onMouseDown={(e) => onBackDragStart('phone', e)}
+                                    onTouchStart={(e) => onBackDragStart('phone', e)}
+                                  >
+                                    <strong style={{ color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor }}>✆</strong> {data.phone || '+91 00000 00000'}
+                                    <span
+                                      className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                                      style={{ right: -6, bottom: -6 }}
+                                      onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
+                                      onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
+                                    />
+                                  </div>
+                                  <div
+                                    className="cursor-move select-none"
+                                    style={{ position: 'absolute', left: `${positionsBack.website.x}%`, top: `${positionsBack.website.y}%`, fontSize: backSizes.website }}
+                                    onMouseDown={(e) => onBackDragStart('website', e)}
+                                    onTouchStart={(e) => onBackDragStart('website', e)}
+                                  >
+                                    <strong style={{ color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor }}>⌂</strong> {data.website || 'your-website.com'}
+                                    <span
+                                      className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                                      style={{ right: -6, bottom: -6 }}
+                                      onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
+                                      onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
+                                    />
+                                  </div>
+                                  <div
+                                    className="cursor-move select-none"
+                                    style={{ position: 'absolute', left: `${positionsBack.address.x}%`, top: `${positionsBack.address.y}%`, fontSize: backSizes.address }}
+                                    onMouseDown={(e) => onBackDragStart('address', e)}
+                                    onTouchStart={(e) => onBackDragStart('address', e)}
+                                  >
+                                    <strong style={{ color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor }}>📍</strong> {data.address || 'Your Address, City'}
+                                    <span
+                                      className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                                      style={{ right: -6, bottom: -6 }}
+                                      onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
+                                      onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
+                                    />
+                                  </div>
+                                  <div
+                                    className="cursor-move select-none"
+                                    style={{ position: 'absolute', left: `${positionsBack.qr.x}%`, top: `${positionsBack.qr.y}%` }}
+                                    onMouseDown={(e) => onBackDragStart('qr', e)}
+                                    onTouchStart={(e) => onBackDragStart('qr', e)}
+                                  >
+                                    <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
+                                      <QRCodeSVG value={`BEGIN:VCARD\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`} size={backSizes.qr} />
+                                    </div>
+                                    <span
+                                      className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                                      style={{ right: -6, bottom: -6 }}
+                                      onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('qr', e); }}
+                                      onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('qr', e); }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
                     </>
@@ -1045,7 +1045,7 @@ useEffect(() => {
             </div>
           </div>
         </div>
-        
+
         {/* <div className="mt-4">
           <CustomizationPanel
             selectedFont={selectedFont}
@@ -1146,13 +1146,13 @@ useEffect(() => {
                     </>
                   )}
                 </button> */}
-                {/* tile quick download removed in commerce flow */}
-              {/* </div>
+      {/* tile quick download removed in commerce flow */}
+      {/* </div>
             ))}
           </div>
         )} */}
-        {/* Pagination controls */}
-        {/* {totalPages > 1 && (
+      {/* Pagination controls */}
+      {/* {totalPages > 1 && (
           <div className="flex items-center justify-center gap-3 mt-6">
             <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}>
               Prev
@@ -1177,120 +1177,119 @@ useEffect(() => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-center ">
-  {pagedTemplates.map((item) => (
-    <div
-      key={item.id}
-      ref={(el) => (containerRefs.current[item.id] = el)}
-      className="relative w-full max-w-[280px] aspect-[1.75/1] mx-auto"
-      style={{ ["--cardScale" as any]: 1 }}
+            {pagedTemplates.map((item) => (
+              <div
+                key={item.id}
+                ref={(el) => (containerRefs.current[item.id] = el)}
+                className="relative w-full max-w-[280px] aspect-[1.75/1] mx-auto"
+                style={{ ["--cardScale" as any]: 1 }}
 
-    >
-      <button
-        onClick={() => setSelectedTemplate(item.id)}
-        className={`group relative rounded-lg overflow-hidden transition-all duration-300 border-2 w-full h-full ${
-          selectedTemplate === item.id
-            ? "border-primary shadow-[var(--shadow-hover)]"
-            : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
-        }`}
-      >
-        {/* Selected checkmark */}
-        {selectedTemplate === item.id && (
-          <div className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground rounded-full p-1">
-            <Check className="w-4 h-4" />
-          </div>
-        )}
-
-        {/* SCALE WRAPPER */}
-        <div
-          className="absolute inset-0 origin-top-left pointer-events-none"
-          style={{ transform: `scale(var(--cardScale))` }}
-        >
-          {/* FIXED SIZE CARD AREA */}
-          <div style={{ width: 280, height: 160 }}>
-
-            {/* CLASSIC TEMPLATE */}
-            {item.kind === "classic" ? (
-              <>
-                <div className="w-full h-full relative">
-                  <ClassicCard
-                    data={data}
-                    config={item.classic}
-                    fontFamily={hasOverrides ? selectedFont : undefined}
-                    fontSize={hasOverrides ? fontSize : undefined}
-                    textColor={hasOverrides ? textColor : undefined}
-                    accentColor={hasOverrides ? accentColor : undefined}
-                  />
-                </div>
-                {/* Template name gradient */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                  <p className="text-white font-medium text-sm">
-                    {item.classic.name}
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
-                {/* SERVER TEMPLATE */}
-                {(() => {
-                  const t = item.server;
-                  const bg = t?.thumbnail_url || t?.background_url || undefined;
-                  const cfg = t?.config || {};
-                  const fc = cfg.fontColor || "#000";
-                  const fs = cfg.fontSize || 16;
-                  const accent = cfg.accentColor || "#0ea5e9";
-                  const ff = cfg.fontFamily || "Inter, Arial";
-
-                  return (
-                    <div
-                      className="w-full h-full relative pointer-events-none"
-                      style={{
-                        backgroundImage: bg ? `url(${bg})` : undefined,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        color: fc,
-                        fontFamily: ff,
-                      }}
-                    >
-                      <div className="w-full h-full px-5 py-4 flex items-center justify-between gap-4">
-                        {data.logo ? (
-                          <img
-                            src={data.logo}
-                            alt="Logo"
-                            className="w-16 h-16 rounded-full object-cover border border-white/50 shadow"
-                          />
-                        ) : (
-                          <div />
-                        )}
-                        <div className="flex flex-col text-right">
-                          <div className="font-semibold" style={{ fontSize: fs + 4 }}>
-                            {data.name || "Your Name"}
-                          </div>
-                          <div style={{ fontSize: fs + 2, color: accent }}>
-                            {data.title || "Job Title"}
-                          </div>
-                          <div className="opacity-80" style={{ fontSize: fs }}>
-                            {data.company || "Company"}
-                          </div>
-                        </div>
-                      </div>
+              >
+                <button
+                  onClick={() => setSelectedTemplate(item.id)}
+                  className={`group relative rounded-lg overflow-hidden transition-all duration-300 border-2 w-full h-full ${selectedTemplate === item.id
+                    ? "border-primary shadow-[var(--shadow-hover)]"
+                    : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
+                    }`}
+                >
+                  {/* Selected checkmark */}
+                  {selectedTemplate === item.id && (
+                    <div className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground rounded-full p-1">
+                      <Check className="w-4 h-4" />
                     </div>
-                  );
-                })()}
-                {/* Template name gradient */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                  <p className="text-white font-medium text-sm">
-                    {item.server?.name || "Template"}
-                  </p>
-                </div>
-              </>
-            )}
+                  )}
 
+                  {/* SCALE WRAPPER */}
+                  <div
+                    className="absolute inset-0 origin-top-left pointer-events-none"
+                    style={{ transform: `scale(var(--cardScale))` }}
+                  >
+                    {/* FIXED SIZE CARD AREA */}
+                    <div style={{ width: 280, height: 160 }}>
+
+                      {/* CLASSIC TEMPLATE */}
+                      {item.kind === "classic" ? (
+                        <>
+                          <div className="w-full h-full relative">
+                            <ClassicCard
+                              data={data}
+                              config={item.classic}
+                              fontFamily={hasOverrides ? selectedFont : undefined}
+                              fontSize={hasOverrides ? fontSize : undefined}
+                              textColor={hasOverrides ? textColor : undefined}
+                              accentColor={hasOverrides ? accentColor : undefined}
+                            />
+                          </div>
+                          {/* Template name gradient */}
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                            <p className="text-white font-medium text-sm">
+                              {item.classic.name}
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {/* SERVER TEMPLATE */}
+                          {(() => {
+                            const t = item.server;
+                            const bg = t?.thumbnail_url || t?.background_url || undefined;
+                            const cfg = t?.config || {};
+                            const fc = cfg.fontColor || "#000";
+                            const fs = cfg.fontSize || 16;
+                            const accent = cfg.accentColor || "#0ea5e9";
+                            const ff = cfg.fontFamily || "Inter, Arial";
+
+                            return (
+                              <div
+                                className="w-full h-full relative pointer-events-none"
+                                style={{
+                                  backgroundImage: bg ? `url(${bg})` : undefined,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                  color: fc,
+                                  fontFamily: ff,
+                                }}
+                              >
+                                <div className="w-full h-full px-5 py-4 flex items-center justify-between gap-4">
+                                  {data.logo ? (
+                                    <img
+                                      src={data.logo}
+                                      alt="Logo"
+                                      className="w-16 h-16 rounded-full object-cover border border-white/50 shadow"
+                                    />
+                                  ) : (
+                                    <div />
+                                  )}
+                                  <div className="flex flex-col text-right">
+                                    <div className="font-semibold" style={{ fontSize: fs + 4 }}>
+                                      {data.name || "Your Name"}
+                                    </div>
+                                    <div style={{ fontSize: fs + 2, color: accent }}>
+                                      {data.title || "Job Title"}
+                                    </div>
+                                    <div className="opacity-80" style={{ fontSize: fs }}>
+                                      {data.company || "Company"}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                          {/* Template name gradient */}
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                            <p className="text-white font-medium text-sm">
+                              {item.server?.name || "Template"}
+                            </p>
+                          </div>
+                        </>
+                      )}
+
+                    </div>
+                  </div>
+                </button>
+              </div>
+            ))}
           </div>
-        </div>
-      </button>
-    </div>
-  ))}
-</div>
 
         )}
         {/* Pagination controls */}
