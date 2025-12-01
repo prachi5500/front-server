@@ -1498,6 +1498,18 @@ export const TemplateSelector = ({
       });
     };
 
+  // for font scalling
+  useEffect(() => {
+    const updateScaleAll = () => {
+      Object.entries(containerRefs.current).forEach(([id, el]) => {
+        if (!el) return;
+        const w = el.getBoundingClientRect().width;
+        const cardWidth = 280; // FULL size card width
+        const scaleValue = w / cardWidth;
+        el.style.setProperty("--cardScale", String(scaleValue));
+      });
+    };
+
     updateScaleAll();
     window.addEventListener("resize", updateScaleAll);
     return () => window.removeEventListener("resize", updateScaleAll);
@@ -1728,8 +1740,9 @@ export const TemplateSelector = ({
         </div>
 
         <div className="bg-gradient-to-br from-muted to-background p-0 rounded-lg overflow-x-hidden">
-          <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-0">
+          <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-0 ">
             <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-2">
+
               {(() => {
                 const isServer = selectedTemplate.startsWith("sb:");
                 if (!isServer) {
@@ -1763,6 +1776,7 @@ export const TemplateSelector = ({
                                 config={selectedConfig}
                                 fontFamily={hasOverrides ? selectedFont : undefined}
                                 fontSize={hasOverrides ? fontSize : undefined}
+
                                 textColor={hasOverrides ? textColor : undefined}
                                 accentColor={hasOverrides ? accentColor : undefined}
                               />

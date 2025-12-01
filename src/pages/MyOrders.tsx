@@ -4,15 +4,33 @@ import { apiFetch } from "@/services/api";
 import { classicTemplates } from "@/lib/classicTemplates";
 import { listAllTemplates, type Template } from "@/services/templates";
 import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+
+interface CardData {
+  name?: string;
+  phone?: string;
+  email?: string;
+  company?: string;
+  designation?: string;
+  website?: string;
+  address?: string;
+  [key: string]: any;
+}
 
 interface OrderedItem {
   templateId: string;
   title?: string | null;
   price?: number | null;
   templateName?: string | null;
-  // backend me ho sakta hai par TS type optional rakh rahe
   frontImageUrl?: string | null;
   backImageUrl?: string | null;
+  data?: {
+    frontData?: CardData;
+    backData?: CardData;
+  } | null;
 }
 
 interface Payment {
@@ -42,6 +60,40 @@ export default function MyOrders() {
     payment: Payment;
     item: OrderedItem;
   } | null>(null);
+
+  const handleDownload = async (item: OrderedItem) => {
+    try {
+      if (!item.frontImageUrl || !item.backImageUrl) {
+        alert("Download links not available for this card.");
+        return;
+      }
+
+      // Download front image
+      const frontResponse = await fetch(item.frontImageUrl);
+      const frontBlob = await frontResponse.blob();
+
+      // Download back image
+      const backResponse = await fetch(item.backImageUrl);
+      const backBlob = await backResponse.blob();
+
+      // Create a zip file containing both images
+      const zip = new JSZip();
+      const folder = zip.folder("business-card");
+
+      if (folder) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        folder.file(`front-${timestamp}.png`, frontBlob);
+        folder.file(`back-${timestamp}.png`, backBlob);
+
+        // Generate zip file
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, `business-card-${item.templateId || 'download'}.zip`);
+      }
+    } catch (error) {
+      console.error("Error downloading images:", error);
+      alert("Failed to download card images. Please try again.");
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -78,9 +130,18 @@ export default function MyOrders() {
     };
   }, []);
 
+  const renderCardField = (label: string, value: any) => {
+    if (!value) return null;
+    return (
+      <div className="text-xs">
+        <span className="font-medium">{label}:</span> {value}
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/40">
-      <main className="container mx-auto max-w-3xl px-4 py-10">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-muted/40">
+      <main className="container mx-auto max-w-3xl px-4 py-10 flex-grow">
         <div className="mb-6 space-y-2">
           <h1 className="text-3xl font-bold">My Orders</h1>
           <p className="text-sm text-muted-foreground">
@@ -157,9 +218,7 @@ export default function MyOrders() {
                             (t) => t.id === rawId
                           );
 
-                          let previewStyle:
-                            | React.CSSProperties
-                            | undefined;
+                          let previewStyle: React.CSSProperties | undefined;
                           if (classicTemplate) {
                             if (
                               classicTemplate.bgStyle === "gradient" &&
@@ -183,7 +242,7 @@ export default function MyOrders() {
 
                           const itemAny = item as any;
 
-                          // FRONT thumbnail in list: saved image -> thumbnail -> background -> back
+                          // FRONT thumbnail in list: prefer saved front image, fall back to template assets
                           const listFrontSrc =
                             itemAny.frontImageUrl ||
                             serverTemplate?.thumbnail_url ||
@@ -195,15 +254,13 @@ export default function MyOrders() {
                             <div
                               key={idx}
                               className="flex items-center justify-between gap-3 cursor-pointer hover:bg-muted/60 rounded-md px-2 py-1"
-                              onClick={() =>
-                                setSelected({ payment: p, item })
-                              }
+                              onClick={() => setSelected({ payment: p, item })}
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 {listFrontSrc ? (
                                   <img
                                     src={listFrontSrc}
-                                    alt={displayName}
+                                    alt={`${displayName} (front)`}
                                     className="h-14 w-24 object-cover rounded border"
                                   />
                                 ) : classicTemplate ? (
@@ -216,6 +273,7 @@ export default function MyOrders() {
                                     No preview
                                   </div>
                                 )}
+
                                 <div className="min-w-0">
                                   <div className="font-medium truncate">
                                     {displayName}
@@ -223,18 +281,40 @@ export default function MyOrders() {
                                   <div className="text-[11px] text-muted-foreground truncate">
                                     For: {item.title || "Business Card"}
                                   </div>
-                                  <div className="text-[11px] text-muted-foreground truncate">
-                                    ID: {rawId}
-                                  </div>
+                                  {item.data?.frontData?.name && (
+                                    <div className="text-[11px] text-muted-foreground truncate">
+                                      {item.data.frontData.name}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               <div className="text-right whitespace-nowrap">
-                                <span className="font-medium">₹</span>{" "}
-                                <span className="font-medium">
-                                  {item.price != null
-                                    ? item.price.toFixed(2)
-                                    : "-"}
-                                </span>
+                                <div className="mt-4 flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelected({ payment: p, item });
+                                    }}
+                                  >
+                                    View Details
+                                  </Button>
+                                  {item.frontImageUrl && item.backImageUrl && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDownload(item);
+                                      }}
+                                      className="gap-1"
+                                    >
+                                      <Download className="h-3.5 w-3.5" />
+                                      Download
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           );
@@ -254,13 +334,23 @@ export default function MyOrders() {
 
         {selected && (
           <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4">
-            <div className="bg-card max-w-4xl w-full rounded-xl shadow-2xl border border-border p-4 md:p-6 relative">
+            <div className="bg-card max-w-4xl w-full rounded-xl shadow-2xl border border-border p-4 md:p-6 relative max-h-[90vh] overflow-y-auto">
               <button
                 type="button"
                 className="absolute top-3 right-3 text-xs px-2 py-1 rounded-full bg-muted hover:bg-muted/80"
                 onClick={() => setSelected(null)}
               >
                 Close
+              </button>
+
+              {/* Download button in modal */}
+              <button
+                type="button"
+                className="absolute top-3 right-16 text-xs px-3 py-1 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1"
+                onClick={() => handleDownload(selected.item)}
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span>Download</span>
               </button>
 
               {(() => {
@@ -276,9 +366,7 @@ export default function MyOrders() {
                   (t) => t.id === rawId
                 );
 
-                let previewStyle:
-                  | React.CSSProperties
-                  | undefined;
+                let previewStyle: React.CSSProperties | undefined;
                 if (classicTemplate) {
                   if (
                     classicTemplate.bgStyle === "gradient" &&
@@ -300,20 +388,19 @@ export default function MyOrders() {
                   classicTemplate?.name ||
                   rawId;
 
-                const fullAddress =
-                  [
-                    payment.address_line1,
-                    payment.address_line2,
-                    payment.city,
-                    payment.state,
-                    payment.pincode,
-                  ]
-                    .filter(Boolean)
-                    .join(", ") || "-";
+                const fullAddress = [
+                  payment.address_line1,
+                  payment.address_line2,
+                  payment.city,
+                  payment.state,
+                  payment.pincode,
+                ]
+                  .filter(Boolean)
+                  .join(", ") || "-";
 
                 const itemAny = item as any;
 
-                // Front image in modal: saved URL -> template images
+                // Front image in modal
                 const modalFrontSrc =
                   itemAny.frontImageUrl ||
                   serverTemplate?.thumbnail_url ||
@@ -321,7 +408,7 @@ export default function MyOrders() {
                   serverTemplate?.back_background_url ||
                   null;
 
-                // Back image in modal: saved URL -> back template -> others
+                // Back image in modal
                 const modalBackSrc =
                   itemAny.backImageUrl ||
                   serverTemplate?.back_background_url ||
@@ -337,9 +424,7 @@ export default function MyOrders() {
                       </h2>
                       <p className="text-xs text-muted-foreground">
                         Order on{" "}
-                        {new Date(
-                          payment.createdAt
-                        ).toLocaleString()}
+                        {new Date(payment.createdAt).toLocaleString()}
                       </p>
                     </div>
 
@@ -367,10 +452,24 @@ export default function MyOrders() {
                             </div>
                           )}
                         </div>
+                        {/* Front Side Data */}
+                        {item.data?.frontData && (
+                          <div className="mt-2 p-3 bg-muted/20 rounded-lg border border-border">
+                            <h4 className="text-xs font-medium mb-2 text-muted-foreground">
+                              Front Side Details
+                            </h4>
+                            {Object.entries(item.data.frontData).map(([key, value]) =>
+                              value && renderCardField(
+                                key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim(),
+                                value
+                              )
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* BACK */}
-                      <div className="w-full lg:w-1/3 flex flex-col gap-4 mt-6 lg:mt-0">
+                      <div className="w-full lg:w-1/3 flex flex-col gap-2">
                         <div className="text-[11px] font-medium text-muted-foreground">
                           Back
                         </div>
@@ -392,47 +491,85 @@ export default function MyOrders() {
                             </div>
                           )}
                         </div>
+                        {/* Back Side Data */}
+                        {item.data?.backData && (
+                          <div className="mt-2 p-3 bg-muted/20 rounded-lg border border-border">
+                            <h4 className="text-xs font-medium mb-2 text-muted-foreground">
+                              Back Side Details
+                            </h4>
+                            {Object.entries(item.data.backData).map(([key, value]) =>
+                              value && renderCardField(
+                                key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim(),
+                                value
+                              )
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* DETAILS */}
-                      <div className="w-full lg:w-1/3 space-y-2 mt-6 lg:mt-0">
-                        <div className="font-semibold text-sm">
-                          {displayName}
+                      <div className="w-full lg:w-1/3 space-y-3">
+                        <div>
+                          <div className="font-semibold text-sm">
+                            {displayName}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            For: {item.title || "Business Card"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Template ID: {rawId}
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          For: {item.title || "Business Card"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Template ID: {rawId}
-                        </div>
-                        <div className="text-sm font-medium mt-2">
-                          Amount paid: ₹
-                          {item.price != null
-                            ? item.price.toFixed(2)
-                            : "-"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Overall payment: ₹
-                          {payment.amount != null
-                            ? payment.amount.toFixed(2)
-                            : "-"}{" "}
-                          {payment.currency}
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="border-t pt-3 space-y-2">
-                      <div className="font-medium text-sm">
-                        Delivery address
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {payment.customer_name || "-"}
-                        {payment.customer_phone
-                          ? ` • ${payment.customer_phone}`
-                          : ""}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {fullAddress}
+                        <div className="p-3 bg-muted/20 rounded-lg border border-border">
+                          <h4 className="text-xs font-medium mb-2 text-muted-foreground">
+                            Order Summary
+                          </h4>
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-sm">
+                              <span>Amount paid:</span>
+                              <span className="font-medium">
+                                ₹{item.price != null ? item.price.toFixed(2) : "-"}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>Total payment:</span>
+                              <span>
+                                ₹{payment.amount != null ? payment.amount.toFixed(2) : "-"}{" "}
+                                {payment.currency}
+                              </span>
+                            </div>
+                            <div className="pt-2 mt-2 border-t text-xs">
+                              <div className="font-medium">Status:</div>
+                              <span
+                                className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase ${(payment.status || "").toLowerCase() === "captured" ||
+                                    (payment.status || "").toLowerCase() === "success"
+                                    ? "bg-green-100 text-green-800"
+                                    : (payment.status || "").toLowerCase() === "failed"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-yellow-100 text-yellow-800"
+                                  }`}
+                              >
+                                {payment.status || "-"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-3 bg-muted/20 rounded-lg border border-border">
+                          <h4 className="text-xs font-medium mb-2 text-muted-foreground">
+                            Delivery Address
+                          </h4>
+                          <div className="text-xs space-y-1">
+                            <div>{payment.customer_name || "-"}</div>
+                            {payment.customer_phone && (
+                              <div>{payment.customer_phone}</div>
+                            )}
+                            <div className="text-muted-foreground">
+                              {fullAddress}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -443,7 +580,6 @@ export default function MyOrders() {
         )}
       </main>
 
-      {/* Import and use the Footer component */}
       <Footer />
     </div>
   );

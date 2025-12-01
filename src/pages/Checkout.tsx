@@ -170,6 +170,10 @@ export default function CheckoutPage() {
                 templateName: byId[it.id]?.name || null,
                 frontImageUrl,
                 backImageUrl,
+                data: {
+                  frontData: (it.data as any).frontData || null,
+                  backData: (it.data as any).backData || null,
+                },
               });
             }
 
@@ -459,14 +463,14 @@ export default function CheckoutPage() {
                   <span className="font-medium">Deliver to:&nbsp;</span>
                   {addressLine1 || addressLine2 || city || state || pincode
                     ? [
-                        addressLine1,
-                        addressLine2,
-                        city,
-                        state,
-                        pincode,
-                      ]
-                        .filter((x) => x && x.trim())
-                        .join(", ")
+                      addressLine1,
+                      addressLine2,
+                      city,
+                      state,
+                      pincode,
+                    ]
+                      .filter((x) => x && x.trim())
+                      .join(", ")
                     : "Add your full address above"}
                 </div>
               </div>
@@ -522,8 +526,8 @@ export default function CheckoutPage() {
                 {processing
                   ? "Processing..."
                   : isFormValid
-                  ? "Pay Now"
-                  : "Complete details to pay"}
+                    ? "Pay Now"
+                    : "Complete details to pay"}
               </Button>
             </div>
 
