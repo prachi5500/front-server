@@ -15,6 +15,8 @@ type AuthContextType = {
   profile: AuthUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  requestSignupOTP: (email: string) => Promise<{ error: string | null }>;
+  verifySignupOTP: (email: string, otp: string, password: string, name: string, phone: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 };
 
@@ -57,12 +59,31 @@ setProfile(u);
         const res = await apiFetch("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
         localStorage.setItem("token", res.token);
         const u = res.user as AuthUser;
-setUser(u);
-setProfile(u);
-
+        setUser(u);
+        setProfile(u);
         return { error: null };
       } catch (e: any) {
         return { error: e.message ?? "Login failed" };
+      }
+    },
+    requestSignupOTP: async (email: string) => {
+      try {
+        await apiFetch("/auth/send-signup-otp", { method: "POST", body: JSON.stringify({ email }) });
+        return { error: null };
+      } catch (e: any) {
+        return { error: e.message ?? "Failed to send OTP" };
+      }
+    },
+    verifySignupOTP: async (email: string, otp: string, password: string, name: string, phone: string) => {
+      try {
+        const res = await apiFetch("/auth/verify-signup-otp", { method: "POST", body: JSON.stringify({ email, otp, password, name, phone }) });
+        localStorage.setItem("token", res.token);
+        const u = res.user as AuthUser;
+        setUser(u);
+        setProfile(u);
+        return { error: null };
+      } catch (e: any) {
+        return { error: e.message ?? "Verification failed" };
       }
     },
     signOut: async () => {

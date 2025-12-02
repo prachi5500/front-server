@@ -13,7 +13,16 @@ import paymentRoutes from './routes/payments.js';
 const app = express();
 
 // Allow requests from your specific Frontend URL (or all if comma-separated list fails)
-app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*' }));
+app.use(cors({
+  origin: [
+    'http://localhost:8080',
+    'http://localhost:8081',
+    'http://localhost:3000',
+    'http://127.0.0.1:8080',
+    'http://127.0.0.1:8081'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(morgan('dev'));
 app.disable('x-powered-by');
@@ -55,7 +64,7 @@ app.get('/', (req, res) => {
   res.send("Backend is running successfully. Please use the Frontend URL to view the application.");
 });
 
-const PORT = process.env.PORT || 3002;
+const PORT = 3003; // Force port 3003 to avoid conflicts
 app.listen(PORT, () => {
   console.log(`API listening on port ${PORT}`);
 });
