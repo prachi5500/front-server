@@ -126,7 +126,7 @@ app.get('/', (req, res) => {
   res.send("Backend is running successfully. Please use the Frontend URL to view the application.");
 });
 
-const PORT = process.env.PORT || 3002;
+const PORT = 3003; // Force port 3003 to avoid conflicts
 app.listen(PORT, () => {
   console.log(`API listening on port ${PORT}`);
 });

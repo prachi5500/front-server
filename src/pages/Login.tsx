@@ -210,13 +210,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <form 
         onSubmit={isSignup ? (otpSent ? handleVerifyOTP : handleRequestOTP) : handleLogin} 
-        className="w-full max-w-sm space-y-4 border rounded-lg p-6"
+        className="w-full max-w-md sm:max-w-lg space-y-4 border rounded-lg p-4 sm:p-6 lg:p-8 shadow-lg"
       >
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">{isSignup ? "Sign Up" : "Login"}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h1 className="text-xl sm:text-2xl font-semibold text-center sm:text-left">{isSignup ? "Sign Up" : "Login"}</h1>
           <button
             type="button"
             onClick={() => {
@@ -224,32 +224,33 @@ const Login = () => {
               setOtpSent(false);
               setError(null);
             }}
-            className="text-sm underline"
+            className="text-sm sm:text-base underline hover:text-blue-700 transition-colors"
           >
             {isSignup ? "Have an account? Login" : "New user? Sign Up"}
           </button>
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-red-500 text-sm sm:text-base text-center sm:text-left">{error}</p>}
         
-        <div className="space-y-1">
-          <label className="text-sm">Email</label>
+        <div className="space-y-2">
+          <label className="text-sm sm:text-base font-medium">Email</label>
           <input
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-lg px-3 py-3 sm:py-4 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isSignup && otpSent}
+            placeholder="Enter your email"
           />
         </div>
 
         {isSignup ? (
           otpSent ? (
             <>
-              <div className="space-y-1">
-                <label className="text-sm">OTP</label>
+              <div className="space-y-2">
+                <label className="text-sm sm:text-base font-medium">OTP</label>
                 <input
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded-lg px-3 py-3 sm:py-4 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   type="text"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
@@ -257,40 +258,43 @@ const Login = () => {
                   placeholder="Enter OTP sent to your email"
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-sm">Name</label>
+              <div className="space-y-2">
+                <label className="text-sm sm:text-base font-medium">Name</label>
                 <input
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded-lg px-3 py-3 sm:py-4 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                  placeholder="Enter your full name"
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-sm">Phone No.</label>
+              <div className="space-y-2">
+                <label className="text-sm sm:text-base font-medium">Phone No.</label>
                 <input
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded-lg px-3 py-3 sm:py-4 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
+                  placeholder="Enter your phone number"
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-sm">Password</label>
+              <div className="space-y-2">
+                <label className="text-sm sm:text-base font-medium">Password</label>
                 <input
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded-lg px-3 py-3 sm:py-4 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
+                  placeholder="Create a password"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                className="w-full bg-blue-600 text-white py-3 sm:py-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base font-medium transition-all transform hover:scale-[1.02] active:scale-[0.98]"
                 disabled={loading}
               >
                 {loading ? "Creating Account..." : "Sign Up"}
@@ -299,7 +303,7 @@ const Login = () => {
           ) : (
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+              className="w-full bg-blue-600 text-white py-3 sm:py-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base font-medium transition-all transform hover:scale-[1.02] active:scale-[0.98]"
               disabled={loading}
             >
               {loading ? "Sending OTP..." : "Send OTP"}
@@ -307,24 +311,25 @@ const Login = () => {
           )
         ) : (
           <>
-            <div className="space-y-1">
-              <label className="text-sm">Password</label>
+            <div className="space-y-2">
+              <label className="text-sm sm:text-base font-medium">Password</label>
               <input
-                className="w-full border rounded px-3 py-2"
+                className="w-full border rounded-lg px-3 py-3 sm:py-4 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                placeholder="Enter your password"
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+              className="w-full bg-blue-600 text-white py-3 sm:py-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base font-medium transition-all transform hover:scale-[1.02] active:scale-[0.98]"
               disabled={loading}
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>
-            <div className="flex justify-between text-sm">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-0 text-sm sm:text-base">
               <button
                 type="button"
                 onClick={() => {
@@ -332,7 +337,7 @@ const Login = () => {
                   setOtpSent(false);
                   setError(null);
                 }}
-                className="text-blue-600 hover:underline"
+                className="text-blue-600 hover:text-blue-700 hover:underline transition-colors"
               >
                 New user? Sign Up
               </button>
@@ -342,7 +347,7 @@ const Login = () => {
                   // Navigate to forgot password page or show forgot password modal
                   window.location.href = '/forgot-password';
                 }}
-                className="text-blue-600 hover:underline"
+                className="text-blue-600 hover:text-blue-700 hover:underline transition-colors"
               >
                 Forgot Password?
               </button>

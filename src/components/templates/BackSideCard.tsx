@@ -58,11 +58,33 @@ export const BackSideCard: React.FC<Props> = ({
   qrColor = "#000000",
   qrLogoUrl,
 }) => {
+  // Detect mobile viewport for responsive sizing
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
   // Calculate responsive font sizes
   const baseSize = fontSize || 12;
-  const textSize = baseSize;
+  const textSize = isMobile ? baseSize * 0.8 : baseSize; // smaller text on mobile
   const iconSize = baseSize * 1.2; // Icons slightly larger than text
-  const qrSizeValue = (qrSize ?? (showLargeQR ? 60 : 40)) * (baseSize / 12);
+
+  // QR size:
+  // - On mobile: keep QR smaller so it fits comfortably in the card
+  // - On desktop: allow a larger size (or any passed qrSize) so it matches the earlier design
+  let baseQr: number;
+  if (isMobile) {
+    // Mobile defaults (smaller)
+    const mobileLarge = 40; // base ~40px at fontSize 12
+    const mobileSmall = 28; // base ~28px
+    const requested = qrSize ?? (showLargeQR ? mobileLarge : mobileSmall);
+    // Clamp to avoid oversized QR on very small screens
+    baseQr = Math.min(requested, mobileLarge);
+  } else {
+    // Desktop / tablet defaults (larger, closer to original behavior)
+    const desktopLarge = 68; // approx original large QR
+    const desktopSmall = 48;
+    baseQr = qrSize ?? (showLargeQR ? desktopLarge : desktopSmall);
+  }
+
+  const qrSizeValue = baseQr * (baseSize / 12);
 
   const appliedAccent = accentColor ?? config?.accentColor ?? "#1f2937";
   const hasUserCoreInfo = !!(data.name && data.email && data.phone);
@@ -97,35 +119,37 @@ export const BackSideCard: React.FC<Props> = ({
   }, [qrLogoUrl]);
 
   const renderContent = () => (
-    <div className="relative z-10 flex items-center justify-between h-full w-full px-2 md:px-4 gap-3 md:gap-4">
+    <div className="relative z-10 flex items-center justify-between h-full w-full px-0.5 md:px-4 gap-3 md:gap-5">
+
       {/* Left Side - Text Content (smaller) */}
-      <div className="flex-1 flex items-center justify-start">
-        <div className="space-y-1 md:space-y-2" style={{ lineHeight: 1.3 }}>
+      <div className="flex-1 flex items-center justify-start w-full min-w-0 max-w-[70%] md:max-w-none">
+
+        <div className="space-y-1 md:space-y-2 w-full" style={{ lineHeight: 1.3 }}>
           {hasUserCoreInfo ? (
             <>
               {data.email && (
                 <div className="flex items-center gap-2 md:gap-3">
                   <span style={{ color: appliedAccent, fontSize: `${iconSize}px` }}></span>
-                  <span className="md:text-base lg:text-lg" style={{ fontSize: `${textSize}px` }}>
+                  <span className="md:text-base lg:text-lg break-words" style={{ fontSize: `${textSize}px` }}>
                     {data.email}
                   </span>
                 </div>
               )}
               <div className="flex items-center gap-2 md:gap-3">
                 <span style={{ color: appliedAccent, fontSize: `${iconSize}px` }}></span>
-                <span className="md:text-base lg:text-lg" style={{ fontSize: `${textSize}px` }}>
+                <span className="md:text-base lg:text-lg break-words" style={{ fontSize: `${textSize}px` }}>
                   {data.phone}
                 </span>
               </div>
               <div className="flex items-center gap-2 md:gap-3">
                 <span style={{ color: appliedAccent, fontSize: `${iconSize}px` }}></span>
-                <span className="md:text-base lg:text-lg" style={{ fontSize: `${textSize}px` }}>
+                <span className="md:text-base lg:text-lg break-words" style={{ fontSize: `${textSize}px` }}>
                   {data.website}
                 </span>
               </div>
               <div className="flex items-center gap-2 md:gap-3">
                 <span style={{ color: appliedAccent, fontSize: `${iconSize}px` }}></span>
-                <span className="md:text-base lg:text-lg" style={{ fontSize: `${textSize}px` }}>
+                <span className="md:text-base lg:text-lg break-words" style={{ fontSize: `${textSize}px` }}>
                   {data.address}
                 </span>
               </div>
@@ -134,19 +158,19 @@ export const BackSideCard: React.FC<Props> = ({
             <>
               <div className="flex items-center gap-2 md:gap-3">
                 <span style={{ color: appliedAccent, fontSize: `${iconSize}px` }}></span>
-                <span className="md:text-base lg:text-lg" style={{ fontSize: `${textSize}px` }}>
+                <span className="md:text-base lg:text-lg break-words" style={{ fontSize: `${textSize}px` }}>
                   {data.phone || "+91 00000 00000"}
                 </span>
               </div>
               <div className="flex items-center gap-2 md:gap-3">
                 <span style={{ color: appliedAccent, fontSize: `${iconSize}px` }}></span>
-                <span className="md:text-base lg:text-lg" style={{ fontSize: `${textSize}px` }}>
+                <span className="md:text-base lg:text-lg break-words" style={{ fontSize: `${textSize}px` }}>
                   {data.website || "your-website.com"}
                 </span>
               </div>
               <div className="flex items-center gap-2 md:gap-3">
                 <span style={{ color: appliedAccent, fontSize: `${iconSize}px` }}></span>
-                <span className="md:text-base lg:text-lg" style={{ fontSize: `${textSize}px` }}>
+                <span className="md:text-base lg:text-lg break-words" style={{ fontSize: `${textSize}px` }}>
                   {data.address || "Your Address, City"}
                 </span>
               </div>
@@ -164,7 +188,6 @@ export const BackSideCard: React.FC<Props> = ({
             // size={qrSizeValue } 
             fgColor={qrColor}
             imageSettings={qrImageSettings}
-            className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[90px] md:h-[90px]"
           />
         </div>
       )}
@@ -173,7 +196,8 @@ export const BackSideCard: React.FC<Props> = ({
 
   return (
     <div
-      className="w-full aspect-[1.75/1] p-4 md:p-6 relative overflow-hidden rounded-xl transition-all duration-300"
+      className="w-full aspect-[1.75/1] py-2 px-0.5 md:p-4 lg:p-6 relative overflow-hidden rounded-xl transition-all duration-300"
+
       style={{
         ...bgStyle,
         color: appliedText,
