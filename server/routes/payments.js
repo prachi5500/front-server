@@ -3,7 +3,18 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { authRequired, adminRequired } from '../middleware/auth.js';
 import Payment from '../models/Payment.js';
+import Template from '../models/Template.js';
 import nodemailer from 'nodemailer';
+import { v2 as cloudinary } from 'cloudinary';
+import { PDFDocument } from 'pdf-lib';
+
+// Node 18+ has global fetch; if running older Node, ensure `node-fetch` is available.
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const router = express.Router();
 
@@ -115,7 +126,7 @@ router.post('/verify', authRequired, async (req, res) => {
 
     // Save successful payment in DB
     try {
-      await Payment.create({
+      const createdPayment = await Payment.create({
         user: req.user._id,
         email: req.user.email,
         amount: amount || null,
@@ -139,6 +150,98 @@ router.post('/verify', authRequired, async (req, res) => {
         items,
         payment_method_details: paymentDetails || null,
       });
+
+      // After payment create: generate combined PDF for each item (front+back) asynchronously
+      (async function generatePdfsAndSave() {
+        try {
+          if (!(Array.isArray(items) && items.length > 0)) return;
+
+          // fetch the created payment doc fresh
+          const paymentDoc = await Payment.findById(createdPayment._id);
+          if (!paymentDoc) return;
+
+          let modified = false;
+
+          for (let i = 0; i < paymentDoc.items.length; i++) {
+            const it = paymentDoc.items[i];
+            if ((it.frontImageUrl || it.backImageUrl) && !it.pdfUrl) {
+              try {
+                const pdfDoc = await PDFDocument.create();
+
+                const addImagePage = async (imageUrl) => {
+                  if (!imageUrl) return false;
+                  try {
+                    const resp = await fetch(imageUrl);
+                    if (!resp.ok) return false;
+                    const arrayBuffer = await resp.arrayBuffer();
+                    const bytes = new Uint8Array(arrayBuffer);
+                    // detect simple image type from headers
+                    const ct = resp.headers.get('content-type') || '';
+                    let img;
+                    if (ct.includes('png')) img = await pdfDoc.embedPng(bytes);
+                    else img = await pdfDoc.embedJpg(bytes);
+
+                    const page = pdfDoc.addPage();
+                    const { width, height } = img.scale(1);
+                    const pageWidth = page.getWidth();
+                    const pageHeight = page.getHeight();
+                    // scale image to fit page
+                    const scale = Math.min(pageWidth / width, pageHeight / height);
+                    const imgWidth = width * scale;
+                    const imgHeight = height * scale;
+                    const x = (pageWidth - imgWidth) / 2;
+                    const y = (pageHeight - imgHeight) / 2;
+                    page.drawImage(img, { x, y, width: imgWidth, height: imgHeight });
+                    return true;
+                  } catch (e) {
+                    console.error('Failed to embed image for pdf', imageUrl, e);
+                    return false;
+                  }
+                };
+
+                let addedFront = false;
+                let addedBack = false;
+                if (it.frontImageUrl) addedFront = await addImagePage(it.frontImageUrl);
+                if (it.backImageUrl) addedBack = await addImagePage(it.backImageUrl);
+
+                // If no images embedded, skip
+                if (!addedFront && !addedBack) continue;
+
+                const pdfBytes = await pdfDoc.save();
+                const b64 = Buffer.from(pdfBytes).toString('base64');
+                const dataUri = `data:application/pdf;base64,${b64}`;
+
+                // upload to cloudinary
+                try {
+                  const uploadRes = await cloudinary.uploader.upload(dataUri, {
+                    folder: 'purchased_cards',
+                    resource_type: 'raw',
+                    overwrite: true,
+                  });
+                  if (uploadRes && uploadRes.secure_url) {
+                    it.pdfUrl = uploadRes.secure_url;
+                    modified = true;
+                  }
+                } catch (uploadErr) {
+                  console.error('Failed to upload pdf to cloudinary', uploadErr);
+                }
+              } catch (itmErr) {
+                console.error('Error generating PDF for item', it, itmErr);
+              }
+            }
+          }
+
+          if (modified) {
+            try {
+              await paymentDoc.save();
+            } catch (saveErr) {
+              console.error('Failed to save paymentDoc with pdfUrls', saveErr);
+            }
+          }
+        } catch (outerErr) {
+          console.error('Error in generatePdfsAndSave background task', outerErr);
+        }
+      })();
 
       // Sirf success/captured par hi email bhejo
       if (status === 'captured' || status === 'success') {
@@ -169,6 +272,32 @@ router.post('/verify', authRequired, async (req, res) => {
           });
         } catch (mailErr) {
           console.error('Failed to send payment notification email', mailErr);
+        }
+
+        // Agar frontend ne kisi item ko `saveAsTemplate` mark kiya hai, to woh templates ke roop me save kar do
+        try {
+          if (Array.isArray(items) && items.length > 0) {
+            for (const it of items) {
+              try {
+                if (it && it.saveAsTemplate) {
+                  await Template.create({
+                    name: it.templateName || `Custom card ${Date.now()}`,
+                    status: 'published',
+                    config: it.data?.frontData || it.data || {},
+                    background_url: it.frontImageUrl || null,
+                    back_background_url: it.backImageUrl || null,
+                    thumbnail_url: it.frontImageUrl || it.backImageUrl || null,
+                    price: it.price || 0,
+                    created_by: req.user._id,
+                  });
+                }
+              } catch (tplErr) {
+                console.error('Failed to save custom template for item', it, tplErr);
+              }
+            }
+          }
+        } catch (tplLoopErr) {
+          console.error('Error while attempting to save custom templates', tplLoopErr);
         }
       }
     } catch (dbErr) {

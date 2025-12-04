@@ -181,11 +181,11 @@ export const BackSideCard: React.FC<Props> = ({
 
       {/* Right Side - QR Code */}
       {(data.name || data.email) && (
-        <div className="flex-shrink-0 bg-white/90 p-1.5 md:p-2.5 rounded-lg shadow-sm backdrop-blur-sm max-w-[30%] md:max-w-[35%] self-center">
-
-          <QRCodeSVG 
+        <div className="flex-shrink-0 bg-white/90 p-2 md:p-3 rounded-lg shadow-sm backdrop-blur-sm">
+          <QRCodeSVG
             value={vCardData}
-            size={qrSizeValue}
+            size={window.innerWidth < 640 ? 60 : 90}  // 60px on mobile, 90px on desktop 
+            // size={qrSizeValue } 
             fgColor={qrColor}
             imageSettings={qrImageSettings}
           />

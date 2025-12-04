@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState, useRef } from "react";
 import { BusinessCardData } from "./BusinessCardForm";
 import { ClassicCard } from "./templates/ClassicCard";
@@ -76,7 +74,6 @@ export const TemplateSelector = ({
   const [isEditLayout, setIsEditLayout] = useState(false);
   const [isLayoutDialogOpen, setIsLayoutDialogOpen] = useState(false);
   const [isStyleDialogOpen, setIsStyleDialogOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -306,6 +303,19 @@ export const TemplateSelector = ({
         el.style.setProperty("--cardScale", String(scaleValue));
       });
     };
+  }, []);
+
+  // for font scalling
+  useEffect(() => {
+    const updateScaleAll = () => {
+      Object.entries(containerRefs.current).forEach(([id, el]) => {
+        if (!el) return;
+        const w = el.getBoundingClientRect().width;
+        const cardWidth = 280; // FULL size card width
+        const scaleValue = w / cardWidth;
+        el.style.setProperty("--cardScale", String(scaleValue));
+      });
+    };
 
     updateScaleAll();
     window.addEventListener("resize", updateScaleAll);
@@ -407,6 +417,26 @@ export const TemplateSelector = ({
     const isServer = selectedTemplate.startsWith("sb:");
     const serverId = isServer ? selectedTemplate.slice(3) : "";
     const st = isServer ? sbTemplates.find(x => x.id === serverId) : undefined;
+
+    const designFront = {
+      positions,
+      sizes,
+      font: selectedFont,
+      fontSize,
+      textColor,
+      accentColor,
+      isEditLayout,
+    };
+    const designBack = {
+      positionsBack,
+      backSizes,
+      font: selectedFont,
+      fontSize,
+      textColor,
+      accentColor,
+      isEditLayout,
+    };
+
     cartCtx.add({
       id: selectedTemplate,
       kind: isServer ? "server" : "classic",
@@ -417,6 +447,8 @@ export const TemplateSelector = ({
       accentColor,
       price: pricePerItem,
       serverMeta: isServer ? { name: st?.name, background_url: st?.background_url, back_background_url: st?.back_background_url, config: st?.config } : undefined,
+      frontData: designFront,
+      backData: designBack,
     });
     navigate("/cart");
   };
@@ -433,6 +465,25 @@ export const TemplateSelector = ({
 
       const price =
         (isServer ? st?.price : undefined) ?? DEFAULT_PRICE;
+
+      const designFront = {
+        positions,
+        sizes,
+        font: selectedFont,
+        fontSize,
+        textColor,
+        accentColor,
+        isEditLayout,
+      };
+      const designBack = {
+        positionsBack,
+        backSizes,
+        font: selectedFont,
+        fontSize,
+        textColor,
+        accentColor,
+        isEditLayout,
+      };
 
       cartCtx.add({
         id: selectedTemplate,
@@ -451,6 +502,8 @@ export const TemplateSelector = ({
             config: st?.config,
           }
           : undefined,
+        frontData: designFront,
+        backData: designBack,
       });
 
       navigate("/checkout");
@@ -614,8 +667,9 @@ END:VCARD`;
         </div>
 
         <div className="bg-gradient-to-br from-muted to-background p-0 rounded-lg overflow-x-hidden">
-          <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-0">
+          <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-0 ">
             <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-2">
+
               {(() => {
                 const isServer = selectedTemplate.startsWith("sb:");
                 if (!isServer) {
@@ -649,6 +703,7 @@ END:VCARD`;
                                 config={selectedConfig}
                                 fontFamily={hasOverrides ? selectedFont : undefined}
                                 fontSize={hasOverrides ? fontSize : undefined}
+
                                 textColor={hasOverrides ? textColor : undefined}
                                 accentColor={hasOverrides ? accentColor : undefined}
                               />
@@ -1374,11 +1429,10 @@ END:VCARD`;
                 >
                   <button
                     onClick={() => setSelectedTemplate(item.id)}
-                    className={`group relative rounded-lg overflow-hidden transition-all duration-300 border-2 w-full h-full ${
-                      selectedTemplate === item.id
-                        ? "border-primary shadow-[var(--shadow-hover)]"
-                        : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
-                    }`}
+                    className={`group relative rounded-lg overflow-hidden transition-all duration-300 border-2 w-full h-full ${selectedTemplate === item.id
+                      ? "border-primary shadow-[var(--shadow-hover)]"
+                      : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
+                      }`}
                   >
                     {selectedTemplate === item.id && (
                       <div className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground rounded-full p-1">
