@@ -26,12 +26,12 @@ const defaultConfig: ChatbotConfig = {
   knowledgeBase: [
     {
       question: "How do I buy a business card?",
-      answer: "To buy a business card:\n1. Browse and select a template\n2. Fill your details (name, contact, etc.)\n3. Choose quantity and paper quality\n4. Make payment\n5. We'll print and deliver your cards\n\nNote: You cannot edit templates - you can only select from available designs.",
+      answer: "To buy a business card:\n1. Browse and select a template\n2. Fill your details (name, contact, etc.)\n3. Choose quantity.\n4. Make payment\n5. We'll print and deliver your cards\n\nNote: You cannot edit templates - you can only select from available designs.",
       keywords: ["create", "buy", "purchase", "order", "how to", "process", "get", "obtain"]
     },
     {
       question: "Can I edit the template?",
-      answer: "❌ No, you cannot edit or customize templates.\n\nYou can only:\n✓ Select from available templates\n✓ Fill your personal details\n✓ Choose paper quality\n✓ Select quantity\n\nAll designs are pre-made and cannot be modified.",
+      answer: "❌ No, you cannot edit or customize templates.\n\nYou can only:\n✓ Select from available templates\n✓ Fill your personal details\n✓ Select quantity\n\nAll designs are pre-made and cannot be modified.",
       keywords: ["edit", "customize", "modify", "change", "design", "template", "alter", "adjust"]
     },
     {
@@ -60,9 +60,9 @@ const defaultConfig: ChatbotConfig = {
       keywords: ["logo", "upload", "image", "picture", "brand", "company", "own", "personal"]
     },
     {
-      question: "What paper quality is available?",
-      answer: "We offer 2 paper types:\n• Standard Matte: 300 GSM\n• Premium Glossy: 350 GSM with UV coating\n\nAll cards have rounded corners and professional finish.",
-      keywords: ["paper", "quality", "thick", "material", "finish", "glossy", "matte", "gsm"]
+      question: "What Card quality is available?",
+      answer: "We offer PVC Cards",
+      keywords: ["Paper", "quality", "thick", "material", "finish", "glossy", "matte", "gsm"]
     },
     {
       question: "How do I make payment?",
@@ -106,7 +106,7 @@ const defaultConfig: ChatbotConfig = {
     }
   ],
   
-  fallbackResponse: "I can answer questions about:\n1. Templates & designs\n2. Pricing & packages\n3. Delivery (6-7 days)\n4. Order process\n5. Payment options\n6. Return policy\n\nFor specific questions, email support@yourbrand.com"
+  fallbackResponse: "I can answer questions about:\n1. Templates & designs\n2. Pricing & packages\n3. Delivery (6-7 days)\n4. Order process\n5. Payment options\n6. Return policy\n\nFor specific questions, email support@gmail.com"
 };
 
 const AIChatbot: React.FC = () => {
@@ -121,8 +121,39 @@ const AIChatbot: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const popupTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+useEffect(() => {
+    // Popup sirf first time page load pe show karo
+    const hasSeenPopup = localStorage.getItem('chatbot_popup_seen');
+    
+    if (!hasSeenPopup) {
+      // 2 second baad popup dikhao
+      const timer = setTimeout(() => {
+        setShowWelcomePopup(true);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Popup auto close after 8 seconds
+  useEffect(() => {
+    if (showWelcomePopup) {
+      const timer = setTimeout(() => {
+        setShowWelcomePopup(false);
+        localStorage.setItem('chatbot_popup_seen', 'true');
+      }, 8000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showWelcomePopup]);
+
+
+
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -314,6 +345,74 @@ const AIChatbot: React.FC = () => {
           {isOpen ? "Close chat" : "Need help?"}
         </span>
       </motion.button>
+
+
+{/* Welcome Popup Notification */}
+<AnimatePresence>
+  {showWelcomePopup && !isOpen && (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.8, y: 10 }}
+      className="fixed bottom-24 right-20 z-50"
+      onClick={() => setShowWelcomePopup(false)}
+    >
+      {/* Popup Bubble */}
+      <div className="relative">
+        {/* Tail/Arrow */}
+        <div className="absolute -right-1 bottom-3 w-4 h-4 bg-white transform rotate-45"></div>
+        
+        {/* Popup Content */}
+        <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 max-w-[280px]">
+          <div className="flex items-start gap-3">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-full">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="flex justify-between items-start">
+                <h4 className="font-bold text-gray-800 text-sm">May I help you? 🤖</h4>
+                <button 
+                  onClick={() => setShowWelcomePopup(false)}
+                  className="text-gray-400 hover:text-gray-600 ml-2"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                I'm your AI assistant! I can answer questions about business cards, pricing, delivery, and more.
+              </p>
+              <div className="flex items-center gap-2 mt-3">
+                <button
+                  onClick={() => {
+                    setShowWelcomePopup(false);
+                    setIsOpen(true);
+                  }}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs px-3 py-1.5 rounded-full transition-colors font-medium flex-1"
+                >
+                  Ask a question
+                </button>
+                <button
+                  onClick={() => setShowWelcomePopup(false)}
+                  className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1.5"
+                >
+                  Maybe later
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Close indicator */}
+          <div className="text-[10px] text-gray-400 text-center mt-2">
+            Click outside to close
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+
+
 
       {/* Chatbot Modal */}
       <AnimatePresence>
