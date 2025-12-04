@@ -99,32 +99,59 @@ export const TemplateSelector = ({
 
   type FrontKey = 'name' | 'title' | 'company' | 'logo';
 
+  // Default positions and sizes
+  const defaultPositions = {
+    name: { x: 10, y: 30 },
+    title: { x: 10, y: 45 },
+    company: { x: 10, y: 55 },
+    logo: { x: 10, y: 10 }
+  };
+
+  const defaultSizes = {
+    name: 28,
+    title: 20,
+    company: 18,
+    logo: 80
+  };
+
+  const defaultPositionsBack = {
+    email: { x: 10, y: 15 },
+    phone: { x: 10, y: 30 },
+    website: { x: 10, y: 45 },
+    address: { x: 10, y: 60 },
+    qr: { x: 60, y: 20 }
+  };
+
+  const defaultBackSizes = {
+    email: 16,
+    phone: 16,
+    website: 16,
+    address: 16,
+    qr: 120
+  };
+
+  // Use saved positions from config or defaults
   const [positions, setPositions] = useState<{
     name: { x: number; y: number };
     title: { x: number; y: number };
     company: { x: number; y: number };
     logo: { x: number; y: number };
-  }>(
-    {
-      name: { x: 70, y: 30 },
-      title: { x: 70, y: 42 },
-      company: { x: 70, y: 52 },
-      logo: { x: 18, y: 50 },
-    }
-  );
+  }>(defaultPositions);
+
   const [sizes, setSizes] = useState<{
     name: number;
     title: number;
     company: number;
     logo: number;
-  }>({ name: 22, title: 18, company: 14, logo: 64 });
+  }>(defaultSizes);
+
+  const [positionsBack, setPositionsBack] = useState<{ email: { x: number; y: number }; phone: { x: number; y: number }; website: { x: number; y: number }; address: { x: number; y: number }; qr: { x: number; y: number } }>(defaultPositionsBack);
+
+  const [backSizes, setBackSizes] = useState<{ email: number; phone: number; website: number; address: number; qr: number }>(defaultBackSizes);
+
   const dragState = useRef<{ key: FrontKey | null; offsetX: number; offsetY: number }>({ key: null, offsetX: 0, offsetY: 0 });
   const resizeState = useRef<{ key: FrontKey | null; baseSize: number; startY: number }>({ key: null, baseSize: 0, startY: 0 });
 
-  const [positionsBack, setPositionsBack] = useState<{ email: { x: number; y: number }; phone: { x: number; y: number }; website: { x: number; y: number }; address: { x: number; y: number }; qr: { x: number; y: number } }>(
-    { email: { x: 15, y: 20 }, phone: { x: 15, y: 32 }, website: { x: 15, y: 44 }, address: { x: 15, y: 56 }, qr: { x: 75, y: 35 } }
-  );
-  const [backSizes, setBackSizes] = useState<{ email: number; phone: number; website: number; address: number; qr: number }>({ email: 15, phone: 15, website: 15, address: 15, qr: 72 });
   const backDragState = useRef<{ key: 'email' | 'phone' | 'website' | 'address' | 'qr' | null; offsetX: number; offsetY: number }>({ key: null, offsetX: 0, offsetY: 0 });
   const backResizeState = useRef<{ key: 'email' | 'phone' | 'website' | 'address' | 'qr' | null; baseSize: number; startY: number }>({ key: null, baseSize: 0, startY: 0 });
 
@@ -332,6 +359,60 @@ export const TemplateSelector = ({
     }
   }, [Array.isArray(sbTemplates) ? sbTemplates.length : 0]);
 
+  // Load saved positions when template changes
+  useEffect(() => {
+    const isServer = selectedTemplate.startsWith("sb:");
+    if (!isServer) return;
+
+    const serverId = selectedTemplate.slice(3);
+    const t = sbTemplates.find(x => x.id === serverId);
+    if (!t?.config) return;
+
+    const cfg = t.config;
+
+    // Load front side positions
+    if (cfg.positions) {
+      setPositions({
+        name: cfg.positions.name || defaultPositions.name,
+        title: cfg.positions.title || defaultPositions.title,
+        company: cfg.positions.company || defaultPositions.company,
+        logo: cfg.positions.logo || defaultPositions.logo,
+      });
+    }
+
+    // Load front side sizes
+    if (cfg.sizes) {
+      setSizes({
+        name: cfg.sizes.name || defaultSizes.name,
+        title: cfg.sizes.title || defaultSizes.title,
+        company: cfg.sizes.company || defaultSizes.company,
+        logo: cfg.sizes.logo || defaultSizes.logo,
+      });
+    }
+
+    // Load back side positions
+    if (cfg.positionsBack) {
+      setPositionsBack({
+        email: cfg.positionsBack.email || defaultPositionsBack.email,
+        phone: cfg.positionsBack.phone || defaultPositionsBack.phone,
+        website: cfg.positionsBack.website || defaultPositionsBack.website,
+        address: cfg.positionsBack.address || defaultPositionsBack.address,
+        qr: cfg.positionsBack.qr || defaultPositionsBack.qr,
+      });
+    }
+
+    // Load back side sizes
+    if (cfg.backSizes) {
+      setBackSizes({
+        email: cfg.backSizes.email || defaultBackSizes.email,
+        phone: cfg.backSizes.phone || defaultBackSizes.phone,
+        website: cfg.backSizes.website || defaultBackSizes.website,
+        address: cfg.backSizes.address || defaultBackSizes.address,
+        qr: cfg.backSizes.qr || defaultBackSizes.qr,
+      });
+    }
+  }, [selectedTemplate, sbTemplates]);
+
   const addToCart = () => {
     const isServer = selectedTemplate.startsWith("sb:");
     const serverId = isServer ? selectedTemplate.slice(3) : "";
@@ -431,6 +512,20 @@ export const TemplateSelector = ({
     }
   };
 
+  // Generate vCard string for QR code
+  const generateVCard = () => {
+    return `BEGIN:VCARD
+VERSION:3.0
+FN:${data.name || 'Your Name'}
+TITLE:${data.title || 'Job Title'}
+ORG:${data.company || 'Company'}
+EMAIL:${data.email || 'email@example.com'}
+TEL:${data.phone || '+91 00000 00000'}
+URL:${data.website || 'your-website.com'}
+ADR:${data.address || 'Your Address, City'}
+END:VCARD`;
+  };
+
   return (
     <div className="space-y-6 overflow-x-hidden">
       <div className="bg-card rounded-xl p-4 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.1s] opacity-0 [animation-fill-mode:forwards]">
@@ -438,6 +533,45 @@ export const TemplateSelector = ({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-0">
             <h2 className="text-xl font-bold text-foreground">Preview</h2>
             <div className="flex flex-nowrap items-center justify-end gap-2 w-full overflow-x-auto scrollbar-hide py-1">
+              {/* <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditLayout(!isEditLayout)}
+                className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
+              >
+                {isEditLayout ? 'Save Layout' : 'Edit Layout'}
+              </Button> */}
+
+              {/* <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    setIsSaving(true);
+                    const designState = {
+                      templateId: selectedTemplate,
+                      positions: isEditLayout ? positions : undefined,
+                      backPositions: isEditLayout ? positionsBack : undefined,
+                      font: selectedFont,
+                      fontSize,
+                      textColor,
+                      accentColor,
+                      timestamp: new Date().toISOString()
+                    };
+                    console.log('Saving design:', designState);
+                    alert('Design saved successfully!');
+                  } catch (error) {
+                    console.error('Error saving design:', error);
+                    alert('Failed to save design. Please try again.');
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }}
+                disabled={isSaving}
+                className="gap-1.5 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2"
+              >
+                {isSaving ? 'Saving...' : 'Save Design'}
+              </Button> */}
 
               <Button
                 onClick={buyCurrent}
@@ -745,7 +879,7 @@ export const TemplateSelector = ({
                                     onTouchStart={(e) => onBackDragStart('qr', e)}
                                   >
                                     <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                      <QRCodeSVG value={`BEGIN:VCARD\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`} size={backSizes.qr * previewScale} />
+                                      <QRCodeSVG value={generateVCard()} size={backSizes.qr * previewScale} />
                                     </div>
                                     <span
                                       className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
@@ -763,18 +897,61 @@ export const TemplateSelector = ({
                     </>
                   );
                 }
+
+                // Server-side template rendering
                 const sid = selectedTemplate.slice(3);
                 const t = sbTemplates.find(x => x.id === sid);
                 const bg = t?.background_url || undefined;
                 const backBg = t?.back_background_url || t?.background_url || undefined;
                 const cfg: any = t?.config || {};
+                
+                // Get saved positions and sizes from config
+                const savedPositions = cfg.positions || {};
+                const savedSizes = cfg.sizes || {};
+                const savedPositionsBack = cfg.positionsBack || {};
+                const savedBackSizes = cfg.backSizes || {};
+                
+                // Use saved values or defaults
+                const effectivePositions = {
+                  name: savedPositions.name || defaultPositions.name,
+                  title: savedPositions.title || defaultPositions.title,
+                  company: savedPositions.company || defaultPositions.company,
+                  logo: savedPositions.logo || defaultPositions.logo,
+                };
+                
+                const effectiveSizes = {
+                  name: savedSizes.name || defaultSizes.name,
+                  title: savedSizes.title || defaultSizes.title,
+                  company: savedSizes.company || defaultSizes.company,
+                  logo: savedSizes.logo || defaultSizes.logo,
+                };
+                
+                const effectivePositionsBack = {
+                  email: savedPositionsBack.email || defaultPositionsBack.email,
+                  phone: savedPositionsBack.phone || defaultPositionsBack.phone,
+                  website: savedPositionsBack.website || defaultPositionsBack.website,
+                  address: savedPositionsBack.address || defaultPositionsBack.address,
+                  qr: savedPositionsBack.qr || defaultPositionsBack.qr,
+                };
+                
+                const effectiveBackSizes = {
+                  email: savedBackSizes.email || defaultBackSizes.email,
+                  phone: savedBackSizes.phone || defaultBackSizes.phone,
+                  website: savedBackSizes.website || defaultBackSizes.website,
+                  address: savedBackSizes.address || defaultBackSizes.address,
+                  qr: savedBackSizes.qr || defaultBackSizes.qr,
+                };
+                
                 const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
                 const fs = hasOverrides ? fontSize : (cfg.fontSize || 16);
                 const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
                 const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
-                const hasUserName = !!data.name?.trim();
+                const qrLogoUrl = cfg.qrLogoUrl;
+                const qrColor = cfg.qrColor || "#000000";
+
                 return (
                   <>
+                    {/* Front Side */}
                     <div ref={previewRef} className="w-full max-w-full relative overflow-hidden">
                       <div className="wm-screen-only" data-watermark="screen-only" />
                       {!isEditLayout && (
@@ -790,26 +967,81 @@ export const TemplateSelector = ({
                             fontSize: `${fs}px`,
                           }}
                         >
-                          <div className="w-full h-full flex items-center justify-between gap-4">
-                            {data.logo ? (
-                              <div className="flex-shrink-0">
-                                <img src={data.logo} alt="Logo" className="w-16 h-16 object-cover rounded-full border border-white/50 shadow" />
-                              </div>
-                            ) : <div />}
-                            <div className="flex flex-col text-right leading-snug">
-                              <h3 className="font-bold" style={{ fontFamily: ff, fontSize: fs + 6 }}>
-                                {hasUserName ? (data.name || "") : (data.name || "Your Name")}
-                              </h3>
-                              {data.title?.trim() && (
-                                <p style={{ color: accent, fontSize: fs + 2 }}>{data.title}</p>
-                              )}
-                              {data.company?.trim() && (
-                                <p className="opacity-80" style={{ fontSize: Math.max(12, fs) }}>{data.company}</p>
-                              )}
+                          {/* Logo - if exists and has saved position */}
+                          {data.logo && effectivePositions.logo && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                left: `${effectivePositions.logo.x}%`,
+                                top: `${effectivePositions.logo.y}%`,
+                                width: effectiveSizes.logo,
+                                height: effectiveSizes.logo,
+                                borderRadius: "50%",
+                                overflow: "hidden",
+                                backgroundColor: "white",
+                                border: "2px solid white",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                                zIndex: 10,
+                              }}
+                            >
+                              <img
+                                src={data.logo}
+                                alt="Logo"
+                                className="w-full h-full object-cover"
+                              />
                             </div>
+                          )}
+                          
+                          {/* Name with saved position */}
+                          <div
+                            style={{
+                              position: 'absolute',
+                              left: `${effectivePositions.name.x}%`,
+                              top: `${effectivePositions.name.y}%`,
+                              fontSize: `${effectiveSizes.name}px`,
+                              fontFamily: ff,
+                              fontWeight: 'bold',
+                              color: fc,
+                              zIndex: 5,
+                            }}
+                          >
+                            {data.name || "Your Name"}
+                          </div>
+                          
+                          {/* Title with saved position */}
+                          <div
+                            style={{
+                              position: 'absolute',
+                              left: `${effectivePositions.title.x}%`,
+                              top: `${effectivePositions.title.y}%`,
+                              fontSize: `${effectiveSizes.title}px`,
+                              fontFamily: ff,
+                              color: accent,
+                              zIndex: 5,
+                            }}
+                          >
+                            {data.title || "Job Title"}
+                          </div>
+                          
+                          {/* Company with saved position */}
+                          <div
+                            style={{
+                              position: 'absolute',
+                              left: `${effectivePositions.company.x}%`,
+                              top: `${effectivePositions.company.y}%`,
+                              fontSize: `${effectiveSizes.company}px`,
+                              fontFamily: ff,
+                              color: fc,
+                              opacity: 0.8,
+                              zIndex: 5,
+                            }}
+                          >
+                            {data.company || "Company"}
                           </div>
                         </div>
                       )}
+                      
+                      {/* Edit Mode - Load saved positions for editing */}
                       {isEditLayout && (
                         <div
                           className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
@@ -824,9 +1056,17 @@ export const TemplateSelector = ({
                           }}
                         >
                           <div className="absolute inset-0">
+                            {/* Name - Use saved positions from config or current positions */}
                             <div
                               className="cursor-move select-none font-bold"
-                              style={{ position: 'absolute', left: `${positions.name.x}%`, top: `${positions.name.y}%`, fontFamily: ff, fontSize: sizes.name * previewScale }}
+                              style={{ 
+                                position: 'absolute', 
+                                left: `${positions.name.x}%`, 
+                                top: `${positions.name.y}%`, 
+                                fontFamily: ff, 
+                                fontSize: sizes.name * previewScale,
+                                color: fc,
+                              }}
                               onMouseDown={(e) => onDragStart('name', e)}
                               onTouchStart={(e) => onDragStart('name', e)}
                             >
@@ -838,9 +1078,18 @@ export const TemplateSelector = ({
                                 onTouchStart={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
                               />
                             </div>
+                            
+                            {/* Title */}
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positions.title.x}%`, top: `${positions.title.y}%`, color: accent, fontFamily: ff, fontSize: sizes.title * previewScale }}
+                              style={{ 
+                                position: 'absolute', 
+                                left: `${positions.title.x}%`, 
+                                top: `${positions.title.y}%`, 
+                                color: accent, 
+                                fontFamily: ff, 
+                                fontSize: sizes.title * previewScale 
+                              }}
                               onMouseDown={(e) => onDragStart('title', e)}
                               onTouchStart={(e) => onDragStart('title', e)}
                             >
@@ -852,9 +1101,17 @@ export const TemplateSelector = ({
                                 onTouchStart={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
                               />
                             </div>
+                            
+                            {/* Company */}
                             <div
                               className="cursor-move select-none opacity-80"
-                              style={{ position: 'absolute', left: `${positions.company.x}%`, top: `${positions.company.y}%`, fontFamily: ff, fontSize: sizes.company * previewScale }}
+                              style={{ 
+                                position: 'absolute', 
+                                left: `${positions.company.x}%`, 
+                                top: `${positions.company.y}%`, 
+                                fontFamily: ff, 
+                                fontSize: sizes.company * previewScale 
+                              }}
                               onMouseDown={(e) => onDragStart('company', e)}
                               onTouchStart={(e) => onDragStart('company', e)}
                             >
@@ -867,6 +1124,7 @@ export const TemplateSelector = ({
                               />
                             </div>
 
+                            {/* Logo with saved position */}
                             {data.logo && (
                               <div
                                 className="cursor-move select-none"
@@ -907,6 +1165,8 @@ export const TemplateSelector = ({
                         </div>
                       )}
                     </div>
+                    
+                    {/* Back Side */}
                     <div ref={backRef} className="w-full max-w-full relative overflow-hidden">
                       <div className="wm-screen-only" data-watermark="screen-only" />
                       {!isEditLayout && (
@@ -919,21 +1179,85 @@ export const TemplateSelector = ({
                             backgroundPosition: "center",
                           }}
                         >
-                          <div className="w-full h-full p-4">
-                            <BackSideCard
-                              data={data}
-                              textColor={fc}
-                              accentColor={accent}
-                              fontFamily={ff}
-                              fontSize={fs}
-                              showLargeQR={false}
-                              qrSize={68}
-                              compact={true}
-                              transparentBg={true}
-                            />
+                          <div className="w-full h-full p-4 relative">
+                            {/* Back side elements with saved positions */}
+                            <div
+                              style={{
+                                position: 'absolute',
+                                left: `${effectivePositionsBack.email.x}%`,
+                                top: `${effectivePositionsBack.email.y}%`,
+                                fontSize: `${effectiveBackSizes.email}px`,
+                                fontFamily: ff,
+                                color: fc,
+                              }}
+                            >
+                              <strong style={{ color: accent }}>✉</strong> {data.email || 'email@example.com'}
+                            </div>
+                            
+                            <div
+                              style={{
+                                position: 'absolute',
+                                left: `${effectivePositionsBack.phone.x}%`,
+                                top: `${effectivePositionsBack.phone.y}%`,
+                                fontSize: `${effectiveBackSizes.phone}px`,
+                                fontFamily: ff,
+                                color: fc,
+                              }}
+                            >
+                              <strong style={{ color: accent }}>✆</strong> {data.phone || '+91 00000 00000'}
+                            </div>
+                            
+                            <div
+                              style={{
+                                position: 'absolute',
+                                left: `${effectivePositionsBack.website.x}%`,
+                                top: `${effectivePositionsBack.website.y}%`,
+                                fontSize: `${effectiveBackSizes.website}px`,
+                                fontFamily: ff,
+                                color: fc,
+                              }}
+                            >
+                              <strong style={{ color: accent }}>⌂</strong> {data.website || 'your-website.com'}
+                            </div>
+                            
+                            <div
+                              style={{
+                                position: 'absolute',
+                                left: `${effectivePositionsBack.address.x}%`,
+                                top: `${effectivePositionsBack.address.y}%`,
+                                fontSize: `${effectiveBackSizes.address}px`,
+                                fontFamily: ff,
+                                color: fc,
+                              }}
+                            >
+                              <strong style={{ color: accent }}>📍</strong> {data.address || 'Your Address, City'}
+                            </div>
+                            
+                            <div
+                              style={{
+                                position: 'absolute',
+                                left: `${effectivePositionsBack.qr.x}%`,
+                                top: `${effectivePositionsBack.qr.y}%`,
+                              }}
+                            >
+                              <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
+                                <QRCodeSVG 
+                                  value={generateVCard()} 
+                                  size={effectiveBackSizes.qr} 
+                                  fgColor={qrColor}
+                                  imageSettings={qrLogoUrl ? {
+                                    src: qrLogoUrl,
+                                    height: 24,
+                                    width: 24,
+                                    excavate: true,
+                                  } : undefined}
+                                />
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
+                      
                       {isEditLayout && (
                         <div
                           className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative"
@@ -950,7 +1274,12 @@ export const TemplateSelector = ({
                           <div className="absolute inset-0">
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positionsBack.email.x}%`, top: `${positionsBack.email.y}%`, fontSize: backSizes.email * previewScale }}
+                              style={{ 
+                                position: 'absolute', 
+                                left: `${positionsBack.email.x}%`, 
+                                top: `${positionsBack.email.y}%`, 
+                                fontSize: backSizes.email * previewScale 
+                              }}
                               onMouseDown={(e) => onBackDragStart('email', e)}
                               onTouchStart={(e) => onBackDragStart('email', e)}
                             >
@@ -962,9 +1291,15 @@ export const TemplateSelector = ({
                                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
                               />
                             </div>
+                            
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positionsBack.phone.x}%`, top: `${positionsBack.phone.y}%`, fontSize: backSizes.phone * previewScale }}
+                              style={{ 
+                                position: 'absolute', 
+                                left: `${positionsBack.phone.x}%`, 
+                                top: `${positionsBack.phone.y}%`, 
+                                fontSize: backSizes.phone * previewScale 
+                              }}
                               onMouseDown={(e) => onBackDragStart('phone', e)}
                               onTouchStart={(e) => onBackDragStart('phone', e)}
                             >
@@ -976,9 +1311,15 @@ export const TemplateSelector = ({
                                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
                               />
                             </div>
+                            
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positionsBack.website.x}%`, top: `${positionsBack.website.y}%`, fontSize: backSizes.website * previewScale }}
+                              style={{ 
+                                position: 'absolute', 
+                                left: `${positionsBack.website.x}%`, 
+                                top: `${positionsBack.website.y}%`, 
+                                fontSize: backSizes.website * previewScale 
+                              }}
                               onMouseDown={(e) => onBackDragStart('website', e)}
                               onTouchStart={(e) => onBackDragStart('website', e)}
                             >
@@ -990,9 +1331,15 @@ export const TemplateSelector = ({
                                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
                               />
                             </div>
+                            
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positionsBack.address.x}%`, top: `${positionsBack.address.y}%`, fontSize: backSizes.address * previewScale }}
+                              style={{ 
+                                position: 'absolute', 
+                                left: `${positionsBack.address.x}%`, 
+                                top: `${positionsBack.address.y}%`, 
+                                fontSize: backSizes.address * previewScale 
+                              }}
                               onMouseDown={(e) => onBackDragStart('address', e)}
                               onTouchStart={(e) => onBackDragStart('address', e)}
                             >
@@ -1004,14 +1351,29 @@ export const TemplateSelector = ({
                                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
                               />
                             </div>
+                            
                             <div
                               className="cursor-move select-none"
-                              style={{ position: 'absolute', left: `${positionsBack.qr.x}%`, top: `${positionsBack.qr.y}%` }}
+                              style={{ 
+                                position: 'absolute', 
+                                left: `${positionsBack.qr.x}%`, 
+                                top: `${positionsBack.qr.y}%` 
+                              }}
                               onMouseDown={(e) => onBackDragStart('qr', e)}
                               onTouchStart={(e) => onBackDragStart('qr', e)}
                             >
                               <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                <QRCodeSVG value={`BEGIN:VCARD\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`} size={backSizes.qr * previewScale} />
+                                <QRCodeSVG 
+                                  value={generateVCard()} 
+                                  size={backSizes.qr * previewScale} 
+                                  fgColor={qrColor}
+                                  imageSettings={qrLogoUrl ? {
+                                    src: qrLogoUrl,
+                                    height: 24,
+                                    width: 24,
+                                    excavate: true,
+                                  } : undefined}
+                                />
                               </div>
                               <span
                                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
@@ -1091,46 +1453,126 @@ export const TemplateSelector = ({
                           const fs = cfg.fontSize || 16;
                           const accent = cfg.accentColor || "#0ea5e9";
                           const ff = cfg.fontFamily || "Inter, Arial";
+                          
+                          // Get saved positions from config
+                          const savedPositions = cfg.positions || {};
+                          const savedSizes = cfg.sizes || {};
+                          
+                          // Use saved values or defaults for thumbnail preview
+                          const thumbPositions = {
+                            name: savedPositions.name || defaultPositions.name,
+                            title: savedPositions.title || defaultPositions.title,
+                            company: savedPositions.company || defaultPositions.company,
+                            logo: savedPositions.logo || defaultPositions.logo,
+                          };
+                          
+                          const thumbSizes = {
+                            name: savedSizes.name || defaultSizes.name,
+                            title: savedSizes.title || defaultSizes.title,
+                            company: savedSizes.company || defaultSizes.company,
+                            logo: savedSizes.logo || defaultSizes.logo,
+                          };
+
+                          // Calculate thumbnail scale factor (for smaller preview)
+                          const thumbScale = 0.6; // Scale down for thumbnail
 
                           return (
                             <>
                               <div
                                 className="w-full h-full relative pointer-events-none"
                                 style={{
+                                  backgroundColor: bg ? undefined : "#f3f4f6",
                                   backgroundImage: bg ? `url(${bg})` : undefined,
                                   backgroundSize: "cover",
                                   backgroundPosition: "center",
                                   color: fc,
                                   fontFamily: ff,
+                                  fontSize: `${fs}px`,
                                 }}
                               >
-                                <div className="w-full h-full px-5 py-4 flex items-center justify-between gap-4">
-                                  {data.logo ? (
+                                {/* Logo in thumbnail with saved position */}
+                                {data.logo && thumbPositions.logo && (
+                                  <div
+                                    style={{
+                                      position: 'absolute',
+                                      left: `${thumbPositions.logo.x}%`,
+                                      top: `${thumbPositions.logo.y}%`,
+                                      width: thumbSizes.logo * thumbScale,
+                                      height: thumbSizes.logo * thumbScale,
+                                      borderRadius: "50%",
+                                      overflow: "hidden",
+                                      backgroundColor: "white",
+                                      border: "2px solid white",
+                                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                      zIndex: 10,
+                                    }}
+                                  >
                                     <img
                                       src={data.logo}
                                       alt="Logo"
-                                      className="w-16 h-16 rounded-full object-cover border border-white/50 shadow"
+                                      className="w-full h-full object-cover"
                                     />
-                                  ) : (
-                                    <div />
-                                  )}
-                                  <div className="flex flex-col text-right">
-                                    <div className="font-semibold" style={{ fontSize: fs + 4 }}>
-                                      {data.name || "Your Name"}
-                                    </div>
-                                    <div style={{ fontSize: fs + 2, color: accent }}>
-                                      {data.title || "Job Title"}
-                                    </div>
-                                    <div className="opacity-80" style={{ fontSize: fs }}>
-                                      {data.company || "Company"}
-                                    </div>
                                   </div>
+                                )}
+                                
+                                {/* Name in thumbnail with saved position */}
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    left: `${thumbPositions.name.x}%`,
+                                    top: `${thumbPositions.name.y}%`,
+                                    fontSize: `${thumbSizes.name * thumbScale}px`,
+                                    fontFamily: ff,
+                                    fontWeight: 'bold',
+                                    color: fc,
+                                    zIndex: 5,
+                                  }}
+                                >
+                                  {data.name || "Your Name"}
+                                </div>
+                                
+                                {/* Title in thumbnail with saved position */}
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    left: `${thumbPositions.title.x}%`,
+                                    top: `${thumbPositions.title.y}%`,
+                                    fontSize: `${thumbSizes.title * thumbScale}px`,
+                                    fontFamily: ff,
+                                    color: accent,
+                                    zIndex: 5,
+                                  }}
+                                >
+                                  {data.title || "Job Title"}
+                                </div>
+                                
+                                {/* Company in thumbnail with saved position */}
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    left: `${thumbPositions.company.x}%`,
+                                    top: `${thumbPositions.company.y}%`,
+                                    fontSize: `${thumbSizes.company * thumbScale}px`,
+                                    fontFamily: ff,
+                                    color: fc,
+                                    opacity: 0.8,
+                                    zIndex: 5,
+                                  }}
+                                >
+                                  {data.company || "Company"}
                                 </div>
                               </div>
+                              
+                              {/* Template name overlay */}
                               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                                <p className="text-white font-medium text-sm">
+                                <p className="text-white font-medium text-sm truncate">
                                   {item.server?.name || "Template"}
                                 </p>
+                                {item.server?.price && (
+                                  <p className="text-white/90 text-xs">
+                                    ${item.server.price.toFixed(2)}
+                                  </p>
+                                )}
                               </div>
                             </>
                           );
