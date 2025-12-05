@@ -40,6 +40,8 @@ const paymentSchema = new mongoose.Schema(
         // 👇 naya: user-edited card images
         frontImageUrl: { type: String, default: null },
         backImageUrl: { type: String, default: null },
+        // optional generated PDF containing front+back
+        pdfUrl: { type: String, default: null },
       },
     ],
 

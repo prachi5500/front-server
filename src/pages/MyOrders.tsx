@@ -6,7 +6,6 @@ import { listAllTemplates, type Template } from "@/services/templates";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
 interface CardData {
@@ -27,6 +26,7 @@ interface OrderedItem {
   templateName?: string | null;
   frontImageUrl?: string | null;
   backImageUrl?: string | null;
+  pdfUrl?: string | null;
   data?: {
     frontData?: CardData;
     backData?: CardData;
@@ -61,37 +61,22 @@ export default function MyOrders() {
     item: OrderedItem;
   } | null>(null);
 
-  const handleDownload = async (item: OrderedItem) => {
+  // Image-download removed: only PDF downloads are supported now.
+
+  const handleDownloadPdf = async (item: OrderedItem) => {
     try {
-      if (!item.frontImageUrl || !item.backImageUrl) {
-        alert("Download links not available for this card.");
+      if (!item.pdfUrl) {
+        alert("PDF not available for this card.");
         return;
       }
-
-      // Download front image
-      const frontResponse = await fetch(item.frontImageUrl);
-      const frontBlob = await frontResponse.blob();
-
-      // Download back image
-      const backResponse = await fetch(item.backImageUrl);
-      const backBlob = await backResponse.blob();
-
-      // Create a zip file containing both images
-      const zip = new JSZip();
-      const folder = zip.folder("business-card");
-
-      if (folder) {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        folder.file(`front-${timestamp}.png`, frontBlob);
-        folder.file(`back-${timestamp}.png`, backBlob);
-
-        // Generate zip file
-        const content = await zip.generateAsync({ type: "blob" });
-        saveAs(content, `business-card-${item.templateId || 'download'}.zip`);
-      }
-    } catch (error) {
-      console.error("Error downloading images:", error);
-      alert("Failed to download card images. Please try again.");
+      const res = await fetch(item.pdfUrl);
+      if (!res.ok) throw new Error("Failed to fetch PDF");
+      const blob = await res.blob();
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      saveAs(blob, `business-card-${item.templateId || 'download'}-${timestamp}.pdf`);
+    } catch (err) {
+      console.error('Error downloading pdf:', err);
+      alert('Failed to download PDF. Please try again.');
     }
   };
 
@@ -300,18 +285,20 @@ export default function MyOrders() {
                                   >
                                     View Details
                                   </Button>
-                                  {item.frontImageUrl && item.backImageUrl && (
+                                  {/* Image downloads removed — only PDF download is available */}
+
+                                  {item.pdfUrl && (
                                     <Button
                                       size="sm"
-                                      variant="outline"
+                                      variant="default"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleDownload(item);
+                                        handleDownloadPdf(item);
                                       }}
                                       className="gap-1"
                                     >
                                       <Download className="h-3.5 w-3.5" />
-                                      Download
+                                      PDF
                                     </Button>
                                   )}
                                 </div>
@@ -343,15 +330,18 @@ export default function MyOrders() {
                 Close
               </button>
 
-              {/* Download button in modal */}
-              <button
-                type="button"
-                className="absolute top-3 right-16 text-xs px-3 py-1 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-1"
-                onClick={() => handleDownload(selected.item)}
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>Download</span>
-              </button>
+              {/* Image download (removed). Use the 'Download PDF' button if available. */}
+
+              {selected.item.pdfUrl && (
+                <button
+                  type="button"
+                  className="absolute top-3 right-32 text-xs px-3 py-1 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 flex items-center gap-1"
+                  onClick={() => handleDownloadPdf(selected.item)}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download PDF</span>
+                </button>
+              )}
 
               {(() => {
                 const payment = selected.payment;
@@ -543,11 +533,11 @@ export default function MyOrders() {
                               <div className="font-medium">Status:</div>
                               <span
                                 className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase ${(payment.status || "").toLowerCase() === "captured" ||
-                                    (payment.status || "").toLowerCase() === "success"
-                                    ? "bg-green-100 text-green-800"
-                                    : (payment.status || "").toLowerCase() === "failed"
-                                      ? "bg-red-100 text-red-800"
-                                      : "bg-yellow-100 text-yellow-800"
+                                  (payment.status || "").toLowerCase() === "success"
+                                  ? "bg-green-100 text-green-800"
+                                  : (payment.status || "").toLowerCase() === "failed"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-yellow-100 text-yellow-800"
                                   }`}
                               >
                                 {payment.status || "-"}

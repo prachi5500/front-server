@@ -8,6 +8,7 @@ import { BackSideCard } from "@/components/templates/BackSideCard";
 import { captureElementAndUpload } from "@/lib/utils";
 import { apiFetch } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { listPublishedTemplates, type Template } from "@/services/templates";
 
 declare global {
   interface Window {
@@ -51,6 +52,9 @@ export default function CheckoutPage() {
   const frontRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const backRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Store server templates
+  const [sbTemplates, setSbTemplates] = useState<Template[]>([]);
+
   // Modals
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -75,6 +79,17 @@ export default function CheckoutPage() {
     const map: Record<string, any> = {};
     for (const t of classicTemplates) map[t.id] = t;
     return map;
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const data = await listPublishedTemplates();
+        if (alive) setSbTemplates(Array.isArray(data) ? data : []);
+      } catch { }
+    })();
+    return () => { alive = false; };
   }, []);
 
   useEffect(() => {
@@ -167,12 +182,14 @@ export default function CheckoutPage() {
                 templateId: it.id,
                 title: it.data?.name || "Business Card",
                 price: it.price,
-                templateName: byId[it.id]?.name || null,
+                templateName: (it as any).templateName || byId[it.id]?.name || null,
                 frontImageUrl,
                 backImageUrl,
+                // include any edited data so server can save it as template if requested
+                saveAsTemplate: !!(it as any).saveAsTemplate,
                 data: {
-                  frontData: (it.data as any).frontData || null,
-                  backData: (it.data as any).backData || null,
+                  frontData: (it as any).frontData ?? (it.data as any) ?? null,
+                  backData: (it as any).backData ?? (it.data as any) ?? null,
                 },
               });
             }
@@ -540,46 +557,169 @@ export default function CheckoutPage() {
               }}
             >
               {items.map((it) => {
-                const config = byId[it.id];
-                if (!config) return null;
-                return (
-                  <div key={it.id}>
-                    <div
-                      ref={(el) => {
-                        frontRefs.current[it.id] = el;
-                      }}
-                    >
-                      <ClassicCard
-                        data={it.data}
-                        config={config}
-                        fontFamily={it.selectedFont}
-                        fontSize={it.fontSize}
-                        textColor={it.textColor}
-                        accentColor={it.accentColor}
-                      />
-                    </div>
-                    <div
-                      ref={(el) => {
-                        backRefs.current[it.id] = el;
-                      }}
-                    >
-                      <BackSideCard
-                        data={it.data}
-                        background={{
-                          style:
-                            config.bgStyle === "solid"
-                              ? "solid"
-                              : "gradient",
-                          colors: config.bgColors,
+                const isServer = it.id.startsWith("sb:");
+                const serverId = isServer ? it.id.slice(3) : null;
+                const serverTemplate = isServer
+                  ? sbTemplates.find((t) => t.id === serverId)
+                  : null;
+                const classicConfig = !isServer ? byId[it.id] : null;
+
+                // For server templates: render simple div with background image
+                if (isServer && serverTemplate) {
+                  const bg = serverTemplate.background_url;
+                  const backBg = serverTemplate.back_background_url || bg;
+                  const cfg: any = serverTemplate.config || {};
+                  const fc = cfg.fontColor || "#000000";
+                  const fs = cfg.fontSize || 16;
+                  const accent = cfg.accentColor || "#0ea5e9";
+                  const ff = cfg.fontFamily || "Inter, Arial, sans-serif";
+
+                  return (
+                    <div key={it.id}>
+                      {/* Server template front */}
+                      <div
+                        ref={(el) => {
+                          frontRefs.current[it.id] = el;
                         }}
-                        textColor={it.textColor}
-                        accentColor={it.accentColor}
-                        fontFamily={it.selectedFont}
-                        fontSize={it.fontSize}
-                      />
+                        style={{
+                          width: "560px",
+                          height: "320px",
+                          backgroundColor: bg ? undefined : "#f3f4f6",
+                          backgroundImage: bg ? `url(${bg})` : undefined,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          color: fc,
+                          fontFamily: ff,
+                          fontSize: `${fs}px`,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "16px",
+                          gap: "16px",
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        {it.data?.logo && (
+                          <img
+                            src={it.data.logo}
+                            alt="logo"
+                            style={{
+                              width: "64px",
+                              height: "64px",
+                              borderRadius: "50%",
+                              objectFit: "cover",
+                              border: "2px solid rgba(255,255,255,0.5)",
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                            }}
+                          />
+                        )}
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ fontWeight: "bold", fontSize: fs + 6 }}>
+                            {it.data?.name || "Your Name"}
+                          </div>
+                          {it.data?.title && (
+                            <div style={{ color: accent, fontSize: fs + 2 }}>
+                              {it.data.title}
+                            </div>
+                          )}
+                          {it.data?.company && (
+                            <div style={{ opacity: 0.8, fontSize: Math.max(12, fs) }}>
+                              {it.data.company}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Server template back */}
+                      <div
+                        ref={(el) => {
+                          backRefs.current[it.id] = el;
+                        }}
+                        style={{
+                          width: "560px",
+                          height: "320px",
+                          backgroundColor: backBg ? undefined : "#f3f4f6",
+                          backgroundImage: backBg ? `url(${backBg})` : undefined,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          color: fc,
+                          fontFamily: ff,
+                          fontSize: `${fs}px`,
+                          padding: "16px",
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        {/* Minimal back content */}
+                        <div style={{ fontSize: fs }}>
+                          <div>
+                            <strong style={{ color: accent }}>✉</strong>{" "}
+                            {it.data?.email || "email@example.com"}
+                          </div>
+                          <div>
+                            <strong style={{ color: accent }}>✆</strong>{" "}
+                            {it.data?.phone || "+91 00000 00000"}
+                          </div>
+                          {it.data?.website && (
+                            <div>
+                              <strong style={{ color: accent }}>⌂</strong>{" "}
+                              {it.data.website}
+                            </div>
+                          )}
+                          {it.data?.address && (
+                            <div>
+                              <strong style={{ color: accent }}>📍</strong>{" "}
+                              {it.data.address}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
+                }
+
+                // For classic templates
+                if (!isServer && classicConfig) {
+                  return (
+                    <div key={it.id}>
+                      <div
+                        ref={(el) => {
+                          frontRefs.current[it.id] = el;
+                        }}
+                      >
+                        <ClassicCard
+                          data={it.data}
+                          config={classicConfig}
+                          fontFamily={it.selectedFont}
+                          fontSize={it.fontSize}
+                          textColor={it.textColor}
+                          accentColor={it.accentColor}
+                        />
+                      </div>
+                      <div
+                        ref={(el) => {
+                          backRefs.current[it.id] = el;
+                        }}
+                      >
+                        <BackSideCard
+                          data={it.data}
+                          background={{
+                            style:
+                              classicConfig.bgStyle === "solid"
+                                ? "solid"
+                                : "gradient",
+                            colors: classicConfig.bgColors,
+                          }}
+                          textColor={it.textColor}
+                          accentColor={it.accentColor}
+                          fontFamily={it.selectedFont}
+                          fontSize={it.fontSize}
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+
+                return null;
               })}
             </div>
           </>
