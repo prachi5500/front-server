@@ -86,6 +86,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/services/api";
 
 type AuthUser = {
+  token: any;
   id: string;
   email: string | null;
   name?: string;

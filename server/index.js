@@ -11,7 +11,7 @@ import helmet from 'helmet';
 import paymentRoutes from './routes/payments.js';
 import cartRoutes from './routes/cart.js';
 
-
+const express = require('express');
 const app = express();
 
 // Allow requests from your specific Frontend URL (or all if comma-separated list fails)
@@ -52,6 +52,14 @@ try {
 
 // Simple Health Check
 app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// Increase payload limit BEFORE routes
+app.use(express.json({ limit: '10mb' })); // Increase from default ~100kb
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// OR if using body-parser
+app.use(require('body-parser').json({ limit: '10mb' }));
+
 
 // API Routes
 app.use('/auth', authRoutes);

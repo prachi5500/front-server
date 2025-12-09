@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { CustomizationPanel } from "./CustomizationPanel";
 import { generateCardImage } from "@/services/imageGenerator"; // Add this import
 import QRCode from 'qrcode'; // For generating QR code data URLs
+import html2canvas from 'html2canvas';
 
 declare global {
   interface Window {
@@ -85,7 +86,7 @@ export const TemplateSelector = ({
   const [state, setState] = useState("");
   const [pincode, setPincode] = useState("");
   const [showCustomerDetails, setShowCustomerDetails] = useState(false);
-  
+
 
   const isCustomerDetailsValid = () => {
     const effectiveName = (customerName || data.name || "").trim();
@@ -117,13 +118,20 @@ export const TemplateSelector = ({
     logo: 80
   };
 
+  // const defaultPositionsBack = {
+  //   email: { x: 10, y: 15 },
+  //   phone: { x: 10, y: 30 },
+  //   website: { x: 10, y: 45 },
+  //   address: { x: 10, y: 60 },
+  //   qr: { x: 60, y: 20 }
+  // };
   const defaultPositionsBack = {
-    email: { x: 10, y: 15 },
-    phone: { x: 10, y: 30 },
-    website: { x: 10, y: 45 },
-    address: { x: 10, y: 60 },
-    qr: { x: 60, y: 20 }
-  };
+  email: { x: 10, y: 20 },    // Left aligned
+  phone: { x: 10, y: 35 },    // 15% spacing
+  website: { x: 10, y: 50 },  // 15% spacing
+  address: { x: 10, y: 65 },  // 15% spacing
+  qr: { x: 65, y: 30 }        // Right side for QR
+};
 
   const defaultBackSizes = {
     email: 16,
@@ -414,41 +422,846 @@ export const TemplateSelector = ({
         qr: cfg.backSizes.qr || defaultBackSizes.qr,
       });
     }
-     setIsEditLayout(false);
+    setIsEditLayout(false);
   }, [selectedTemplate, sbTemplates]);
 
-const addToCart = async () => {
-  try {
-    const isServer = selectedTemplate.startsWith("sb:");
-    const serverId = isServer ? selectedTemplate.slice(3) : "";
-    const st = isServer ? sbTemplates.find(x => x.id === serverId) : undefined;
-    const classicConfig = !isServer ? classicTemplates.find(t => t.id === selectedTemplate) : undefined;
+  // const addToCart = async () => {
+  //   try {
+  //     const isServer = selectedTemplate.startsWith("sb:");
+  //     const serverId = isServer ? selectedTemplate.slice(3) : "";
+  //     const st = isServer ? sbTemplates.find(x => x.id === serverId) : undefined;
+  //     const classicConfig = !isServer ? classicTemplates.find(t => t.id === selectedTemplate) : undefined;
 
-    const price = (isServer && st?.price) ? st.price : (pricePerItem || DEFAULT_PRICE);
+  //     const price = (isServer && st?.price) ? st.price : (pricePerItem || DEFAULT_PRICE);
 
-    const designFront = {
-      positions,
-      sizes,
-      font: selectedFont,
-      fontSize,
-      textColor,
-      accentColor,
-      isEditLayout,
-    };
-    
-    const designBack = {
-      positionsBack,
-      backSizes,
-      font: selectedFont,
-      fontSize,
-      textColor,
-      accentColor,
-      isEditLayout,
-    };
+  //     // Generate vCard string for QR code
+  //     const generateVCard = () => {
+  //       return `BEGIN:VCARD
+  // VERSION:3.0
+  // FN:${data.name || 'Your Name'}
+  // TITLE:${data.title || 'Job Title'}
+  // ORG:${data.company || 'Company'}
+  // EMAIL:${data.email || 'email@example.com'}
+  // TEL:${data.phone || '+91 00000 00000'}
+  // URL:${data.website || 'your-website.com'}
+  // ADR:${data.address || 'Your Address, City'}
+  // END:VCARD`;
+  //     };
 
-    // Generate vCard string for QR code
-    const generateVCard = () => {
-      return `BEGIN:VCARD
+  //     let frontImageUrl = '';
+  //     let backImageUrl = '';
+  //     let thumbnailUrl = '';
+
+  //     // Wait for QR code generation if needed
+  //     const QRCode = (await import('qrcode')).default;
+  //     const vCard = generateVCard();
+  //     const qrDataUrl = await QRCode.toDataURL(vCard, {
+  //       width: 200,
+  //       margin: 0,
+  //       color: {
+  //         dark: "#000000",
+  //         light: "#FFFFFF"
+  //       }
+  //     });
+
+  //     // Complete design data create karein
+  //     const designData = {
+  //       positions,
+  //       sizes,
+  //       positionsBack,
+  //       backSizes,
+  //       font: selectedFont,
+  //       fontSize,
+  //       textColor,
+  //       accentColor,
+  //       isEditLayout: false,
+  //       // QR code data
+  //       qrColor: isServer ? (st?.config?.qrColor || "#000000") : "#000000",
+  //       qrLogoUrl: isServer ? st?.config?.qrLogoUrl : undefined,
+  //         qrData: vCard, // Use the vCard constant here
+  //     };
+
+  //     // const frontDesign = {
+  //     //   positions,
+  //     //   sizes,
+  //     //   font: selectedFont,
+  //     //   fontSize,
+  //     //   textColor,
+  //     //   accentColor,
+  //     //   isEditLayout: false,
+  //     // };
+
+  //     // const backDesign = {
+  //     //   positionsBack,
+  //     //   backSizes,
+  //     //   font: selectedFont,
+  //     //   fontSize,
+  //     //   textColor,
+  //     //   accentColor,
+  //     //   isEditLayout: false,
+  //     // };
+
+
+  //     // Create proper HTML for front and back sides
+  //     const createCardHTML = (side: 'front' | 'back') => {
+  //       const isServer = selectedTemplate.startsWith("sb:");
+  //       const serverId = isServer ? selectedTemplate.slice(3) : "";
+  //       const st = isServer ? sbTemplates.find(x => x.id === serverId) : undefined;
+
+  //       if (isServer && st) {
+  //         const cfg: any = st.config || {};
+  //         const bg = side === 'front' ? st.background_url : (st.back_background_url || st.background_url);
+  //         const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
+  //         const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
+  //         const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
+  //         const fs = hasOverrides ? fontSize : (cfg.fontSize || 16);
+
+  //         if (side === 'front') {
+  //           return `
+  //             <div style="width: 560px; height: 320px; position: relative;
+  //                         background: ${bg ? `url('${bg}')` : '#f3f4f6'};
+  //                         background-size: cover; background-position: center;
+  //                         font-family: ${ff}; color: ${fc};">
+
+  //               ${data.logo ? `
+  //               <div style="position: absolute; 
+  //                           left: ${positions.logo.x}%; top: ${positions.logo.y}%;
+  //                           width: ${sizes.logo}px; height: ${sizes.logo}px;
+  //                           border-radius: 50%; overflow: hidden;
+  //                           border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+  //                 <img src="${data.logo}" alt="Logo" 
+  //                      style="width: 100%; height: 100%; object-fit: cover;" />
+  //               </div>
+  //               ` : ''}
+
+  //               <div style="position: absolute; 
+  //                           left: ${positions.name.x}%; top: ${positions.name.y}%;
+  //                           font-family: ${ff}; font-size: ${sizes.name}px; 
+  //                           color: ${fc}; font-weight: bold;">
+  //                 ${data.name || 'Your Name'}
+  //               </div>
+
+  //               <div style="position: absolute; 
+  //                           left: ${positions.title.x}%; top: ${positions.title.y}%;
+  //                           font-family: ${ff}; font-size: ${sizes.title}px; 
+  //                           color: ${accent};">
+  //                 ${data.title || 'Job Title'}
+  //               </div>
+
+  //               <div style="position: absolute; 
+  //                           left: ${positions.company.x}%; top: ${positions.company.y}%;
+  //                           font-family: ${ff}; font-size: ${sizes.company}px; 
+  //                           color: ${fc}; opacity: 0.8;">
+  //                 ${data.company || 'Company'}
+  //               </div>
+  //             </div>
+  //           `;
+  //         } else {
+  //           // Back side
+  //           const qrLogoUrl = cfg.qrLogoUrl;
+  //           const qrColor = cfg.qrColor || "#000000";
+
+  //           return `
+  //             <div style="width: 560px; height: 320px; position: relative;
+  //                         background: ${bg ? `url('${bg}')` : '#f3f4f6'};
+  //                         background-size: cover; background-position: center;
+  //                         font-family: ${ff}; color: ${fc};">
+
+  //               <div style="position: absolute; 
+  //                           left: ${positionsBack.email.x}%; top: ${positionsBack.email.y}%;
+  //                           font-size: ${backSizes.email}px;">
+  //                 <span style="color: ${accent}; margin-right: 8px;">✉</span>
+  //                 ${data.email || 'email@example.com'}
+  //               </div>
+
+  //               <div style="position: absolute; 
+  //                           left: ${positionsBack.phone.x}%; top: ${positionsBack.phone.y}%;
+  //                           font-size: ${backSizes.phone}px;">
+  //                 <span style="color: ${accent}; margin-right: 8px;">✆</span>
+  //                 ${data.phone || '+91 00000 00000'}
+  //               </div>
+
+  //               ${data.website ? `
+  //               <div style="position: absolute; 
+  //                           left: ${positionsBack.website.x}%; top: ${positionsBack.website.y}%;
+  //                           font-size: ${backSizes.website}px;">
+  //                 <span style="color: ${accent}; margin-right: 8px;">⌂</span>
+  //                 ${data.website}
+  //               </div>
+  //               ` : ''}
+
+  //               ${data.address ? `
+  //               <div style="position: absolute; 
+  //                           left: ${positionsBack.address.x}%; top: ${positionsBack.address.y}%;
+  //                           font-size: ${backSizes.address}px;">
+  //                 <span style="color: ${accent}; margin-right: 8px;">📍</span>
+  //                 ${data.address}
+  //               </div>
+  //               ` : ''}
+
+  //               <div style="position: absolute; 
+  //                           left: ${positionsBack.qr.x}%; top: ${positionsBack.qr.y}%;
+  //                           background: white; padding: 10px; border-radius: 8px;
+  //                           box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  //                 <img src="${qrDataUrl}" alt="QR Code" 
+  //                      style="width: ${backSizes.qr}px; height: ${backSizes.qr}px;" />
+  //                 ${qrLogoUrl ? `
+  //                 <div style="position: absolute; top: 50%; left: 50%; 
+  //                             transform: translate(-50%, -50%);
+  //                             width: 30px; height: 30px; border-radius: 4px;
+  //                             overflow: hidden; background: white; padding: 2px;">
+  //                   <img src="${qrLogoUrl}" alt="Logo" 
+  //                        style="width: 100%; height: 100%; object-fit: contain;" />
+  //                 </div>
+  //                 ` : ''}
+  //               </div>
+  //             </div>
+  //           `;
+  //         }
+  //       } else if (classicConfig) {
+  //         // Classic template rendering
+  //         if (side === 'front') {
+  //           return `
+  //             <div style="width: 560px; height: 320px; position: relative;
+  //                         ${classicConfig.bgStyle === 'gradient' 
+  //                           ? `background: linear-gradient(135deg, ${classicConfig.bgColors[0]}, ${classicConfig.bgColors[1]})`
+  //                           : `background-color: ${classicConfig.bgColors[0]}`};
+  //                         font-family: ${selectedFont}; color: ${textColor};">
+
+  //               ${data.logo ? `
+  //               <div style="position: absolute; top: 20px; left: 20px;
+  //                           width: ${sizes.logo}px; height: ${sizes.logo}px;
+  //                           border-radius: 50%; overflow: hidden;
+  //                           border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+  //                 <img src="${data.logo}" alt="Logo" 
+  //                      style="width: 100%; height: 100%; object-fit: cover;" />
+  //               </div>
+  //               ` : ''}
+
+  //               <div style="position: absolute; 
+  //                           left: ${positions.name.x}%; top: ${positions.name.y}%;
+  //                           font-size: ${sizes.name}px; font-weight: bold;">
+  //                 ${data.name || 'Your Name'}
+  //               </div>
+
+  //               <div style="position: absolute; 
+  //                           left: ${positions.title.x}%; top: ${positions.title.y}%;
+  //                           font-size: ${sizes.title}px; color: ${accentColor};">
+  //                 ${data.title || 'Job Title'}
+  //               </div>
+
+  //               <div style="position: absolute; 
+  //                           left: ${positions.company.x}%; top: ${positions.company.y}%;
+  //                           font-size: ${sizes.company}px; opacity: 0.8;">
+  //                 ${data.company || 'Company'}
+  //               </div>
+  //             </div>
+  //           `;
+  //         } else {
+  //           // Classic back side
+  //           return `
+  //             <div style="width: 560px; height: 320px; position: relative;
+  //                         ${classicConfig.bgStyle === 'gradient' 
+  //                           ? `background: linear-gradient(135deg, ${classicConfig.bgColors[0]}, ${classicConfig.bgColors[1]})`
+  //                           : `background-color: ${classicConfig.bgColors[0]}`};
+  //                         font-family: ${selectedFont}; color: ${textColor};
+  //                         padding: 30px;">
+
+  //               <div style="margin-bottom: 15px; font-size: ${backSizes.email}px;">
+  //                 <span style="color: ${accentColor}; margin-right: 10px;">✉</span>
+  //                 ${data.email || 'email@example.com'}
+  //               </div>
+
+  //               <div style="margin-bottom: 15px; font-size: ${backSizes.phone}px;">
+  //                 <span style="color: ${accentColor}; margin-right: 10px;">✆</span>
+  //                 ${data.phone || '+91 00000 00000'}
+  //               </div>
+
+  //               ${data.website ? `
+  //               <div style="margin-bottom: 15px; font-size: ${backSizes.website}px;">
+  //                 <span style="color: ${accentColor}; margin-right: 10px;">⌂</span>
+  //                 ${data.website}
+  //               </div>
+  //               ` : ''}
+
+  //               ${data.address ? `
+  //               <div style="margin-bottom: 15px; font-size: ${backSizes.address}px;">
+  //                 <span style="color: ${accentColor}; margin-right: 10px;">📍</span>
+  //                 ${data.address}
+  //               </div>
+  //               ` : ''}
+
+  //               <div style="position: absolute; right: 30px; top: 50%;
+  //                         transform: translateY(-50%); background: white; 
+  //                         padding: 12px; border-radius: 8px;
+  //                         box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  //                 <img src="${qrDataUrl}" alt="QR Code" 
+  //                      style="width: ${backSizes.qr}px; height: ${backSizes.qr}px;" />
+  //               </div>
+  //             </div>
+  //           `;
+  //         }
+  //       }
+
+  //       return '';
+  //     };
+
+  //     try {
+  //       // Create temporary divs for image generation
+  //       const container = document.createElement('div');
+  //       container.style.position = 'fixed';
+  //       container.style.left = '-9999px';
+  //       container.style.top = '-9999px';
+  //       container.style.width = '1120px'; // Enough for both images
+  //       container.style.height = '320px';
+  //       container.style.zIndex = '-1000';
+  //       document.body.appendChild(container);
+
+  //       // Create front image
+  //       const frontDiv = document.createElement('div');
+  //       frontDiv.id = `front-${Date.now()}`;
+  //       frontDiv.style.width = '560px';
+  //       frontDiv.style.height = '320px';
+  //       frontDiv.style.float = 'left';
+  //       frontDiv.innerHTML = createCardHTML('front');
+  //       container.appendChild(frontDiv);
+
+  //       // Create back image
+  //       const backDiv = document.createElement('div');
+  //       backDiv.id = `back-${Date.now()}`;
+  //       backDiv.style.width = '560px';
+  //       backDiv.style.height = '320px';
+  //       backDiv.style.float = 'left';
+  //       backDiv.innerHTML = createCardHTML('back');
+  //       container.appendChild(backDiv);
+
+  //       // Wait for images to load
+  //       await new Promise(resolve => setTimeout(resolve, 500));
+
+  //       // Generate images
+  //       if (window.html2canvas) {
+  //         // Using html2canvas
+  //         const frontCanvas = await window.html2canvas(frontDiv, {
+  //           scale: 2,
+  //           useCORS: true,
+  //           backgroundColor: null,
+  //           logging: false
+  //         });
+  //         frontImageUrl = frontCanvas.toDataURL('image/png');
+
+  //         const backCanvas = await window.html2canvas(backDiv, {
+  //           scale: 2,
+  //           useCORS: true,
+  //           backgroundColor: null,
+  //           logging: false
+  //         });
+  //         backImageUrl = backCanvas.toDataURL('image/png');
+
+  //         thumbnailUrl = frontImageUrl; // Use front as thumbnail
+  //       } else if (typeof generateCardImage === 'function') {
+  //         // Using your custom generateCardImage function
+  //         frontImageUrl = await generateCardImage(frontDiv.id);
+  //         backImageUrl = await generateCardImage(backDiv.id);
+  //         thumbnailUrl = frontImageUrl;
+  //       } else {
+  //         // Fallback
+  //         throw new Error('No image generation method available');
+  //       }
+
+  //       // Clean up
+  //       document.body.removeChild(container);
+
+  //     } catch (error) {
+  //       console.error('Error generating images:', error);
+  //       // Fallback to placeholder
+  //       frontImageUrl = `https://via.placeholder.com/560x320/ffffff/000000?text=${encodeURIComponent(data.name || 'Business Card')}`;
+  //       backImageUrl = `https://via.placeholder.com/560x320/ffffff/000000?text=${encodeURIComponent(data.name || 'Card Back')}`;
+  //       thumbnailUrl = frontImageUrl;
+  //     }
+
+  //     // Add to cart with image URLs
+  //     cartCtx.add({
+  //       id: selectedTemplate,
+  //       kind: isServer ? "server" : "classic",
+  //       data,
+  //       selectedFont,
+  //       fontSize,
+  //       textColor,
+  //       accentColor,
+  //       price: price,
+  //       serverMeta: isServer ? { 
+  //         name: st?.name, 
+  //         background_url: st?.background_url, 
+  //         back_background_url: st?.back_background_url, 
+  //         config: st?.config
+  //         qrColor: st?.config?.qrColor || "#000000",
+  //         qrLogoUrl: st?.config?.qrLogoUrl,
+  //       } : undefined,
+  //        design: designData,
+  //       // frontData: frontDesign,
+  //       // backData: backDesign,
+  //       frontImageUrl, 
+  //       backImageUrl,  
+  //       thumbnailUrl
+  //     });
+
+  //     // Show success message
+  //     alert('Item added to cart successfully!');
+  //     navigate("/cart");
+
+  //   } catch (error) {
+  //     console.error('Error adding to cart:', error);
+  //     alert('Failed to add item to cart. Please try again.');
+  //   }
+  // };
+
+  // TemplateSelector.tsx mein addToCart function update karein
+
+  // const addToCart = async () => {
+  //   try {
+  //     const isServer = selectedTemplate.startsWith("sb:");
+  //     const serverId = isServer ? selectedTemplate.slice(3) : "";
+  //     const st = isServer ? sbTemplates.find(x => x.id === serverId) : undefined;
+  //     const classicConfig = !isServer ? classicTemplates.find(t => t.id === selectedTemplate) : undefined;
+
+  //     const price = (isServer && st?.price) ? st.price : (pricePerItem || DEFAULT_PRICE);
+
+  //     // ✅ FIXED: QR Color properly handle karein
+  //     const qrColorFromConfig = isServer ? (st?.config?.qrColor || "#000000") : "#000000";
+  //     const qrLogoUrlFromConfig = isServer ? st?.config?.qrLogoUrl : undefined;
+
+  //     // Generate vCard string for QR code
+  //     const generateVCard = () => {
+  //       return `BEGIN:VCARD
+  // VERSION:3.0
+  // FN:${data.name || 'Your Name'}
+  // TITLE:${data.title || 'Job Title'}
+  // ORG:${data.company || 'Company'}
+  // EMAIL:${data.email || 'email@example.com'}
+  // TEL:${data.phone || '+91 00000 00000'}
+  // URL:${data.website || 'your-website.com'}
+  // ADR:${data.address || 'Your Address, City'}
+  // END:VCARD`;
+  //     };
+
+  //     let frontImageUrl = '';
+  //     let backImageUrl = '';
+  //     let thumbnailUrl = '';
+
+  //     // Wait for QR code generation if needed
+  //     const QRCode = (await import('qrcode')).default;
+  //     const vCard = generateVCard();
+
+  //     // ✅ FIXED: QR code with custom color
+  //     const qrDataUrl = await QRCode.toDataURL(vCard, {
+  //       width: 200,
+  //       margin: 1,
+  //       color: {
+  //         dark: qrColorFromConfig, // ✅ Custom QR color
+  //         light: "#FFFFFF"
+  //       }
+  //     });
+
+  //     // ✅ FIXED: Complete design data with QR color
+  //     const designData = {
+  //       positions,
+  //       sizes,
+  //       positionsBack,
+  //       backSizes,
+  //       font: selectedFont,
+  //       fontSize,
+  //       textColor,
+  //       accentColor,
+  //       isEditLayout: false,
+  //       // QR code data with color
+  //       qrColor: qrColorFromConfig,
+  //       qrLogoUrl: qrLogoUrlFromConfig,
+  //       qrData: vCard,
+  //     };
+
+  //     // ✅ FIXED: Better image generation function
+  //     // const generateCardImage = async (side: 'front' | 'back'): Promise<string> => {
+  //     //   try {
+  //     //     // Create temporary div
+  //     //     const tempDiv = document.createElement('div');
+  //     //     tempDiv.style.position = 'fixed';
+  //     //     tempDiv.style.left = '-9999px';
+  //     //     tempDiv.style.width = '560px';
+  //     //     tempDiv.style.height = '320px';
+  //     //     tempDiv.style.zIndex = '-1000';
+
+  //     //     if (side === 'front') {
+  //     //       // Front side HTML
+  //     //       if (isServer && st) {
+  //     //         const cfg: any = st.config || {};
+  //     //         const bg = st.background_url;
+  //     //         const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
+  //     //         const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
+  //     //         const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
+
+  //     //         tempDiv.innerHTML = `
+  //     //           <div style="width: 560px; height: 320px; position: relative;
+  //     //                       background: ${bg ? `url('${bg}')` : '#f3f4f6'};
+  //     //                       background-size: cover; background-position: center;
+  //     //                       font-family: ${ff}; color: ${fc};">
+
+  //     //             ${data.logo ? `
+  //     //             <div style="position: absolute; 
+  //     //                         left: ${positions.logo.x}%; top: ${positions.logo.y}%;
+  //     //                         width: ${sizes.logo}px; height: ${sizes.logo}px;
+  //     //                         border-radius: 50%; overflow: hidden;
+  //     //                         border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+  //     //               <img src="${data.logo}" alt="Logo" 
+  //     //                    style="width: 100%; height: 100%; object-fit: cover;" />
+  //     //             </div>
+  //     //             ` : ''}
+
+  //     //             <div style="position: absolute; 
+  //     //                         left: ${positions.name.x}%; top: ${positions.name.y}%;
+  //     //                         font-family: ${ff}; font-size: ${sizes.name}px; 
+  //     //                         color: ${fc}; font-weight: bold;">
+  //     //               ${data.name || 'Your Name'}
+  //     //             </div>
+
+  //     //             <div style="position: absolute; 
+  //     //                         left: ${positions.title.x}%; top: ${positions.title.y}%;
+  //     //                         font-family: ${ff}; font-size: ${sizes.title}px; 
+  //     //                         color: ${accent};">
+  //     //               ${data.title || 'Job Title'}
+  //     //             </div>
+
+  //     //             <div style="position: absolute; 
+  //     //                         left: ${positions.company.x}%; top: ${positions.company.y}%;
+  //     //                         font-family: ${ff}; font-size: ${sizes.company}px; 
+  //     //                         color: ${fc}; opacity: 0.8;">
+  //     //               ${data.company || 'Company'}
+  //     //             </div>
+  //     //           </div>
+  //     //         `;
+  //     //       }
+  //     //     } else {
+  //     //       // Back side HTML with QR
+  //     //       if (isServer && st) {
+  //     //         const cfg: any = st.config || {};
+  //     //         const bg = st.back_background_url || st.background_url;
+  //     //         const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
+  //     //         const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
+  //     //         const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
+
+  //     //         tempDiv.innerHTML = `
+  //     //           <div style="width: 560px; height: 320px; position: relative;
+  //     //                       background: ${bg ? `url('${bg}')` : '#f3f4f6'};
+  //     //                       background-size: cover; background-position: center;
+  //     //                       font-family: ${ff}; color: ${fc}; padding: 20px;">
+
+  //     //             <div style="margin-bottom: 15px; font-size: ${backSizes.email}px;">
+  //     //               <span style="color: ${accent}; margin-right: 10px;">✉</span>
+  //     //               ${data.email || 'email@example.com'}
+  //     //             </div>
+
+  //     //             <div style="margin-bottom: 15px; font-size: ${backSizes.phone}px;">
+  //     //               <span style="color: ${accent}; margin-right: 10px;">✆</span>
+  //     //               ${data.phone || '+91 00000 00000'}
+  //     //             </div>
+
+  //     //             ${data.website ? `
+  //     //             <div style="margin-bottom: 15px; font-size: ${backSizes.website}px;">
+  //     //               <span style="color: ${accent}; margin-right: 10px;">⌂</span>
+  //     //               ${data.website}
+  //     //             </div>
+  //     //             ` : ''}
+
+  //     //             ${data.address ? `
+  //     //             <div style="margin-bottom: 15px; font-size: ${backSizes.address}px;">
+  //     //               <span style="color: ${accent}; margin-right: 10px;">📍</span>
+  //     //               ${data.address}
+  //     //             </div>
+  //     //             ` : ''}
+
+  //     //             <div style="position: absolute; right: 30px; top: 50%;
+  //     //                       transform: translateY(-50%); background: white; 
+  //     //                       padding: 10px; border-radius: 8px;
+  //     //                       box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  //     //               <img src="${qrDataUrl}" alt="QR Code" 
+  //     //                    style="width: ${backSizes.qr}px; height: ${backSizes.qr}px;" />
+  //     //             </div>
+  //     //           </div>
+  //     //         `;
+  //     //       }
+  //     //     }
+
+  //     //     document.body.appendChild(tempDiv);
+
+  //     //     // Generate image using html2canvas
+  //     //     const canvas = await html2canvas(tempDiv, {
+  //     //       scale: 2,
+  //     //       useCORS: true,
+  //     //       backgroundColor: null,
+  //     //       logging: false
+  //     //     }as any);
+
+  //     //     // Remove temp div
+  //     //     document.body.removeChild(tempDiv);
+
+  //     //     return canvas.toDataURL('image/png');
+
+  //     //   } catch (error) {
+  //     //     console.error('Image generation error:', error);
+  //     //     // Fallback placeholder
+  //     //     return `https://via.placeholder.com/560x320/f3f4f6/000000?text=${encodeURIComponent(data.name || 'Card')}`;
+  //     //   }
+  //     // };
+
+  //     const generateCardImage = async (side: 'front' | 'back'): Promise<string> => {
+  //   try {
+  //     // Create temporary div
+  //     const tempDiv = document.createElement('div');
+  //     tempDiv.style.position = 'fixed';
+  //     tempDiv.style.left = '-9999px';
+  //     tempDiv.style.width = '560px';
+  //     tempDiv.style.height = '320px';
+  //     tempDiv.style.zIndex = '-1000';
+  //     tempDiv.style.overflow = 'hidden';
+
+  //     // Get template config
+  //     const isServer = selectedTemplate.startsWith("sb:");
+  //     const serverId = isServer ? selectedTemplate.slice(3) : "";
+  //     const st = isServer ? sbTemplates.find(x => x.id === serverId) : undefined;
+  //     const cfg: any = st?.config || {};
+
+  //     if (side === 'front') {
+  //       // Front side HTML
+  //       const bg = st?.background_url;
+  //       const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
+  //       const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
+  //       const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
+
+  //       tempDiv.innerHTML = `
+  //         <div style="width: 560px; height: 320px; position: relative;
+  //                     background: ${bg ? `url('${bg}')` : '#f3f4f6'};
+  //                     background-size: cover; background-position: center;
+  //                     font-family: ${ff}; color: ${fc};">
+
+  //           ${data.logo ? `
+  //           <div style="position: absolute; 
+  //                       left: ${positions.logo.x}%; top: ${positions.logo.y}%;
+  //                       width: ${sizes.logo}px; height: ${sizes.logo}px;
+  //                       border-radius: 50%; overflow: hidden;
+  //                       border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+  //             <img src="${data.logo}" alt="Logo" 
+  //                  style="width: 100%; height: 100%; object-fit: cover;" 
+  //                  crossorigin="anonymous" />
+  //           </div>
+  //           ` : ''}
+
+  //           <div style="position: absolute; 
+  //                       left: ${positions.name.x}%; top: ${positions.name.y}%;
+  //                       font-family: ${ff}; font-size: ${sizes.name}px; 
+  //                       color: ${fc}; font-weight: bold;">
+  //             ${data.name || 'Your Name'}
+  //           </div>
+
+  //           <div style="position: absolute; 
+  //                       left: ${positions.title.x}%; top: ${positions.title.y}%;
+  //                       font-family: ${ff}; font-size: ${sizes.title}px; 
+  //                       color: ${accent};">
+  //             ${data.title || 'Job Title'}
+  //           </div>
+
+  //           <div style="position: absolute; 
+  //                       left: ${positions.company.x}%; top: ${positions.company.y}%;
+  //                       font-family: ${ff}; font-size: ${sizes.company}px; 
+  //                       color: ${fc}; opacity: 0.8;">
+  //             ${data.company || 'Company'}
+  //           </div>
+  //         </div>
+  //       `;
+  //     } else {
+  //       // Back side HTML with QR
+  //       const bg = st?.back_background_url || st?.background_url;
+  //       const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
+  //       const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
+  //       const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
+  //       const qrColorFromConfig = cfg.qrColor || "#000000";
+
+  //       tempDiv.innerHTML = `
+  //         <div style="width: 560px; height: 320px; position: relative;
+  //                     background: ${bg ? `url('${bg}')` : '#f3f4f6'};
+  //                     background-size: cover; background-position: center;
+  //                     font-family: ${ff}; color: ${fc}; padding: 20px;">
+
+  //           <div style="margin-bottom: 15px; font-size: ${backSizes.email}px;">
+  //             <span style="color: ${accent}; margin-right: 10px;">✉</span>
+  //             ${data.email || 'email@example.com'}
+  //           </div>
+
+  //           <div style="margin-bottom: 15px; font-size: ${backSizes.phone}px;">
+  //             <span style="color: ${accent}; margin-right: 10px;">✆</span>
+  //             ${data.phone || '+91 00000 00000'}
+  //           </div>
+
+  //           ${data.website ? `
+  //           <div style="margin-bottom: 15px; font-size: ${backSizes.website}px;">
+  //             <span style="color: ${accent}; margin-right: 10px;">⌂</span>
+  //             ${data.website}
+  //           </div>
+  //           ` : ''}
+
+  //           ${data.address ? `
+  //           <div style="margin-bottom: 15px; font-size: ${backSizes.address}px;">
+  //             <span style="color: ${accent}; margin-right: 10px;">📍</span>
+  //             ${data.address}
+  //           </div>
+  //           ` : ''}
+
+  //           <div style="position: absolute; right: 30px; top: 50%;
+  //                     transform: translateY(-50%); background: white; 
+  //                     padding: 10px; border-radius: 8px;
+  //                     box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  //             <img src="${qrDataUrl}" alt="QR Code" 
+  //                  style="width: ${backSizes.qr}px; height: ${backSizes.qr}px;"
+  //                  crossorigin="anonymous" />
+  //           </div>
+  //         </div>
+  //       `;
+  //     }
+
+  //     document.body.appendChild(tempDiv);
+
+  //     // Wait for images to load
+  //     await new Promise(resolve => {
+  //       const images = tempDiv.getElementsByTagName('img');
+  //       let loaded = 0;
+
+  //       if (images.length === 0) {
+  //         resolve(true);
+  //         return;
+  //       }
+
+  //       Array.from(images).forEach(img => {
+  //         if (img.complete) {
+  //           loaded++;
+  //         } else {
+  //           img.onload = () => {
+  //             loaded++;
+  //             if (loaded === images.length) resolve(true);
+  //           };
+  //           img.onerror = () => {
+  //             loaded++;
+  //             if (loaded === images.length) resolve(true);
+  //           };
+  //         }
+  //       });
+
+  //       if (loaded === images.length) resolve(true);
+  //     });
+
+  //     // Generate image using html2canvas
+  //     const canvas = await html2canvas(tempDiv, {
+  //       scale: 2,
+  //       useCORS: true,
+  //       backgroundColor: null,
+  //       logging: false,
+  //       allowTaint: true
+  //     } as any);
+
+  //     // Remove temp div
+  //     document.body.removeChild(tempDiv);
+
+  //     return canvas.toDataURL('image/png', 1.0);
+
+  //   } catch (error) {
+  //     console.error('Image generation error:', error);
+  //     // Better fallback - create a simple colored image
+  //     const canvas = document.createElement('canvas');
+  //     canvas.width = 560;
+  //     canvas.height = 320;
+  //     const ctx = canvas.getContext('2d');
+
+  //     if (ctx) {
+  //       // Create gradient background
+  //       const gradient = ctx.createLinearGradient(0, 0, 560, 320);
+  //       gradient.addColorStop(0, '#f3f4f6');
+  //       gradient.addColorStop(1, '#e5e7eb');
+  //       ctx.fillStyle = gradient;
+  //       ctx.fillRect(0, 0, 560, 320);
+
+  //       // Add text
+  //       ctx.fillStyle = '#000000';
+  //       ctx.font = 'bold 24px Arial';
+  //       ctx.textAlign = 'center';
+  //       ctx.fillText(data.name || 'Business Card', 280, 150);
+  //       ctx.font = '18px Arial';
+  //       ctx.fillText('Preview Not Available', 280, 180);
+  //     }
+
+  //     return canvas.toDataURL('image/png');
+  //   }
+  // };
+
+  //     // Generate images
+  //     try {
+  //       frontImageUrl = await generateCardImage('front');
+  //       backImageUrl = await generateCardImage('back');
+  //       thumbnailUrl = frontImageUrl;
+  //     } catch (error) {
+  //       console.error('Failed to generate images:', error);
+  //       // Fallback placeholders
+  //       frontImageUrl = `https://via.placeholder.com/560x320/f3f4f6/000000?text=${encodeURIComponent(data.name || 'Business Card')}`;
+  //       backImageUrl = `https://via.placeholder.com/560x320/f3f4f6/000000?text=${encodeURIComponent(data.name || 'Card Back')}`;
+  //       thumbnailUrl = frontImageUrl;
+  //     }
+
+  //     // Add to cart with image URLs
+  //     cartCtx.add({
+  //       id: selectedTemplate,
+  //       kind: isServer ? "server" : "classic",
+  //       data,
+  //       selectedFont,
+  //       fontSize,
+  //       textColor,
+  //       accentColor,
+  //       price: price,
+  //       serverMeta: isServer ? { 
+  //         name: st?.name, 
+  //         background_url: st?.background_url, 
+  //         back_background_url: st?.back_background_url, 
+  //         config: st?.config,
+  //         qrColor: qrColorFromConfig, // ✅ Save QR color
+  //         qrLogoUrl: qrLogoUrlFromConfig,
+  //       } : undefined,
+  //       design: designData,
+  //       frontImageUrl, 
+  //       backImageUrl,  
+  //       thumbnailUrl
+  //     });
+
+  //     // Show success message
+  //     alert('Item added to cart successfully!');
+  //     navigate("/cart");
+
+  //   } catch (error) {
+  //     console.error('Error adding to cart:', error);
+  //     alert('Failed to add item to cart. Please try again.');
+  //   }
+  // };
+
+  const addToCart = async () => {
+    try {
+      const isServer = selectedTemplate.startsWith("sb:");
+      const serverId = isServer ? selectedTemplate.slice(3) : "";
+      const st = isServer ? sbTemplates.find(x => x.id === serverId) : undefined;
+      const classicConfig = !isServer ? classicTemplates.find(t => t.id === selectedTemplate) : undefined;
+
+      const price = (isServer && st?.price) ? st.price : (pricePerItem || DEFAULT_PRICE);
+
+      // ✅ QR Color
+      const qrColorFromConfig = isServer ? (st?.config?.qrColor || "#000000") : "#000000";
+      const qrLogoUrlFromConfig = isServer ? st?.config?.qrLogoUrl : undefined;
+
+      // Generate vCard
+      const generateVCard = () => {
+        return `BEGIN:VCARD
 VERSION:3.0
 FN:${data.name || 'Your Name'}
 TITLE:${data.title || 'Job Title'}
@@ -458,274 +1271,212 @@ TEL:${data.phone || '+91 00000 00000'}
 URL:${data.website || 'your-website.com'}
 ADR:${data.address || 'Your Address, City'}
 END:VCARD`;
-    };
+      };
 
-    // Generate image URLs directly
-    let frontImageUrl = '';
-    let backImageUrl = '';
-    let thumbnailUrl = '';
+      let frontImageUrl = '';
+      let backImageUrl = '';
+      let thumbnailUrl = '';
 
-    try {
-      // Create temporary container for card rendering
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '-9999px';
-      tempContainer.style.width = '560px';
-      tempContainer.style.height = '320px';
-      document.body.appendChild(tempContainer);
+      // Generate QR code
+      const QRCode = (await import('qrcode')).default;
+      const vCard = generateVCard();
 
-      // ========== FRONT SIDE IMAGE ==========
-      const frontDiv = document.createElement('div');
-      frontDiv.id = `temp-front-${Date.now()}`;
-      frontDiv.style.width = '560px';
-      frontDiv.style.height = '320px';
-      
-      if (isServer && st) {
-        const bg = st.background_url;
-        const cfg: any = st.config || {};
-        const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
-        const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
-        const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
-        
-        frontDiv.innerHTML = `
-          <div style="width: 560px; height: 320px; position: relative;
-                      background: ${bg ? `url('${bg}')` : '#f3f4f6'};
-                      background-size: cover; background-position: center;">
-            <div style="position: absolute; left: ${positions.name.x}%; top: ${positions.name.y}%;
-                        font-family: ${ff}; font-size: ${sizes.name}px; 
-                        color: ${fc}; font-weight: bold;">
-              ${data.name || 'Your Name'}
-            </div>
-            <div style="position: absolute; left: ${positions.title.x}%; top: ${positions.title.y}%;
-                        font-family: ${ff}; font-size: ${sizes.title}px; 
-                        color: ${accent};">
-              ${data.title || 'Job Title'}
-            </div>
-            <div style="position: absolute; left: ${positions.company.x}%; top: ${positions.company.y}%;
-                        font-family: ${ff}; font-size: ${sizes.company}px; 
-                        color: ${fc}; opacity: 0.8;">
-              ${data.company || 'Company'}
-            </div>
-            ${data.logo ? `
-            <img src="${data.logo}" alt="Logo" 
-                 style="position: absolute; left: ${positions.logo.x}%; top: ${positions.logo.y}%;
-                        width: ${sizes.logo}px; height: ${sizes.logo}px; 
-                        border-radius: 50%; object-fit: cover; border: 2px solid white;">
-            ` : ''}
-          </div>
-        `;
-      } else if (classicConfig) {
-        // For classic templates
-        frontDiv.innerHTML = `
-          <div style="width: 560px; height: 320px; position: relative;
-                      ${classicConfig.bgStyle === 'gradient' ? 
-                        `background: linear-gradient(135deg, ${classicConfig.bgColors[0]}, ${classicConfig.bgColors[1]})` : 
-                        `background-color: ${classicConfig.bgColors[0]}`};
-                      font-family: ${selectedFont}; color: ${textColor};">
-            <!-- Add your classic template rendering here -->
-            <div style="padding: 40px;">
-              <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 10px;">
-                ${data.name || 'Your Name'}
-              </h2>
-              <p style="font-size: 20px; color: ${accentColor}; margin-bottom: 8px;">
-                ${data.title || 'Job Title'}
-              </p>
-              <p style="font-size: 18px; opacity: 0.8;">
-                ${data.company || 'Company'}
-              </p>
-            </div>
-          </div>
-        `;
-      }
-      
-      tempContainer.appendChild(frontDiv);
+      const qrDataUrl = await QRCode.toDataURL(vCard, {
+        width: 200,
+        margin: 1,
+        color: {
+          dark: qrColorFromConfig,
+          light: "#FFFFFF"
+        }
+      });
 
-      // Generate front image
-      const frontDataUrl = await generateCardImage(frontDiv.id);
-      frontImageUrl = frontDataUrl;
-      thumbnailUrl = frontDataUrl; // Use front as thumbnail
+      // Design data
+      const designData = {
+        positions,
+        sizes,
+        positionsBack,
+        backSizes,
+        font: selectedFont,
+        fontSize,
+        textColor,
+        accentColor,
+        isEditLayout: false,
+        qrColor: qrColorFromConfig,
+        qrLogoUrl: qrLogoUrlFromConfig,
+        qrData: vCard,
+      };
 
-      // Remove front div
-      tempContainer.removeChild(frontDiv);
+      // Generate card images
+      const generateCardImage = async (side: 'front' | 'back'): Promise<string> => {
+        try {
+          const tempDiv = document.createElement('div');
+          tempDiv.style.position = 'fixed';
+          tempDiv.style.left = '-9999px';
+          tempDiv.style.width = '560px';
+          tempDiv.style.height = '320px';
+          tempDiv.style.zIndex = '-1000';
+          tempDiv.style.overflow = 'hidden';
 
-      // ========== BACK SIDE IMAGE ==========
-      const backDiv = document.createElement('div');
-      backDiv.id = `temp-back-${Date.now()}`;
-      backDiv.style.width = '560px';
-      backDiv.style.height = '320px';
-      
-      if (isServer && st) {
-        const backBg = st.back_background_url || st.background_url;
-        const cfg: any = st.config || {};
-        const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
-        const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
-        const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
-        const qrLogoUrl = cfg.qrLogoUrl;
-        const qrColor = cfg.qrColor || "#000000";
-        
-        // Create QR code SVG
-        const vCard = generateVCard();
-        
-        // Generate QR code using qrcode library
-        const QRCode = (await import('qrcode')).default;
-        const qrDataUrl = await QRCode.toDataURL(vCard, {
-          width: backSizes.qr,
-          margin: 0,
-          color: {
-            dark: qrColor,
-            light: "#FFFFFF"
-          }
-        });
-        
-        backDiv.innerHTML = `
-          <div style="width: 560px; height: 320px; position: relative;
-                      background: ${backBg ? `url('${backBg}')` : '#f3f4f6'};
-                      background-size: cover; background-position: center;
-                      font-family: ${ff}; color: ${fc}; padding: 20px;">
-            
-            <!-- Contact Information -->
-            <div style="position: absolute; left: ${positionsBack.email.x}%; top: ${positionsBack.email.y}%;
-                        font-size: ${backSizes.email}px;">
-              <strong style="color: ${accent};">✉</strong> ${data.email || 'email@example.com'}
-            </div>
-            
-            <div style="position: absolute; left: ${positionsBack.phone.x}%; top: ${positionsBack.phone.y}%;
-                        font-size: ${backSizes.phone}px;">
-              <strong style="color: ${accent};">✆</strong> ${data.phone || '+91 00000 00000'}
-            </div>
-            
-            ${data.website ? `
-            <div style="position: absolute; left: ${positionsBack.website.x}%; top: ${positionsBack.website.y}%;
-                        font-size: ${backSizes.website}px;">
-              <strong style="color: ${accent};">⌂</strong> ${data.website}
-            </div>
-            ` : ''}
-            
-            ${data.address ? `
-            <div style="position: absolute; left: ${positionsBack.address.x}%; top: ${positionsBack.address.y}%;
-                        font-size: ${backSizes.address}px;">
-              <strong style="color: ${accent};">📍</strong> ${data.address}
-            </div>
-            ` : ''}
-            
-            <!-- QR Code -->
-            <div style="position: absolute; left: ${positionsBack.qr.x}%; top: ${positionsBack.qr.y}%;
-                        transform: translate(-50%, -50%); background: rgba(255,255,255,0.9); 
-                        padding: 8px; border-radius: 8px;">
-              <img src="${qrDataUrl}" alt="QR Code" 
-                   style="width: ${backSizes.qr}px; height: ${backSizes.qr}px;" />
-              ${qrLogoUrl ? `
-              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                          width: 24px; height: 24px;">
-                <img src="${qrLogoUrl}" alt="QR Logo" style="width: 100%; height: 100%;" />
+          const cfg: any = st?.config || {};
+
+          if (side === 'front') {
+            const bg = st?.background_url;
+            const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
+            const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
+            const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
+
+            tempDiv.innerHTML = `
+            <div style="width: 560px; height: 320px; position: relative;
+                        background: ${bg ? `url('${bg}')` : '#f3f4f6'};
+                        background-size: cover; background-position: center;">
+              ${data.logo ? `
+              <div style="position: absolute; 
+                          left: ${positions.logo.x}%; top: ${positions.logo.y}%;
+                          width: ${sizes.logo}px; height: ${sizes.logo}px;
+                          border-radius: 50%; overflow: hidden;
+                          border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                <img src="${data.logo}" alt="Logo" 
+                     style="width: 100%; height: 100%; object-fit: cover;" 
+                     crossorigin="anonymous" />
               </div>
               ` : ''}
+              
+              <div style="position: absolute; 
+                          left: ${positions.name.x}%; top: ${positions.name.y}%;
+                          font-family: ${ff}; font-size: ${sizes.name}px; 
+                          color: ${fc}; font-weight: bold;">
+                ${data.name || 'Your Name'}
+              </div>
+              
+              <div style="position: absolute; 
+                          left: ${positions.title.x}%; top: ${positions.title.y}%;
+                          font-family: ${ff}; font-size: ${sizes.title}px; 
+                          color: ${accent};">
+                ${data.title || 'Job Title'}
+              </div>
+              
+              <div style="position: absolute; 
+                          left: ${positions.company.x}%; top: ${positions.company.y}%;
+                          font-family: ${ff}; font-size: ${sizes.company}px; 
+                          color: ${fc}; opacity: 0.8;">
+                ${data.company || 'Company'}
+              </div>
             </div>
-            
-          </div>
-        `;
-      } else if (classicConfig) {
-        // For classic templates back side
-        const vCard = generateVCard();
-        const QRCode = (await import('qrcode')).default;
-        const qrDataUrl = await QRCode.toDataURL(vCard, {
-          width: backSizes.qr,
-          margin: 0,
-          color: {
-            dark: "#000000",
-            light: "#FFFFFF"
+          `;
+          } else {
+            const bg = st?.back_background_url || st?.background_url;
+            const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
+            const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
+            const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
+
+            tempDiv.innerHTML = `
+            <div style="width: 560px; height: 320px; position: relative;
+                        background: ${bg ? `url('${bg}')` : '#f3f4f6'};
+                        background-size: cover; background-position: center;
+                        font-family: ${ff}; color: ${fc}; padding: 20px;">
+              
+              <div style="margin-bottom: 15px; font-size: ${backSizes.email}px;">
+                <span style="color: ${accent}; margin-right: 10px;">✉</span>
+                ${data.email || 'email@example.com'}
+              </div>
+              
+              <div style="margin-bottom: 15px; font-size: ${backSizes.phone}px;">
+                <span style="color: ${accent}; margin-right: 10px;">✆</span>
+                ${data.phone || '+91 00000 00000'}
+              </div>
+              
+              ${data.website ? `
+              <div style="margin-bottom: 15px; font-size: ${backSizes.website}px;">
+                <span style="color: ${accent}; margin-right: 10px;">⌂</span>
+                ${data.website}
+              </div>
+              ` : ''}
+              
+              ${data.address ? `
+              <div style="margin-bottom: 15px; font-size: ${backSizes.address}px;">
+                <span style="color: ${accent}; margin-right: 10px;">📍</span>
+                ${data.address}
+              </div>
+              ` : ''}
+              
+              <div style="position: absolute; right: 30px; top: 50%;
+                        transform: translateY(-50%); background: white; 
+                        padding: 10px; border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <img src="${qrDataUrl}" alt="QR Code" 
+                     style="width: ${backSizes.qr}px; height: ${backSizes.qr}px;"
+                     crossorigin="anonymous" />
+              </div>
+            </div>
+          `;
           }
-        });
-        
-        backDiv.innerHTML = `
-          <div style="width: 560px; height: 320px; position: relative;
-                      ${classicConfig.bgStyle === 'gradient' ? 
-                        `background: linear-gradient(135deg, ${classicConfig.bgColors[0]}, ${classicConfig.bgColors[1]})` : 
-                        `background-color: ${classicConfig.bgColors[0]}`};
-                      font-family: ${selectedFont}; color: ${textColor}; padding: 20px;">
-            
-            <!-- Contact Information -->
-            <div style="margin-bottom: 10px; font-size: ${backSizes.email}px;">
-              <strong style="color: ${accentColor};">✉</strong> ${data.email || 'email@example.com'}
-            </div>
-            
-            <div style="margin-bottom: 10px; font-size: ${backSizes.phone}px;">
-              <strong style="color: ${accentColor};">✆</strong> ${data.phone || '+91 00000 00000'}
-            </div>
-            
-            ${data.website ? `
-            <div style="margin-bottom: 10px; font-size: ${backSizes.website}px;">
-              <strong style="color: ${accentColor};">⌂</strong> ${data.website}
-            </div>
-            ` : ''}
-            
-            ${data.address ? `
-            <div style="margin-bottom: 10px; font-size: ${backSizes.address}px;">
-              <strong style="color: ${accentColor};">📍</strong> ${data.address}
-            </div>
-            ` : ''}
-            
-            <!-- QR Code -->
-            <div style="position: absolute; right: 30px; top: 50%; transform: translateY(-50%);
-                        background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px;">
-              <img src="${qrDataUrl}" alt="QR Code" 
-                   style="width: ${backSizes.qr}px; height: ${backSizes.qr}px;" />
-            </div>
-            
-          </div>
-        `;
+
+          document.body.appendChild(tempDiv);
+
+          // Wait for images
+          await new Promise(resolve => setTimeout(resolve, 300));
+
+          const canvas = await html2canvas(tempDiv, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: null,
+            logging: false,
+            allowTaint: true
+          } as any);
+
+          document.body.removeChild(tempDiv);
+          return canvas.toDataURL('image/png', 1.0);
+
+        } catch (error) {
+          console.error('Image generation error:', error);
+          return createFallbackImage(side === 'front' ? 'Card Front' : 'Card Back');
+        }
+      };
+
+      // Generate images
+      try {
+        frontImageUrl = await generateCardImage('front');
+        backImageUrl = await generateCardImage('back');
+        thumbnailUrl = frontImageUrl;
+      } catch (error) {
+        console.error('Failed to generate images:', error);
+        frontImageUrl = await createFallbackImage(data.name || 'Business Card');
+        backImageUrl = await createFallbackImage(`${data.name || 'Card'} Back`);
+        thumbnailUrl = frontImageUrl;
       }
-      
-      tempContainer.appendChild(backDiv);
 
-      // Generate back image
-      const backDataUrl = await generateCardImage(backDiv.id);
-      backImageUrl = backDataUrl;
+      // Add to cart
+      cartCtx.add({
+        id: selectedTemplate,
+        kind: isServer ? "server" : "classic",
+        data,
+        selectedFont,
+        fontSize,
+        textColor,
+        accentColor,
+        price: price,
+        serverMeta: isServer ? {
+          name: st?.name,
+          background_url: st?.background_url,
+          back_background_url: st?.back_background_url,
+          config: st?.config,
+          qrColor: qrColorFromConfig,
+          qrLogoUrl: qrLogoUrlFromConfig,
+        } : undefined,
+        design: designData,
+        frontImageUrl,
+        backImageUrl,
+        thumbnailUrl
+      });
 
-      // Clean up
-      document.body.removeChild(tempContainer);
+      alert('Item added to cart successfully!');
+      navigate("/cart");
 
     } catch (error) {
-      console.error('Error generating images:', error);
-      // Fallback placeholder
-      frontImageUrl = `https://via.placeholder.com/560x320/ffffff/000000?text=${encodeURIComponent(data.name || 'Business Card')}`;
-      backImageUrl = `https://via.placeholder.com/560x320/ffffff/000000?text=${encodeURIComponent(data.name || 'Card Back')}+QR`;
-      thumbnailUrl = frontImageUrl;
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
     }
-
-    // Add to cart with image URLs
-    cartCtx.add({
-      id: selectedTemplate,
-      kind: isServer ? "server" : "classic",
-      data,
-      selectedFont,
-      fontSize,
-      textColor,
-      accentColor,
-      price: price,
-      serverMeta: isServer ? { 
-        name: st?.name, 
-        background_url: st?.background_url, 
-        back_background_url: st?.back_background_url, 
-        config: st?.config 
-      } : undefined,
-      frontData: designFront,
-      backData: designBack,
-      frontImageUrl, 
-      backImageUrl,  
-      thumbnailUrl
-    });
-    
-    // Show success message
-    alert('Item added to cart successfully!');
-    navigate("/cart");
-    
-  } catch (error) {
-    console.error('Error adding to cart:', error);
-    alert('Failed to add item to cart. Please try again.');
-  }
-};
+  };
 
 
   const buyCurrent = () => {
@@ -1179,13 +1930,13 @@ END:VCARD`;
                 const bg = t?.background_url || undefined;
                 const backBg = t?.back_background_url || t?.background_url || undefined;
                 const cfg: any = t?.config || {};
-                
+
                 // Get saved positions and sizes from config
                 const savedPositions = cfg.positions || {};
                 const savedSizes = cfg.sizes || {};
                 const savedPositionsBack = cfg.positionsBack || {};
                 const savedBackSizes = cfg.backSizes || {};
-                
+
                 // Use saved values or defaults
                 const effectivePositions = {
                   name: savedPositions.name || defaultPositions.name,
@@ -1193,14 +1944,14 @@ END:VCARD`;
                   company: savedPositions.company || defaultPositions.company,
                   logo: savedPositions.logo || defaultPositions.logo,
                 };
-                
+
                 const effectiveSizes = {
                   name: savedSizes.name || defaultSizes.name,
                   title: savedSizes.title || defaultSizes.title,
                   company: savedSizes.company || defaultSizes.company,
                   logo: savedSizes.logo || defaultSizes.logo,
                 };
-                
+
                 const effectivePositionsBack = {
                   email: savedPositionsBack.email || defaultPositionsBack.email,
                   phone: savedPositionsBack.phone || defaultPositionsBack.phone,
@@ -1208,7 +1959,7 @@ END:VCARD`;
                   address: savedPositionsBack.address || defaultPositionsBack.address,
                   qr: savedPositionsBack.qr || defaultPositionsBack.qr,
                 };
-                
+
                 const effectiveBackSizes = {
                   email: savedBackSizes.email || defaultBackSizes.email,
                   phone: savedBackSizes.phone || defaultBackSizes.phone,
@@ -1216,7 +1967,7 @@ END:VCARD`;
                   address: savedBackSizes.address || defaultBackSizes.address,
                   qr: savedBackSizes.qr || defaultBackSizes.qr,
                 };
-                
+
                 const fc = hasOverrides ? textColor : (cfg.fontColor || "#000000");
                 const fs = hasOverrides ? fontSize : (cfg.fontSize || 16);
                 const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
@@ -1266,7 +2017,7 @@ END:VCARD`;
                               />
                             </div>
                           )}
-                          
+
                           {/* Name with saved position */}
                           <div
                             style={{
@@ -1282,7 +2033,7 @@ END:VCARD`;
                           >
                             {data.name || "Your Name"}
                           </div>
-                          
+
                           {/* Title with saved position */}
                           <div
                             style={{
@@ -1297,7 +2048,7 @@ END:VCARD`;
                           >
                             {data.title || "Job Title"}
                           </div>
-                          
+
                           {/* Company with saved position */}
                           <div
                             style={{
@@ -1315,7 +2066,7 @@ END:VCARD`;
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Edit Mode - Load saved positions for editing */}
                       {isEditLayout && (
                         <div
@@ -1334,11 +2085,11 @@ END:VCARD`;
                             {/* Name - Use saved positions from config or current positions */}
                             <div
                               className="cursor-move select-none font-bold"
-                              style={{ 
-                                position: 'absolute', 
-                                left: `${positions.name.x}%`, 
-                                top: `${positions.name.y}%`, 
-                                fontFamily: ff, 
+                              style={{
+                                position: 'absolute',
+                                left: `${positions.name.x}%`,
+                                top: `${positions.name.y}%`,
+                                fontFamily: ff,
                                 fontSize: sizes.name * previewScale,
                                 color: fc,
                               }}
@@ -1353,17 +2104,17 @@ END:VCARD`;
                                 onTouchStart={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
                               />
                             </div>
-                            
+
                             {/* Title */}
                             <div
                               className="cursor-move select-none"
-                              style={{ 
-                                position: 'absolute', 
-                                left: `${positions.title.x}%`, 
-                                top: `${positions.title.y}%`, 
-                                color: accent, 
-                                fontFamily: ff, 
-                                fontSize: sizes.title * previewScale 
+                              style={{
+                                position: 'absolute',
+                                left: `${positions.title.x}%`,
+                                top: `${positions.title.y}%`,
+                                color: accent,
+                                fontFamily: ff,
+                                fontSize: sizes.title * previewScale
                               }}
                               onMouseDown={(e) => onDragStart('title', e)}
                               onTouchStart={(e) => onDragStart('title', e)}
@@ -1376,16 +2127,16 @@ END:VCARD`;
                                 onTouchStart={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
                               />
                             </div>
-                            
+
                             {/* Company */}
                             <div
                               className="cursor-move select-none opacity-80"
-                              style={{ 
-                                position: 'absolute', 
-                                left: `${positions.company.x}%`, 
-                                top: `${positions.company.y}%`, 
-                                fontFamily: ff, 
-                                fontSize: sizes.company * previewScale 
+                              style={{
+                                position: 'absolute',
+                                left: `${positions.company.x}%`,
+                                top: `${positions.company.y}%`,
+                                fontFamily: ff,
+                                fontSize: sizes.company * previewScale
                               }}
                               onMouseDown={(e) => onDragStart('company', e)}
                               onTouchStart={(e) => onDragStart('company', e)}
@@ -1440,7 +2191,7 @@ END:VCARD`;
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Back Side */}
                     <div ref={backRef} className="w-full max-w-full relative overflow-hidden">
                       <div className="wm-screen-only" data-watermark="screen-only" />
@@ -1461,14 +2212,14 @@ END:VCARD`;
                                 position: 'absolute',
                                 left: `${effectivePositionsBack.email.x}%`,
                                 top: `${effectivePositionsBack.email.y}%`,
-                                fontSize: `${effectiveBackSizes.email}px`,
+                                  fontSize: `${effectiveBackSizes.email * previewScale}px`,
                                 fontFamily: ff,
                                 color: fc,
                               }}
                             >
                               <strong style={{ color: accent }}>✉</strong> {data.email || 'email@example.com'}
                             </div>
-                            
+
                             <div
                               style={{
                                 position: 'absolute',
@@ -1481,7 +2232,7 @@ END:VCARD`;
                             >
                               <strong style={{ color: accent }}>✆</strong> {data.phone || '+91 00000 00000'}
                             </div>
-                            
+
                             <div
                               style={{
                                 position: 'absolute',
@@ -1494,7 +2245,7 @@ END:VCARD`;
                             >
                               <strong style={{ color: accent }}>⌂</strong> {data.website || 'your-website.com'}
                             </div>
-                            
+
                             <div
                               style={{
                                 position: 'absolute',
@@ -1507,7 +2258,7 @@ END:VCARD`;
                             >
                               <strong style={{ color: accent }}>📍</strong> {data.address || 'Your Address, City'}
                             </div>
-                            
+
                             <div
                               style={{
                                 position: 'absolute',
@@ -1516,9 +2267,9 @@ END:VCARD`;
                               }}
                             >
                               <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                <QRCodeSVG 
-                                  value={generateVCard()} 
-                                  size={effectiveBackSizes.qr} 
+                                <QRCodeSVG
+                                  value={generateVCard()}
+                                  size={effectiveBackSizes.qr}
                                   fgColor={qrColor}
                                   imageSettings={qrLogoUrl ? {
                                     src: qrLogoUrl,
@@ -1532,7 +2283,7 @@ END:VCARD`;
                           </div>
                         </div>
                       )}
-                      
+
                       {isEditLayout && (
                         <div
                           className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative"
@@ -1549,11 +2300,11 @@ END:VCARD`;
                           <div className="absolute inset-0">
                             <div
                               className="cursor-move select-none"
-                              style={{ 
-                                position: 'absolute', 
-                                left: `${positionsBack.email.x}%`, 
-                                top: `${positionsBack.email.y}%`, 
-                                fontSize: backSizes.email * previewScale 
+                              style={{
+                                position: 'absolute',
+                                left: `${positionsBack.email.x}%`,
+                                top: `${positionsBack.email.y}%`,
+                                fontSize: backSizes.email * previewScale
                               }}
                               onMouseDown={(e) => onBackDragStart('email', e)}
                               onTouchStart={(e) => onBackDragStart('email', e)}
@@ -1566,14 +2317,14 @@ END:VCARD`;
                                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
                               />
                             </div>
-                            
+
                             <div
                               className="cursor-move select-none"
-                              style={{ 
-                                position: 'absolute', 
-                                left: `${positionsBack.phone.x}%`, 
-                                top: `${positionsBack.phone.y}%`, 
-                                fontSize: backSizes.phone * previewScale 
+                              style={{
+                                position: 'absolute',
+                                left: `${positionsBack.phone.x}%`,
+                                top: `${positionsBack.phone.y}%`,
+                                fontSize: backSizes.phone * previewScale
                               }}
                               onMouseDown={(e) => onBackDragStart('phone', e)}
                               onTouchStart={(e) => onBackDragStart('phone', e)}
@@ -1586,14 +2337,14 @@ END:VCARD`;
                                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
                               />
                             </div>
-                            
+
                             <div
                               className="cursor-move select-none"
-                              style={{ 
-                                position: 'absolute', 
-                                left: `${positionsBack.website.x}%`, 
-                                top: `${positionsBack.website.y}%`, 
-                                fontSize: backSizes.website * previewScale 
+                              style={{
+                                position: 'absolute',
+                                left: `${positionsBack.website.x}%`,
+                                top: `${positionsBack.website.y}%`,
+                                fontSize: backSizes.website * previewScale
                               }}
                               onMouseDown={(e) => onBackDragStart('website', e)}
                               onTouchStart={(e) => onBackDragStart('website', e)}
@@ -1606,14 +2357,14 @@ END:VCARD`;
                                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
                               />
                             </div>
-                            
+
                             <div
                               className="cursor-move select-none"
-                              style={{ 
-                                position: 'absolute', 
-                                left: `${positionsBack.address.x}%`, 
-                                top: `${positionsBack.address.y}%`, 
-                                fontSize: backSizes.address * previewScale 
+                              style={{
+                                position: 'absolute',
+                                left: `${positionsBack.address.x}%`,
+                                top: `${positionsBack.address.y}%`,
+                                fontSize: backSizes.address * previewScale
                               }}
                               onMouseDown={(e) => onBackDragStart('address', e)}
                               onTouchStart={(e) => onBackDragStart('address', e)}
@@ -1626,21 +2377,21 @@ END:VCARD`;
                                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
                               />
                             </div>
-                            
+
                             <div
                               className="cursor-move select-none"
-                              style={{ 
-                                position: 'absolute', 
-                                left: `${positionsBack.qr.x}%`, 
-                                top: `${positionsBack.qr.y}%` 
+                              style={{
+                                position: 'absolute',
+                                left: `${positionsBack.qr.x}%`,
+                                top: `${positionsBack.qr.y}%`
                               }}
                               onMouseDown={(e) => onBackDragStart('qr', e)}
                               onTouchStart={(e) => onBackDragStart('qr', e)}
                             >
                               <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                <QRCodeSVG 
-                                  value={generateVCard()} 
-                                  size={backSizes.qr * previewScale} 
+                                <QRCodeSVG
+                                  value={generateVCard()}
+                                  size={backSizes.qr * previewScale}
                                   fgColor={qrColor}
                                   imageSettings={qrLogoUrl ? {
                                     src: qrLogoUrl,
@@ -1728,11 +2479,11 @@ END:VCARD`;
                           const fs = cfg.fontSize || 16;
                           const accent = cfg.accentColor || "#0ea5e9";
                           const ff = cfg.fontFamily || "Inter, Arial";
-                          
+
                           // Get saved positions from config
                           const savedPositions = cfg.positions || {};
                           const savedSizes = cfg.sizes || {};
-                          
+
                           // Use saved values or defaults for thumbnail preview
                           const thumbPositions = {
                             name: savedPositions.name || defaultPositions.name,
@@ -1740,7 +2491,7 @@ END:VCARD`;
                             company: savedPositions.company || defaultPositions.company,
                             logo: savedPositions.logo || defaultPositions.logo,
                           };
-                          
+
                           const thumbSizes = {
                             name: savedSizes.name || defaultSizes.name,
                             title: savedSizes.title || defaultSizes.title,
@@ -1789,7 +2540,7 @@ END:VCARD`;
                                     />
                                   </div>
                                 )}
-                                
+
                                 {/* Name in thumbnail with saved position */}
                                 <div
                                   style={{
@@ -1805,7 +2556,7 @@ END:VCARD`;
                                 >
                                   {data.name || "Your Name"}
                                 </div>
-                                
+
                                 {/* Title in thumbnail with saved position */}
                                 <div
                                   style={{
@@ -1820,7 +2571,7 @@ END:VCARD`;
                                 >
                                   {data.title || "Job Title"}
                                 </div>
-                                
+
                                 {/* Company in thumbnail with saved position */}
                                 <div
                                   style={{
@@ -1837,7 +2588,7 @@ END:VCARD`;
                                   {data.company || "Company"}
                                 </div>
                               </div>
-                              
+
                               {/* Template name overlay */}
                               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
                                 <p className="text-white font-medium text-sm truncate">
@@ -1890,3 +2641,40 @@ END:VCARD`;
     </div>
   );
 };
+
+const createFallbackImage = (text: string, width = 560, height = 320): string => {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  
+  if (!ctx) return '';
+  
+  // Create gradient background
+  const gradient = ctx.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, '#f3f4f6');
+  gradient.addColorStop(1, '#e5e7eb');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+  
+  // Add border
+  ctx.strokeStyle = '#d1d5db';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, width - 2, height - 2);
+  
+  // Add text
+  ctx.fillStyle = '#374151';
+  ctx.font = 'bold 20px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(text, width / 2, height / 2 - 20);
+  
+  ctx.font = '14px Arial';
+  ctx.fillStyle = '#6b7280';
+  ctx.fillText('Image Preview', width / 2, height / 2 + 10);
+  
+  return canvas.toDataURL('image/png');
+};
+
+// function createFallbackImage(arg0: string): string | PromiseLike<string> {
+//   throw new Error("Function not implemented.");
+// }
