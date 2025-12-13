@@ -14,8 +14,8 @@ import { apiFetch } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
 import { CustomizationPanel } from "./CustomizationPanel";
-import { generateCardImage } from "@/services/imageGenerator"; 
-import QRCode from 'qrcode'; 
+import { generateCardImage } from "@/services/imageGenerator";
+import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
 
 declare global {
@@ -419,7 +419,7 @@ export const TemplateSelector = ({
     setIsEditLayout(false);
   }, [selectedTemplate, sbTemplates]);
 
-  const [isUploading, setIsUploading] = useState(false); 
+  const [isUploading, setIsUploading] = useState(false);
 
   const generateVCard1 = () => {
     return `BEGIN:VCARD
@@ -436,13 +436,13 @@ END:VCARD`;
 
 
   //  Optimized function to generate card images
-  const generateCardImages = async (): Promise<{front: string, back: string, thumbnail: string}> => {
+  const generateCardImages = async (): Promise<{ front: string, back: string, thumbnail: string }> => {
     const isServer = selectedTemplate.startsWith("sb:");
     const serverId = isServer ? selectedTemplate.slice(3) : "";
     const st = isServer ? sbTemplates.find(x => x.id === serverId) : undefined;
-    
+
     // Generate vCard for QR code
-     const generateVCard = (): string => {
+    const generateVCard = (): string => {
       return `BEGIN:VCARD
 VERSION:3.0
 FN:${data.name || 'Your Name'}
@@ -454,10 +454,10 @@ URL:${data.website || 'your-website.com'}
 ADR:${data.address || 'Your Address, City'}
 END:VCARD`;
     };
-    
+
     const vCard = generateVCard();
     const qrColor = isServer ? (st?.config?.qrColor || "#000000") : "#000000";
-    
+
     // Generate QR code
     const QRCodeLib = (await import('qrcode')).default;
     const qrDataUrl = await QRCodeLib.toDataURL(vCard, {
@@ -608,11 +608,11 @@ END:VCARD`;
     try {
       const frontImage = await createCardSideHTML('front');
       const backImage = await createCardSideHTML('back');
-      
+
       return {
         front: frontImage,
         back: backImage,
-        thumbnail: frontImage 
+        thumbnail: frontImage
       };
     } catch (error) {
       console.error('Error generating card images:', error);
@@ -625,9 +625,9 @@ END:VCARD`;
     }
   };
 
-const addToCart = async () => {
+  const addToCart = async () => {
     setIsUploading(true);
-    
+
     try {
       const isServer = selectedTemplate.startsWith("sb:");
       const serverId = isServer ? selectedTemplate.slice(3) : "";
@@ -638,17 +638,17 @@ const addToCart = async () => {
 
       // Step 1: Generate card images (Base64)
       const { front: frontBase64, back: backBase64, thumbnail: thumbnailBase64 } = await generateCardImages();
-      
+
       // Step 2: Upload images to Cloudinary
       let frontImageUrl = '';
       let backImageUrl = '';
       let thumbnailUrl = '';
-      
+
       try {
         frontImageUrl = await uploadImageToCloudinary(frontBase64);
         backImageUrl = await uploadImageToCloudinary(backBase64);
         thumbnailUrl = await uploadImageToCloudinary(thumbnailBase64);
-        
+
         if (!frontImageUrl || !backImageUrl) {
           throw new Error("Failed to upload images to Cloudinary");
         }
@@ -744,10 +744,10 @@ END:VCARD`;
 
       // Step 4: Navigate to cart
       setShowCartSuccess(true);
-setTimeout(() => {
-  setShowCartSuccess(false);
-  navigate("/cart");
-}, 2000); // Auto-close after 2 seconds and navigate
+      setTimeout(() => {
+        setShowCartSuccess(false);
+        navigate("/cart");
+      }, 2000); // Auto-close after 2 seconds and navigate
     } catch (error) {
       console.error('Error adding to cart:', error);
       alert('Failed to add item to cart. Please try again.');
@@ -758,7 +758,7 @@ setTimeout(() => {
 
   const buyCurrent = async () => {
     setIsUploading(true);
-    
+
     try {
       if (!selectedTemplate) return;
 
@@ -770,15 +770,15 @@ setTimeout(() => {
 
       // Step 1: Generate card images
       const { front: frontBase64, back: backBase64 } = await generateCardImages();
-      
+
       // Step 2: Upload to Cloudinary
       let frontImageUrl = '';
       let backImageUrl = '';
-      
+
       try {
         frontImageUrl = await uploadImageToCloudinary(frontBase64);
         backImageUrl = await uploadImageToCloudinary(backBase64);
-        
+
         if (!frontImageUrl || !backImageUrl) {
           throw new Error("Failed to upload images to Cloudinary");
         }
@@ -797,7 +797,7 @@ setTimeout(() => {
         accentColor,
         isEditLayout,
       };
-      
+
       const designBack = {
         positionsBack,
         backSizes,
@@ -958,10 +958,19 @@ setTimeout(() => {
 
                   return (
                     <>
-                      <div
+                      {/* <div
                         ref={previewContainerRef}
                         className="relative overflow-hidden mx-auto"
                         style={{ maxWidth: "450px" }}
+                      > */}
+                      <div
+                        ref={previewContainerRef}
+                        className="relative overflow-hidden mx-auto"
+                        style={{
+                          maxWidth: "560px",
+                          width: "100%",
+                          height: `${320 * previewScale}px`
+                        }}
                       >
                         <div
                           className="origin-top-left"
@@ -1003,9 +1012,10 @@ setTimeout(() => {
                                 }}
                               >
                                 <div className="absolute inset-0">
+                                  {/* Name */}
                                   <div
                                     className="cursor-move select-none font-bold"
-                                    style={{ position: 'absolute', left: `${positions.name.x}%`, top: `${positions.name.y}%`, fontSize: sizes.name * previewScale }}
+                                    style={{ position: 'absolute', left: `${positions.name.x}%`, top: `${positions.name.y}%`, fontSize: sizes.name }}
                                     onMouseDown={(e) => onDragStart('name', e)}
                                     onTouchStart={(e) => onDragStart('name', e)}
                                   >
@@ -1017,9 +1027,11 @@ setTimeout(() => {
                                       onTouchStart={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
                                     />
                                   </div>
+
+                                  {/* Title */}
                                   <div
                                     className="cursor-move select-none"
-                                    style={{ position: 'absolute', left: `${positions.title.x}%`, top: `${positions.title.y}%`, color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor, fontSize: sizes.title * previewScale }}
+                                    style={{ position: 'absolute', left: `${positions.title.x}%`, top: `${positions.title.y}%`, color: hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor, fontSize: sizes.title }}
                                     onMouseDown={(e) => onDragStart('title', e)}
                                     onTouchStart={(e) => onDragStart('title', e)}
                                   >
@@ -1031,9 +1043,11 @@ setTimeout(() => {
                                       onTouchStart={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
                                     />
                                   </div>
+
+                                  {/* Company */}
                                   <div
                                     className="cursor-move select-none opacity-80"
-                                    style={{ position: 'absolute', left: `${positions.company.x}%`, top: `${positions.company.y}%`, fontSize: sizes.company * previewScale }}
+                                    style={{ position: 'absolute', left: `${positions.company.x}%`, top: `${positions.company.y}%`, fontSize: sizes.company }}
                                     onMouseDown={(e) => onDragStart('company', e)}
                                     onTouchStart={(e) => onDragStart('company', e)}
                                   >
@@ -1052,10 +1066,19 @@ setTimeout(() => {
                         </div>
                       </div>
 
-                      <div
+                      {/* <div
                         ref={previewContainerRef}
                         className="relative overflow-hidden mx-auto"
                         style={{ maxWidth: "450px" }}
+                      > */}
+                      <div
+                        ref={previewContainerRef}
+                        className="relative overflow-hidden mx-auto"
+                        style={{
+                          maxWidth: "560px",
+                          width: "100%",
+                          height: `${320 * previewScale}px`
+                        }}
                       >
                         <div
                           className="origin-top-left"
@@ -1101,7 +1124,7 @@ setTimeout(() => {
                                 <div className="absolute inset-0">
                                   <div
                                     className="cursor-move select-none"
-                                    style={{ position: 'absolute', left: `${positionsBack.email.x}%`, top: `${positionsBack.email.y}%`, fontSize: backSizes.email * previewScale }}
+                                    style={{ position: 'absolute', left: `${positionsBack.email.x}%`, top: `${positionsBack.email.y}%`, fontSize: backSizes.email }}
                                     onMouseDown={(e) => onBackDragStart('email', e)}
                                     onTouchStart={(e) => onBackDragStart('email', e)}
                                   >
@@ -1115,7 +1138,7 @@ setTimeout(() => {
                                   </div>
                                   <div
                                     className="cursor-move select-none"
-                                    style={{ position: 'absolute', left: `${positionsBack.phone.x}%`, top: `${positionsBack.phone.y}%`, fontSize: backSizes.phone * previewScale }}
+                                    style={{ position: 'absolute', left: `${positionsBack.phone.x}%`, top: `${positionsBack.phone.y}%`, fontSize: backSizes.phone }}
                                     onMouseDown={(e) => onBackDragStart('phone', e)}
                                     onTouchStart={(e) => onBackDragStart('phone', e)}
                                   >
@@ -1129,7 +1152,7 @@ setTimeout(() => {
                                   </div>
                                   <div
                                     className="cursor-move select-none"
-                                    style={{ position: 'absolute', left: `${positionsBack.website.x}%`, top: `${positionsBack.website.y}%`, fontSize: backSizes.website * previewScale }}
+                                    style={{ position: 'absolute', left: `${positionsBack.website.x}%`, top: `${positionsBack.website.y}%`, fontSize: backSizes.website }}
                                     onMouseDown={(e) => onBackDragStart('website', e)}
                                     onTouchStart={(e) => onBackDragStart('website', e)}
                                   >
@@ -1143,7 +1166,7 @@ setTimeout(() => {
                                   </div>
                                   <div
                                     className="cursor-move select-none"
-                                    style={{ position: 'absolute', left: `${positionsBack.address.x}%`, top: `${positionsBack.address.y}%`, fontSize: backSizes.address * previewScale }}
+                                    style={{ position: 'absolute', left: `${positionsBack.address.x}%`, top: `${positionsBack.address.y}%`, fontSize: backSizes.address }}
                                     onMouseDown={(e) => onBackDragStart('address', e)}
                                     onTouchStart={(e) => onBackDragStart('address', e)}
                                   >
@@ -1162,7 +1185,7 @@ setTimeout(() => {
                                     onTouchStart={(e) => onBackDragStart('qr', e)}
                                   >
                                     <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                      <QRCodeSVG value={generateVCard()} size={backSizes.qr * previewScale} />
+                                      <QRCodeSVG value={generateVCard()} size={backSizes.qr} />
                                     </div>
                                     <span
                                       className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
@@ -1235,442 +1258,672 @@ setTimeout(() => {
                 const generateVCard = (): string => generateVCard1();
 
 
+                // return (
+                //   <>
+                //     {/* Front Side */}
+                //     <div ref={previewRef} className="w-full max-w-full relative overflow-hidden">
+                //       <div className="wm-screen-only" data-watermark="screen-only" />
+                //       {!isEditLayout && (
+                //         <div
+                //           className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
+                //           style={{
+                //             backgroundColor: bg ? undefined : "#f3f4f6",
+                //             backgroundImage: bg ? `url(${bg})` : undefined,
+                //             backgroundSize: "cover",
+                //             backgroundPosition: "center",
+                //             color: fc,
+                //             fontFamily: ff,
+                //             fontSize: `${fs}px`,
+                //           }}
+                //         >
+                //           {/* Logo - if exists and has saved position */}
+                //           {data.logo && effectivePositions.logo && (
+                //             <div
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${effectivePositions.logo.x}%`,
+                //                 top: `${effectivePositions.logo.y}%`,
+                //                 width: effectiveSizes.logo,
+                //                 height: effectiveSizes.logo,
+                //                 borderRadius: "50%",
+                //                 overflow: "hidden",
+                //                 backgroundColor: "white",
+                //                 border: "2px solid white",
+                //                 boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                //                 zIndex: 10,
+                //               }}
+                //             >
+                //               <img
+                //                 src={data.logo}
+                //                 alt="Logo"
+                //                 className="w-full h-full object-cover"
+                //               />
+                //             </div>
+                //           )}
+
+                //           {/* Name with saved position */}
+                //           <div
+                //             style={{
+                //               position: 'absolute',
+                //               left: `${effectivePositions.name.x}%`,
+                //               top: `${effectivePositions.name.y}%`,
+                //               fontSize: `${effectiveSizes.name}px`,
+                //               fontFamily: ff,
+                //               fontWeight: 'bold',
+                //               color: fc,
+                //               zIndex: 5,
+                //             }}
+                //           >
+                //             {data.name || "Your Name"}
+                //           </div>
+
+                //           {/* Title with saved position */}
+                //           <div
+                //             style={{
+                //               position: 'absolute',
+                //               left: `${effectivePositions.title.x}%`,
+                //               top: `${effectivePositions.title.y}%`,
+                //               fontSize: `${effectiveSizes.title}px`,
+                //               fontFamily: ff,
+                //               color: accent,
+                //               zIndex: 5,
+                //             }}
+                //           >
+                //             {data.title || "Job Title"}
+                //           </div>
+
+                //           {/* Company with saved position */}
+                //           <div
+                //             style={{
+                //               position: 'absolute',
+                //               left: `${effectivePositions.company.x}%`,
+                //               top: `${effectivePositions.company.y}%`,
+                //               fontSize: `${effectiveSizes.company}px`,
+                //               fontFamily: ff,
+                //               color: fc,
+                //               opacity: 0.8,
+                //               zIndex: 5,
+                //             }}
+                //           >
+                //             {data.company || "Company"}
+                //           </div>
+                //         </div>
+                //       )}
+
+                //       {/* Edit Mode - Load saved positions for editing */}
+                //       {isEditLayout && (
+                //         <div
+                //           className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
+                //           style={{
+                //             backgroundColor: bg ? undefined : "#f3f4f6",
+                //             backgroundImage: bg ? `url(${bg})` : undefined,
+                //             backgroundSize: "cover",
+                //             backgroundPosition: "center",
+                //             color: fc,
+                //             fontFamily: ff,
+                //             fontSize: `${fs}px`,
+                //           }}
+                //         >
+                //           <div className="absolute inset-0">
+                //             {/* Name - Use saved positions from config or current positions */}
+                //             <div
+                //               className="cursor-move select-none font-bold"
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${positions.name.x}%`,
+                //                 top: `${positions.name.y}%`,
+                //                 fontFamily: ff,
+                //                 fontSize: sizes.name * previewScale,
+                //                 color: fc,
+                //               }}
+                //               onMouseDown={(e) => onDragStart('name', e)}
+                //               onTouchStart={(e) => onDragStart('name', e)}
+                //             >
+                //               {data.name || 'Your Name'}
+                //               <span
+                //                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                //                 style={{ right: -6, bottom: -6 }}
+                //                 onMouseDown={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
+                //                 onTouchStart={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
+                //               />
+                //             </div>
+
+                //             {/* Title */}
+                //             <div
+                //               className="cursor-move select-none"
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${positions.title.x}%`,
+                //                 top: `${positions.title.y}%`,
+                //                 color: accent,
+                //                 fontFamily: ff,
+                //                 fontSize: sizes.title * previewScale
+                //               }}
+                //               onMouseDown={(e) => onDragStart('title', e)}
+                //               onTouchStart={(e) => onDragStart('title', e)}
+                //             >
+                //               {data.title || 'Job Title'}
+                //               <span
+                //                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                //                 style={{ right: -6, bottom: -6 }}
+                //                 onMouseDown={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
+                //                 onTouchStart={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
+                //               />
+                //             </div>
+
+                //             {/* Company */}
+                //             <div
+                //               className="cursor-move select-none opacity-80"
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${positions.company.x}%`,
+                //                 top: `${positions.company.y}%`,
+                //                 fontFamily: ff,
+                //                 fontSize: sizes.company * previewScale
+                //               }}
+                //               onMouseDown={(e) => onDragStart('company', e)}
+                //               onTouchStart={(e) => onDragStart('company', e)}
+                //             >
+                //               {data.company || 'Company'}
+                //               <span
+                //                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                //                 style={{ right: -6, bottom: -6 }}
+                //                 onMouseDown={(e) => { e.stopPropagation(); onResizeStart('company', e); }}
+                //                 onTouchStart={(e) => { e.stopPropagation(); onResizeStart('company', e); }}
+                //               />
+                //             </div>
+
+                //             {/* Logo with saved position */}
+                //             {data.logo && (
+                //               <div
+                //                 className="cursor-move select-none"
+                //                 style={{
+                //                   position: "absolute",
+                //                   left: `${positions.logo.x}%`,
+                //                   top: `${positions.logo.y}%`,
+                //                   width: sizes.logo,
+                //                   height: sizes.logo,
+                //                   borderRadius: "9999px",
+                //                   overflow: "hidden",
+                //                   backgroundColor: "rgba(255,255,255,0.9)",
+                //                 }}
+                //                 onMouseDown={(e) => onDragStart("logo", e)}
+                //                 onTouchStart={(e) => onDragStart("logo", e)}
+                //               >
+                //                 <img
+                //                   src={data.logo}
+                //                   alt="logo"
+                //                   className="w-full h-full object-cover"
+                //                   crossOrigin="anonymous"
+                //                 />
+                //                 <span
+                //                   className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                //                   style={{ right: -6, bottom: -6 }}
+                //                   onMouseDown={(e) => {
+                //                     e.stopPropagation();
+                //                     onResizeStart("logo", e);
+                //                   }}
+                //                   onTouchStart={(e) => {
+                //                     e.stopPropagation();
+                //                     onResizeStart("logo", e);
+                //                   }}
+                //                 />
+                //               </div>
+                //             )}
+                //           </div>
+                //         </div>
+                //       )}
+                //     </div>
+
+                //     {/* Back Side */}
+                //     <div ref={backRef} className="w-full max-w-full relative overflow-hidden">
+                //       <div className="wm-screen-only" data-watermark="screen-only" />
+                //       {!isEditLayout && (
+                //         <div
+                //           className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden"
+                //           style={{
+                //             backgroundColor: backBg ? undefined : "#f3f4f6",
+                //             backgroundImage: backBg ? `url(${backBg})` : undefined,
+                //             backgroundSize: "cover",
+                //             backgroundPosition: "center",
+                //           }}
+                //         >
+                //           <div className="w-full h-full p-4 relative">
+                //             {/* Back side elements with saved positions */}
+                //             <div
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${effectivePositionsBack.email.x}%`,
+                //                 top: `${effectivePositionsBack.email.y}%`,
+                //                 fontSize: `${effectiveBackSizes.email}px`,
+                //                 fontFamily: ff,
+                //                 color: fc,
+                //               }}
+                //             >
+                //               <strong style={{ color: accent }}>✉</strong> {data.email || 'email@example.com'}
+                //             </div>
+
+                //             <div
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${effectivePositionsBack.phone.x}%`,
+                //                 top: `${effectivePositionsBack.phone.y}%`,
+                //                 fontSize: `${effectiveBackSizes.phone}px`,
+                //                 fontFamily: ff,
+                //                 color: fc,
+                //               }}
+                //             >
+                //               <strong style={{ color: accent }}>✆</strong> {data.phone || '+91 00000 00000'}
+                //             </div>
+
+                //             <div
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${effectivePositionsBack.website.x}%`,
+                //                 top: `${effectivePositionsBack.website.y}%`,
+                //                 fontSize: `${effectiveBackSizes.website}px`,
+                //                 fontFamily: ff,
+                //                 color: fc,
+                //               }}
+                //             >
+                //               <strong style={{ color: accent }}>⌂</strong> {data.website || 'your-website.com'}
+                //             </div>
+
+                //             <div
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${effectivePositionsBack.address.x}%`,
+                //                 top: `${effectivePositionsBack.address.y}%`,
+                //                 fontSize: `${effectiveBackSizes.address}px`,
+                //                 fontFamily: ff,
+                //                 color: fc,
+                //               }}
+                //             >
+                //               <strong style={{ color: accent }}>📍</strong> {data.address || 'Your Address, City'}
+                //             </div>
+
+                //             <div
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${effectivePositionsBack.qr.x}%`,
+                //                 top: `${effectivePositionsBack.qr.y}%`,
+                //               }}
+                //             >
+                //               <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
+                //                 <QRCodeSVG
+                //                   value={generateVCard()}
+                //                   size={effectiveBackSizes.qr}
+                //                   fgColor={qrColor}
+                //                   imageSettings={qrLogoUrl ? {
+                //                     src: qrLogoUrl,
+                //                     height: 24,
+                //                     width: 24,
+                //                     excavate: true,
+                //                   } : undefined}
+                //                 />
+                //               </div>
+                //             </div>
+                //           </div>
+                //         </div>
+                //       )}
+
+                //       {isEditLayout && (
+                //         <div
+                //           className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative"
+                //           style={{
+                //             backgroundColor: backBg ? undefined : "#f3f4f6",
+                //             backgroundImage: backBg ? `url(${backBg})` : undefined,
+                //             backgroundSize: "cover",
+                //             backgroundPosition: "center",
+                //             color: fc,
+                //             fontFamily: ff,
+                //             fontSize: `${fs}px`,
+                //           }}
+                //         >
+                //           <div className="absolute inset-0">
+                //             <div
+                //               className="cursor-move select-none"
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${positionsBack.email.x}%`,
+                //                 top: `${positionsBack.email.y}%`,
+                //                 fontSize: backSizes.email * previewScale
+                //               }}
+                //               onMouseDown={(e) => onBackDragStart('email', e)}
+                //               onTouchStart={(e) => onBackDragStart('email', e)}
+                //             >
+                //               <strong style={{ color: accent }}>✉</strong> {data.email || 'email@example.com'}
+                //               <span
+                //                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                //                 style={{ right: -6, bottom: -6 }}
+                //                 onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
+                //                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
+                //               />
+                //             </div>
+
+                //             <div
+                //               className="cursor-move select-none"
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${positionsBack.phone.x}%`,
+                //                 top: `${positionsBack.phone.y}%`,
+                //                 fontSize: backSizes.phone * previewScale
+                //               }}
+                //               onMouseDown={(e) => onBackDragStart('phone', e)}
+                //               onTouchStart={(e) => onBackDragStart('phone', e)}
+                //             >
+                //               <strong style={{ color: accent }}>✆</strong> {data.phone || '+91 00000 00000'}
+                //               <span
+                //                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                //                 style={{ right: -6, bottom: -6 }}
+                //                 onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
+                //                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
+                //               />
+                //             </div>
+
+                //             <div
+                //               className="cursor-move select-none"
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${positionsBack.website.x}%`,
+                //                 top: `${positionsBack.website.y}%`,
+                //                 fontSize: backSizes.website * previewScale
+                //               }}
+                //               onMouseDown={(e) => onBackDragStart('website', e)}
+                //               onTouchStart={(e) => onBackDragStart('website', e)}
+                //             >
+                //               <strong style={{ color: accent }}>⌂</strong> {data.website || 'your-website.com'}
+                //               <span
+                //                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                //                 style={{ right: -6, bottom: -6 }}
+                //                 onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
+                //                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
+                //               />
+                //             </div>
+
+                //             <div
+                //               className="cursor-move select-none"
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${positionsBack.address.x}%`,
+                //                 top: `${positionsBack.address.y}%`,
+                //                 fontSize: backSizes.address * previewScale
+                //               }}
+                //               onMouseDown={(e) => onBackDragStart('address', e)}
+                //               onTouchStart={(e) => onBackDragStart('address', e)}
+                //             >
+                //               <strong style={{ color: accent }}>📍</strong> {data.address || 'Your Address, City'}
+                //               <span
+                //                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                //                 style={{ right: -6, bottom: -6 }}
+                //                 onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
+                //                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
+                //               />
+                //             </div>
+
+                //             <div
+                //               className="cursor-move select-none"
+                //               style={{
+                //                 position: 'absolute',
+                //                 left: `${positionsBack.qr.x}%`,
+                //                 top: `${positionsBack.qr.y}%`
+                //               }}
+                //               onMouseDown={(e) => onBackDragStart('qr', e)}
+                //               onTouchStart={(e) => onBackDragStart('qr', e)}
+                //             >
+                //               <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
+                //                 <QRCodeSVG
+                //                   value={generateVCard()}
+                //                   size={backSizes.qr * previewScale}
+                //                   fgColor={qrColor}
+                //                   imageSettings={qrLogoUrl ? {
+                //                     src: qrLogoUrl,
+                //                     height: 24,
+                //                     width: 24,
+                //                     excavate: true,
+                //                   } : undefined}
+                //                 />
+                //               </div>
+                //               <span
+                //                 className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+                //                 style={{ right: -6, bottom: -6 }}
+                //                 onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('qr', e); }}
+                //                 onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('qr', e); }}
+                //               />
+                //             </div>
+                //           </div>
+                //         </div>
+                //       )}
+                //     </div>
+                //   </>
+                // );
                 return (
                   <>
-                    {/* Front Side */}
-                    <div ref={previewRef} className="w-full max-w-full relative overflow-hidden">
-                      <div className="wm-screen-only" data-watermark="screen-only" />
-                      {!isEditLayout && (
-                        <div
-                          className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
-                          style={{
-                            backgroundColor: bg ? undefined : "#f3f4f6",
-                            backgroundImage: bg ? `url(${bg})` : undefined,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            color: fc,
-                            fontFamily: ff,
-                            fontSize: `${fs}px`,
-                          }}
-                        >
-                          {/* Logo - if exists and has saved position */}
-                          {data.logo && effectivePositions.logo && (
+                    {/* --- FRONT SIDE (Fixed with Scale) --- */}
+                    <div
+                      ref={previewContainerRef}
+                      className="relative overflow-hidden mx-auto"
+                      style={{
+                        width: "100%",
+                        height: `${320 * previewScale}px` // Dynamic Height
+                      }}
+                    >
+                      <div
+                        className="origin-top-left"
+                        style={{
+                          width: "560px", // Fixed logical width
+                          height: "320px",
+                          transform: `scale(${previewScale})`, // Scale down based on screen width
+                          transformOrigin: "top left",
+                        }}
+                      >
+                        <div ref={previewRef} className="w-full h-full relative overflow-hidden">
+                          <div className="wm-screen-only" data-watermark="screen-only" />
+
+                          {/* Card Background & Content */}
+                          <div
+                            className="w-full h-full rounded-lg border overflow-hidden p-4 relative"
+                            style={{
+                              backgroundColor: bg ? undefined : "#f3f4f6",
+                              backgroundImage: bg ? `url(${bg})` : undefined,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              color: fc,
+                              fontFamily: ff,
+                              fontSize: `${fs}px`,
+                            }}
+                          >
+                            {/* Logo */}
+                            {data.logo && effectivePositions.logo && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  left: `${effectivePositions.logo.x}%`,
+                                  top: `${effectivePositions.logo.y}%`,
+                                  width: effectiveSizes.logo,
+                                  height: effectiveSizes.logo,
+                                  borderRadius: "50%",
+                                  overflow: "hidden",
+                                  backgroundColor: "white",
+                                  border: "2px solid white",
+                                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                                  zIndex: 10,
+                                }}
+                              >
+                                <img src={data.logo} alt="Logo" className="w-full h-full object-cover" />
+                              </div>
+                            )}
+
+                            {/* Name */}
                             <div
                               style={{
                                 position: 'absolute',
-                                left: `${effectivePositions.logo.x}%`,
-                                top: `${effectivePositions.logo.y}%`,
-                                width: effectiveSizes.logo,
-                                height: effectiveSizes.logo,
-                                borderRadius: "50%",
-                                overflow: "hidden",
-                                backgroundColor: "white",
-                                border: "2px solid white",
-                                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                                zIndex: 10,
-                              }}
-                            >
-                              <img
-                                src={data.logo}
-                                alt="Logo"
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-
-                          {/* Name with saved position */}
-                          <div
-                            style={{
-                              position: 'absolute',
-                              left: `${effectivePositions.name.x}%`,
-                              top: `${effectivePositions.name.y}%`,
-                              fontSize: `${effectiveSizes.name}px`,
-                              fontFamily: ff,
-                              fontWeight: 'bold',
-                              color: fc,
-                              zIndex: 5,
-                            }}
-                          >
-                            {data.name || "Your Name"}
-                          </div>
-
-                          {/* Title with saved position */}
-                          <div
-                            style={{
-                              position: 'absolute',
-                              left: `${effectivePositions.title.x}%`,
-                              top: `${effectivePositions.title.y}%`,
-                              fontSize: `${effectiveSizes.title}px`,
-                              fontFamily: ff,
-                              color: accent,
-                              zIndex: 5,
-                            }}
-                          >
-                            {data.title || "Job Title"}
-                          </div>
-
-                          {/* Company with saved position */}
-                          <div
-                            style={{
-                              position: 'absolute',
-                              left: `${effectivePositions.company.x}%`,
-                              top: `${effectivePositions.company.y}%`,
-                              fontSize: `${effectiveSizes.company}px`,
-                              fontFamily: ff,
-                              color: fc,
-                              opacity: 0.8,
-                              zIndex: 5,
-                            }}
-                          >
-                            {data.company || "Company"}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Edit Mode - Load saved positions for editing */}
-                      {isEditLayout && (
-                        <div
-                          className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
-                          style={{
-                            backgroundColor: bg ? undefined : "#f3f4f6",
-                            backgroundImage: bg ? `url(${bg})` : undefined,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            color: fc,
-                            fontFamily: ff,
-                            fontSize: `${fs}px`,
-                          }}
-                        >
-                          <div className="absolute inset-0">
-                            {/* Name - Use saved positions from config or current positions */}
-                            <div
-                              className="cursor-move select-none font-bold"
-                              style={{
-                                position: 'absolute',
-                                left: `${positions.name.x}%`,
-                                top: `${positions.name.y}%`,
+                                left: `${effectivePositions.name.x}%`,
+                                top: `${effectivePositions.name.y}%`,
+                                fontSize: `${effectiveSizes.name}px`,
                                 fontFamily: ff,
-                                fontSize: sizes.name * previewScale,
+                                fontWeight: 'bold',
                                 color: fc,
+                                zIndex: 5,
+                                whiteSpace: "nowrap"
                               }}
-                              onMouseDown={(e) => onDragStart('name', e)}
-                              onTouchStart={(e) => onDragStart('name', e)}
                             >
-                              {data.name || 'Your Name'}
-                              <span
-                                className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                style={{ right: -6, bottom: -6 }}
-                                onMouseDown={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
-                                onTouchStart={(e) => { e.stopPropagation(); onResizeStart('name', e); }}
-                              />
+                              {data.name || "Your Name"}
                             </div>
 
                             {/* Title */}
                             <div
-                              className="cursor-move select-none"
                               style={{
                                 position: 'absolute',
-                                left: `${positions.title.x}%`,
-                                top: `${positions.title.y}%`,
-                                color: accent,
+                                left: `${effectivePositions.title.x}%`,
+                                top: `${effectivePositions.title.y}%`,
+                                fontSize: `${effectiveSizes.title}px`,
                                 fontFamily: ff,
-                                fontSize: sizes.title * previewScale
+                                color: accent,
+                                zIndex: 5,
+                                whiteSpace: "nowrap"
                               }}
-                              onMouseDown={(e) => onDragStart('title', e)}
-                              onTouchStart={(e) => onDragStart('title', e)}
                             >
-                              {data.title || 'Job Title'}
-                              <span
-                                className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                style={{ right: -6, bottom: -6 }}
-                                onMouseDown={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
-                                onTouchStart={(e) => { e.stopPropagation(); onResizeStart('title', e); }}
-                              />
+                              {data.title || "Job Title"}
                             </div>
 
                             {/* Company */}
                             <div
-                              className="cursor-move select-none opacity-80"
                               style={{
                                 position: 'absolute',
-                                left: `${positions.company.x}%`,
-                                top: `${positions.company.y}%`,
+                                left: `${effectivePositions.company.x}%`,
+                                top: `${effectivePositions.company.y}%`,
+                                fontSize: `${effectiveSizes.company}px`,
                                 fontFamily: ff,
-                                fontSize: sizes.company * previewScale
+                                color: fc,
+                                opacity: 0.8,
+                                zIndex: 5,
+                                whiteSpace: "nowrap"
                               }}
-                              onMouseDown={(e) => onDragStart('company', e)}
-                              onTouchStart={(e) => onDragStart('company', e)}
                             >
-                              {data.company || 'Company'}
-                              <span
-                                className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                style={{ right: -6, bottom: -6 }}
-                                onMouseDown={(e) => { e.stopPropagation(); onResizeStart('company', e); }}
-                                onTouchStart={(e) => { e.stopPropagation(); onResizeStart('company', e); }}
-                              />
+                              {data.company || "Company"}
                             </div>
-
-                            {/* Logo with saved position */}
-                            {data.logo && (
-                              <div
-                                className="cursor-move select-none"
-                                style={{
-                                  position: "absolute",
-                                  left: `${positions.logo.x}%`,
-                                  top: `${positions.logo.y}%`,
-                                  width: sizes.logo,
-                                  height: sizes.logo,
-                                  borderRadius: "9999px",
-                                  overflow: "hidden",
-                                  backgroundColor: "rgba(255,255,255,0.9)",
-                                }}
-                                onMouseDown={(e) => onDragStart("logo", e)}
-                                onTouchStart={(e) => onDragStart("logo", e)}
-                              >
-                                <img
-                                  src={data.logo}
-                                  alt="logo"
-                                  className="w-full h-full object-cover"
-                                  crossOrigin="anonymous"
-                                />
-                                <span
-                                  className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                  style={{ right: -6, bottom: -6 }}
-                                  onMouseDown={(e) => {
-                                    e.stopPropagation();
-                                    onResizeStart("logo", e);
-                                  }}
-                                  onTouchStart={(e) => {
-                                    e.stopPropagation();
-                                    onResizeStart("logo", e);
-                                  }}
-                                />
-                              </div>
-                            )}
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
 
-                    {/* Back Side */}
-                    <div ref={backRef} className="w-full max-w-full relative overflow-hidden">
-                      <div className="wm-screen-only" data-watermark="screen-only" />
-                      {!isEditLayout && (
-                        <div
-                          className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden"
-                          style={{
-                            backgroundColor: backBg ? undefined : "#f3f4f6",
-                            backgroundImage: backBg ? `url(${backBg})` : undefined,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                          }}
-                        >
-                          <div className="w-full h-full p-4 relative">
-                            {/* Back side elements with saved positions */}
-                            <div
-                              style={{
-                                position: 'absolute',
-                                left: `${effectivePositionsBack.email.x}%`,
-                                top: `${effectivePositionsBack.email.y}%`,
-                                fontSize: `${effectiveBackSizes.email}px`,
-                                fontFamily: ff,
-                                color: fc,
-                              }}
-                            >
-                              <strong style={{ color: accent }}>✉</strong> {data.email || 'email@example.com'}
-                            </div>
+                    {/* --- BACK SIDE (Fixed with Scale) --- */}
+                    <div
+                      className="relative overflow-hidden mx-auto mt-4" // mt-4 for gap between cards
+                      style={{
+                        width: "100%",
+                        height: `${320 * previewScale}px`
+                      }}
+                    >
+                      <div
+                        className="origin-top-left"
+                        style={{
+                          width: "560px",
+                          height: "320px",
+                          transform: `scale(${previewScale})`,
+                          transformOrigin: "top left",
+                        }}
+                      >
+                        <div ref={backRef} className="w-full h-full relative overflow-hidden">
+                          <div className="wm-screen-only" data-watermark="screen-only" />
 
-                            <div
-                              style={{
-                                position: 'absolute',
-                                left: `${effectivePositionsBack.phone.x}%`,
-                                top: `${effectivePositionsBack.phone.y}%`,
-                                fontSize: `${effectiveBackSizes.phone}px`,
-                                fontFamily: ff,
-                                color: fc,
-                              }}
-                            >
-                              <strong style={{ color: accent }}>✆</strong> {data.phone || '+91 00000 00000'}
-                            </div>
+                          <div
+                            className="w-full h-full rounded-lg border overflow-hidden relative"
+                            style={{
+                              backgroundColor: backBg ? undefined : "#f3f4f6",
+                              backgroundImage: backBg ? `url(${backBg})` : undefined,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }}
+                          >
+                            <div className="w-full h-full p-4 relative">
+                              {/* Email */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  left: `${effectivePositionsBack.email.x}%`,
+                                  top: `${effectivePositionsBack.email.y}%`,
+                                  fontSize: `${effectiveBackSizes.email}px`,
+                                  fontFamily: ff,
+                                  color: fc,
+                                  whiteSpace: "nowrap"
+                                }}
+                              >
+                                <strong style={{ color: accent }}>✉</strong> {data.email || 'email@example.com'}
+                              </div>
 
-                            <div
-                              style={{
-                                position: 'absolute',
-                                left: `${effectivePositionsBack.website.x}%`,
-                                top: `${effectivePositionsBack.website.y}%`,
-                                fontSize: `${effectiveBackSizes.website}px`,
-                                fontFamily: ff,
-                                color: fc,
-                              }}
-                            >
-                              <strong style={{ color: accent }}>⌂</strong> {data.website || 'your-website.com'}
-                            </div>
+                              {/* Phone */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  left: `${effectivePositionsBack.phone.x}%`,
+                                  top: `${effectivePositionsBack.phone.y}%`,
+                                  fontSize: `${effectiveBackSizes.phone}px`,
+                                  fontFamily: ff,
+                                  color: fc,
+                                  whiteSpace: "nowrap"
+                                }}
+                              >
+                                <strong style={{ color: accent }}>✆</strong> {data.phone || '+91 00000 00000'}
+                              </div>
 
-                            <div
-                              style={{
-                                position: 'absolute',
-                                left: `${effectivePositionsBack.address.x}%`,
-                                top: `${effectivePositionsBack.address.y}%`,
-                                fontSize: `${effectiveBackSizes.address}px`,
-                                fontFamily: ff,
-                                color: fc,
-                              }}
-                            >
-                              <strong style={{ color: accent }}>📍</strong> {data.address || 'Your Address, City'}
-                            </div>
+                              {/* Website */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  left: `${effectivePositionsBack.website.x}%`,
+                                  top: `${effectivePositionsBack.website.y}%`,
+                                  fontSize: `${effectiveBackSizes.website}px`,
+                                  fontFamily: ff,
+                                  color: fc,
+                                  whiteSpace: "nowrap"
+                                }}
+                              >
+                                <strong style={{ color: accent }}>⌂</strong> {data.website || 'your-website.com'}
+                              </div>
 
-                            <div
-                              style={{
-                                position: 'absolute',
-                                left: `${effectivePositionsBack.qr.x}%`,
-                                top: `${effectivePositionsBack.qr.y}%`,
-                              }}
-                            >
-                              <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                <QRCodeSVG
-                                  value={generateVCard()}
-                                  size={effectiveBackSizes.qr}
-                                  fgColor={qrColor}
-                                  imageSettings={qrLogoUrl ? {
-                                    src: qrLogoUrl,
-                                    height: 24,
-                                    width: 24,
-                                    excavate: true,
-                                  } : undefined}
-                                />
+                              {/* Address */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  left: `${effectivePositionsBack.address.x}%`,
+                                  top: `${effectivePositionsBack.address.y}%`,
+                                  fontSize: `${effectiveBackSizes.address}px`,
+                                  fontFamily: ff,
+                                  color: fc,
+                                  whiteSpace: "nowrap"
+                                }}
+                              >
+                                <strong style={{ color: accent }}>📍</strong> {data.address || 'Your Address, City'}
+                              </div>
+
+                              {/* QR Code */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  left: `${effectivePositionsBack.qr.x}%`,
+                                  top: `${effectivePositionsBack.qr.y}%`,
+                                }}
+                              >
+                                <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
+                                  <QRCodeSVG
+                                    value={generateVCard()}
+                                    size={effectiveBackSizes.qr}
+                                    fgColor={qrColor}
+                                    imageSettings={qrLogoUrl ? {
+                                      src: qrLogoUrl,
+                                      height: 24,
+                                      width: 24,
+                                      excavate: true,
+                                    } : undefined}
+                                  />
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      )}
-
-                      {isEditLayout && (
-                        <div
-                          className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative"
-                          style={{
-                            backgroundColor: backBg ? undefined : "#f3f4f6",
-                            backgroundImage: backBg ? `url(${backBg})` : undefined,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            color: fc,
-                            fontFamily: ff,
-                            fontSize: `${fs}px`,
-                          }}
-                        >
-                          <div className="absolute inset-0">
-                            <div
-                              className="cursor-move select-none"
-                              style={{
-                                position: 'absolute',
-                                left: `${positionsBack.email.x}%`,
-                                top: `${positionsBack.email.y}%`,
-                                fontSize: backSizes.email * previewScale
-                              }}
-                              onMouseDown={(e) => onBackDragStart('email', e)}
-                              onTouchStart={(e) => onBackDragStart('email', e)}
-                            >
-                              <strong style={{ color: accent }}>✉</strong> {data.email || 'email@example.com'}
-                              <span
-                                className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                style={{ right: -6, bottom: -6 }}
-                                onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
-                                onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('email', e); }}
-                              />
-                            </div>
-
-                            <div
-                              className="cursor-move select-none"
-                              style={{
-                                position: 'absolute',
-                                left: `${positionsBack.phone.x}%`,
-                                top: `${positionsBack.phone.y}%`,
-                                fontSize: backSizes.phone * previewScale
-                              }}
-                              onMouseDown={(e) => onBackDragStart('phone', e)}
-                              onTouchStart={(e) => onBackDragStart('phone', e)}
-                            >
-                              <strong style={{ color: accent }}>✆</strong> {data.phone || '+91 00000 00000'}
-                              <span
-                                className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                style={{ right: -6, bottom: -6 }}
-                                onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
-                                onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('phone', e); }}
-                              />
-                            </div>
-
-                            <div
-                              className="cursor-move select-none"
-                              style={{
-                                position: 'absolute',
-                                left: `${positionsBack.website.x}%`,
-                                top: `${positionsBack.website.y}%`,
-                                fontSize: backSizes.website * previewScale
-                              }}
-                              onMouseDown={(e) => onBackDragStart('website', e)}
-                              onTouchStart={(e) => onBackDragStart('website', e)}
-                            >
-                              <strong style={{ color: accent }}>⌂</strong> {data.website || 'your-website.com'}
-                              <span
-                                className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                style={{ right: -6, bottom: -6 }}
-                                onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
-                                onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('website', e); }}
-                              />
-                            </div>
-
-                            <div
-                              className="cursor-move select-none"
-                              style={{
-                                position: 'absolute',
-                                left: `${positionsBack.address.x}%`,
-                                top: `${positionsBack.address.y}%`,
-                                fontSize: backSizes.address * previewScale
-                              }}
-                              onMouseDown={(e) => onBackDragStart('address', e)}
-                              onTouchStart={(e) => onBackDragStart('address', e)}
-                            >
-                              <strong style={{ color: accent }}>📍</strong> {data.address || 'Your Address, City'}
-                              <span
-                                className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                style={{ right: -6, bottom: -6 }}
-                                onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
-                                onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('address', e); }}
-                              />
-                            </div>
-
-                            <div
-                              className="cursor-move select-none"
-                              style={{
-                                position: 'absolute',
-                                left: `${positionsBack.qr.x}%`,
-                                top: `${positionsBack.qr.y}%`
-                              }}
-                              onMouseDown={(e) => onBackDragStart('qr', e)}
-                              onTouchStart={(e) => onBackDragStart('qr', e)}
-                            >
-                              <div style={{ background: 'rgba(255,255,255,0.9)', padding: 6, borderRadius: 8 }}>
-                                <QRCodeSVG
-                                  value={generateVCard()}
-                                  size={backSizes.qr * previewScale}
-                                  fgColor={qrColor}
-                                  imageSettings={qrLogoUrl ? {
-                                    src: qrLogoUrl,
-                                    height: 24,
-                                    width: 24,
-                                    excavate: true,
-                                  } : undefined}
-                                />
-                              </div>
-                              <span
-                                className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
-                                style={{ right: -6, bottom: -6 }}
-                                onMouseDown={(e) => { e.stopPropagation(); onBackResizeStart('qr', e); }}
-                                onTouchStart={(e) => { e.stopPropagation(); onBackResizeStart('qr', e); }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                      </div>
                     </div>
                   </>
                 );
@@ -1896,17 +2149,17 @@ setTimeout(() => {
               </div>
             )}
             {/* Success Modal */}
-<Dialog open={showCartSuccess} onOpenChange={setShowCartSuccess}>
-  <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-lg bg-white p-6 shadow-lg">
-    <div className="flex flex-col items-center justify-center space-y-4">
-      <div className="rounded-full bg-green-100 p-3">
-        <Check className="h-6 w-6 text-green-600" />
-      </div>
-      <h3 className="text-lg font-medium text-gray-900">Success!</h3>
-      <p className="text-gray-600">Item added to cart successfully!</p>
-    </div>
-  </DialogContent>
-</Dialog>
+            <Dialog open={showCartSuccess} onOpenChange={setShowCartSuccess}>
+              <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-lg bg-white p-6 shadow-lg">
+                <div className="flex flex-col items-center justify-center space-y-4">
+                  <div className="rounded-full bg-green-100 p-3">
+                    <Check className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900">Success!</h3>
+                  <p className="text-gray-600">Item added to cart successfully!</p>
+                </div>
+              </DialogContent>
+            </Dialog>
           </>
         )}
       </div>
@@ -1921,31 +2174,31 @@ const createFallbackImage = (text: string, width = 560, height = 320): string =>
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
-    
+
     if (!ctx) return '';
-    
+
     // Create gradient background
     const gradient = ctx.createLinearGradient(0, 0, width, height);
     gradient.addColorStop(0, '#f3f4f6');
     gradient.addColorStop(1, '#e5e7eb');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
-    
+
     // Add border
     ctx.strokeStyle = '#d1d5db';
     ctx.lineWidth = 2;
     ctx.strokeRect(1, 1, width - 2, height - 2);
-    
+
     // Add text
     ctx.fillStyle = '#374151';
     ctx.font = 'bold 20px Arial';
     ctx.textAlign = 'center';
     ctx.fillText(text, width / 2, height / 2 - 20);
-    
+
     ctx.font = '14px Arial';
     ctx.fillStyle = '#6b7280';
     ctx.fillText('Image Preview', width / 2, height / 2 + 10);
-    
+
     return canvas.toDataURL('image/png');
   } catch (error) {
     console.error('Error creating fallback image:', error);
