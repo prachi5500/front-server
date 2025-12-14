@@ -121,39 +121,12 @@ const AIChatbot: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const popupTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-useEffect(() => {
-    // Popup sirf first time page load pe show karo
-    const hasSeenPopup = localStorage.getItem('chatbot_popup_seen');
-    
-    if (!hasSeenPopup) {
-      // 2 second baad popup dikhao
-      const timer = setTimeout(() => {
-        setShowWelcomePopup(true);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  // Popup auto close after 8 seconds
-  useEffect(() => {
-    if (showWelcomePopup) {
-      const timer = setTimeout(() => {
-        setShowWelcomePopup(false);
-        localStorage.setItem('chatbot_popup_seen', 'true');
-      }, 8000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showWelcomePopup]);
-
-
-
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -166,6 +139,71 @@ useEffect(() => {
       setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [isOpen]);
+
+  // Auto show popup on page load for 10 seconds
+  useEffect(() => {
+    // Sirf first time page load pe show karo
+    const hasSeenPopup = sessionStorage.getItem('chatbot_initial_popup_seen');
+    
+    if (!hasSeenPopup) {
+      // 1 second baad popup dikhao
+      const timer = setTimeout(() => {
+        setShowWelcomePopup(true);
+        
+        // 10 seconds baad auto close
+        const autoCloseTimer = setTimeout(() => {
+          setShowWelcomePopup(false);
+          sessionStorage.setItem('chatbot_initial_popup_seen', 'true');
+        }, 10000); // 10 seconds
+      
+        popupTimerRef.current = autoCloseTimer;
+      }, 1000); // 1 second delay
+      
+      return () => {
+        clearTimeout(timer);
+        if (popupTimerRef.current) clearTimeout(popupTimerRef.current);
+      };
+    }
+  }, []);
+
+  // Handle hover on chatbot icon
+  const handleMouseEnter = () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    hoverTimerRef.current = setTimeout(() => {
+      setIsHovering(false);
+    }, 300); // Small delay to prevent flickering
+  };
+
+  // Show popup on hover (if chat is not open)
+  useEffect(() => {
+    if (isHovering && !isOpen) {
+      setShowWelcomePopup(true);
+    } else if (!isHovering && !isOpen) {
+      // Small delay before hiding on mouse leave
+      const timer = setTimeout(() => {
+        setShowWelcomePopup(false);
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+    
+    // Chat open hone par popup hide karo
+    if (isOpen) {
+      setShowWelcomePopup(false);
+    }
+  }, [isHovering, isOpen]);
+
+  // Cleanup timers
+  useEffect(() => {
+    return () => {
+      if (popupTimerRef.current) clearTimeout(popupTimerRef.current);
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    };
+  }, []);
 
   // Improved matching algorithm
   const findBestAnswer = (question: string): string => {
@@ -326,6 +364,8 @@ useEffect(() => {
       {/* Chatbot Toggle Button */}
       <motion.button
         onClick={toggleChatbot}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 group"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
@@ -346,73 +386,63 @@ useEffect(() => {
         </span>
       </motion.button>
 
-
-{/* Welcome Popup Notification */}
-<AnimatePresence>
-  {showWelcomePopup && !isOpen && (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.8, y: 10 }}
-      className="fixed bottom-24 right-20 z-50"
-      onClick={() => setShowWelcomePopup(false)}
-    >
-      {/* Popup Bubble */}
-      <div className="relative">
-        {/* Tail/Arrow */}
-        <div className="absolute -right-1 bottom-3 w-4 h-4 bg-white transform rotate-45"></div>
-        
-        {/* Popup Content */}
-        <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 max-w-[280px]">
-          <div className="flex items-start gap-3">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-full">
-              <Bot className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between items-start">
-                <h4 className="font-bold text-gray-800 text-sm">May I help you? 🤖</h4>
-                <button 
-                  onClick={() => setShowWelcomePopup(false)}
-                  className="text-gray-400 hover:text-gray-600 ml-2"
-                >
-                  <X className="w-3 h-3" />
-                </button>
+      {/* Welcome Popup Notification */}
+      <AnimatePresence>
+        {showWelcomePopup && !isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            className="fixed bottom-24 right-24 z-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowWelcomePopup(false);
+            }}
+          >
+            {/* Popup Bubble */}
+            <div className="relative">
+              {/* Tail/Arrow pointing to chatbot icon */}
+              <div className="absolute -right-2 bottom-4 w-4 h-4 bg-white transform rotate-45"></div>
+              
+              {/* Popup Content - Simpler version */}
+              <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 max-w-[240px]">
+                <div className="flex items-start gap-3">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-full">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-bold text-gray-800 text-sm">May I help you? 🤖</h4>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowWelcomePopup(false);
+                        }}
+                        className="text-gray-400 hover:text-gray-600 ml-2"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Ask me anything about business cards!
+                    </p>
+                    {/* <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowWelcomePopup(false);
+                        setIsOpen(true);
+                      }}
+                      className="mt-3 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs px-3 py-1.5 rounded-full transition-colors font-medium"
+                    >
+                      Open Chat
+                    </button> */}
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-gray-600 mt-1">
-                I'm your AI assistant! I can answer questions about business cards, pricing, delivery, and more.
-              </p>
-              <div className="flex items-center gap-2 mt-3">
-                <button
-                  onClick={() => {
-                    setShowWelcomePopup(false);
-                    setIsOpen(true);
-                  }}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs px-3 py-1.5 rounded-full transition-colors font-medium flex-1"
-                >
-                  Ask a question
-                </button>
-                <button
-                  onClick={() => setShowWelcomePopup(false)}
-                  className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1.5"
-                >
-                  Maybe later
-                </button>
-              </div>
             </div>
-          </div>
-          
-          {/* Close indicator */}
-          <div className="text-[10px] text-gray-400 text-center mt-2">
-            Click outside to close
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-
-
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Chatbot Modal */}
       <AnimatePresence>
@@ -452,7 +482,7 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Quick Questions Section - FIXED VISIBILITY */}
+            {/* Quick Questions Section */}
             <div className="p-2 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-sm font-bold text-gray-800 flex items-center gap-2">
@@ -546,7 +576,6 @@ useEffect(() => {
                   <Send className="w-4 h-4" />
                 </Button>
               </div>
-             
             </div>
           </motion.div>
         )}
@@ -565,5 +594,3 @@ useEffect(() => {
 };
 
 export default AIChatbot;
-
-
