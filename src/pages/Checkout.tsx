@@ -91,7 +91,8 @@ export default function CheckoutPage() {
         formData.append('file', blob, 'card_image.png');
 
         const token = localStorage.getItem('token');
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3003'}/upload`, {
+        // const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3003'}/upload`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
           method: 'POST',
           headers: {
             'Authorization': token ? `Bearer ${token}` : ''
