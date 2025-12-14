@@ -121,13 +121,13 @@ const Index = () => {
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className={`flex items-center gap-2 ${isScrolled
-                        ? 'text-gray-700 hover:text-gray-900'
-                        : 'text-white hover:text-white/80'
+                      ? 'text-gray-700 hover:text-gray-900'
+                      : 'text-white hover:text-white/80'
                       } transition-colors focus:outline-none`}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isScrolled
-                        ? 'bg-gray-100 hover:bg-gray-200'
-                        : 'bg-white/10 hover:bg-white/20'
+                      ? 'bg-gray-100 hover:bg-gray-200'
+                      : 'bg-white/10 hover:bg-white/20'
                       } border ${isScrolled ? 'border-gray-200' : 'border-white/20'
                       }`}>
                       <User size={18} className={isScrolled ? 'text-gray-600' : 'text-white'} />
@@ -152,8 +152,8 @@ const Index = () => {
                       <Link
                         to="/my-orders"
                         className={`flex items-center gap-2 px-4 py-2 text-sm ${isScrolled
-                            ? 'text-gray-700 hover:bg-gray-100 hover:text-black'
-                            : 'text-gray-200 hover:bg-gray-700 hover:text-white'
+                          ? 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                          : 'text-gray-200 hover:bg-gray-700 hover:text-white'
                           } w-full`}
                         onClick={() => setIsDropdownOpen(false)}
                       >
@@ -185,7 +185,7 @@ const Index = () => {
 
                       <div className={`h-px my-1 mx-2 ${isScrolled ? 'bg-gray-200' : 'bg-gray-700'
                         }`}></div>
-                        {/* Logout */}
+                      {/* Logout */}
                       <button
                         onClick={async () => {
                           setIsDropdownOpen(false);
@@ -193,8 +193,8 @@ const Index = () => {
                           navigate("/");
                         }}
                         className={`flex items-center gap-2 px-4 py-2 text-sm ${isScrolled
-                            ? 'text-red-600 hover:bg-red-50'
-                            : 'text-red-400 hover:bg-red-900/20 hover:text-red-300'
+                          ? 'text-red-600 hover:bg-red-50'
+                          : 'text-red-400 hover:bg-red-900/20 hover:text-red-300'
                           } w-full text-left`}
                       >
                         <LogOut size={16} />
@@ -225,35 +225,122 @@ const Index = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-black/90 backdrop-blur-2xl border-t border-white/10">
-            <div className="px-6 py-8 space-y-6">
-              <a href="#services" onClick={(e) => { e.preventDefault(); document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false); }} className="block text-white text-lg py-2">
-                Services
-              </a>
-              <a href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false); }} className="block text-white text-lg py-2">
-                Contact
-              </a>
-              <Link to="/cart" onClick={() => setMobileMenuOpen(false)} className="block text-white text-lg py-2">
-                Cart
-              </Link>
-              {user ? (
-                <>
-                  <Link to="/my-orders" onClick={() => setMobileMenuOpen(false)} className="block text-white text-lg py-2">Orders</Link>
-                  <Link to="/my-account" onClick={() => setMobileMenuOpen(false)} className="block text-white text-lg py-2">My Account</Link>
-                  {profile?.role === "admin" && (
-                    <Link to="/admin/templates" onClick={() => setMobileMenuOpen(false)} className="block text-white text-lg py-2">Admin Panel</Link>
+          <div className="fixed inset-0 z-50">
+            {/* Overlay */}
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setMobileMenuOpen(false)}
+            ></div>
+
+            {/* Mobile Menu */}
+            <div className="absolute inset-0 w-full bg-white shadow-2xl transform transition-transform duration-300 ease-in-out">
+              <div className="h-full flex flex-col">
+                {/* Header */}
+                <div className="flex justify-between items-center p-4 border-b">
+                  <h2 className="text-xl font-semibold">Menu</h2>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-full hover:bg-gray-100"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                {/* Menu Items */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  <a
+                    href="#services"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    Services
+                  </a>
+                  <a
+                    href="#contact"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    Contact
+                  </a>
+                  <Link
+                    to="/cart"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    Cart
+                  </Link>
+
+                  {user ? (
+                    <>
+                      <div className="border-t my-2"></div>
+                      <Link
+                        to="/my-orders"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        Orders
+                      </Link>
+                      <Link
+                        to="/my-account"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        My Account
+                      </Link>
+                      {profile?.role === "admin" && (
+                        <Link
+                          to="/admin/templates"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                          Admin Panel
+                        </Link>
+                      )}
+                      <div className="mt-4">
+                        <Button
+                          onClick={async () => {
+                            await signOut();
+                            navigate("/");
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full bg-red-600 text-white hover:bg-red-700 py-6 text-lg"
+                        >
+                          Logout
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mt-4 space-y-3">
+                      <Link
+                        to="/login"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block"
+                      >
+                        <Button className="w-full bg-blue-600 text-white hover:bg-blue-700 py-6 text-lg">
+                          Login
+                        </Button>
+                      </Link>
+                      <Link
+                        to="/signup"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block"
+                      >
+                        <Button variant="outline" className="w-full py-6 text-lg border-gray-300">
+                          Sign Up
+                        </Button>
+                      </Link>
+                    </div>
                   )}
-                  <Button onClick={async () => { await signOut(); navigate("/"); setMobileMenuOpen(false); }} className="w-full bg-white text-black hover:bg-gray-200">
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full bg-white text-black hover:bg-gray-200">
-                    Login
-                  </Button>
-                </Link>
-              )}
+                </div>
+              </div>
             </div>
           </div>
         )}
