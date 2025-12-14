@@ -70,7 +70,7 @@ export const PaymentFeatures = () => {
         ref={sectionRef}
         className="relative min-h-screen w-full py-20 "
         style={{
-          backgroundImage: `url('/PixVerse_Image_Effect_prompt_Convert HD 4K ima.jpg')`,
+          backgroundImage: `url('/Service_image.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed',
