@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, User, ChevronDown, ShoppingBag, LayoutDashboard, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/services/api";
@@ -21,6 +21,7 @@ const Index = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -83,6 +84,7 @@ const Index = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
+            {/* Home, Services, Contact Links (Same as before) */}
             <a
               href="#hero"
               onClick={(e) => {
@@ -93,54 +95,114 @@ const Index = () => {
             >
               Home
             </a>
-            <a href="#services" onClick={(e) => { e.preventDefault(); document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' }); }} className={navLinkClass}>
+            <a
+              href="#services"
+              onClick={(e) => { e.preventDefault(); document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' }); }}
+              className={navLinkClass}
+            >
               Services
             </a>
-            <a href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }} className={navLinkClass}>
+            <a
+              href="#contact"
+              onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}
+              className={navLinkClass}
+            >
               Contact
             </a>
 
-            {/* Search Bar - Only Desktop */}
-            {/* <div className="mx-4">
-              <div className="relative max-w-md w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
-                <Input
-                  type="search"
-                  placeholder="Search templates..."
-                  className="pl-10 rounded-full bg-white/10 border-white/20 placeholder-white/60 focus-visible:ring-0 focus:bg-white/15 text-white"
-                />
-              </div>
-            </div> */}
-
-            {/* Right Side Buttons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Link to="/cart" className={navLinkClass}>
                 Cart
               </Link>
 
               {user ? (
-                <>
-                  <Link to="/my-orders" className={navLinkClass}>
-                    Orders
-                  </Link>
-                  <Link to="/my-account" className={navLinkClass}>
-                    Account
-                  </Link>
-                  {profile?.role === "admin" && (
-                    <Link to="/admin/templates" className={navLinkClass}>
-                      Admin
-                    </Link>
-                  )}
-                  <Button
-                    onClick={async () => {
-                      await signOut();
-                      navigate("/");
-                    }}
-                    className="bg-white text-black hover:bg-white/90 font-semibold"
+                <div className="relative">
+                  {/* Dropdown Trigger Button (Icon + Name) */}
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className={`flex items-center gap-2 ${isScrolled
+                        ? 'text-gray-700 hover:text-gray-900'
+                        : 'text-white hover:text-white/80'
+                      } transition-colors focus:outline-none`}
                   >
-                    Logout
-                  </Button>
-                </>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isScrolled
+                        ? 'bg-gray-100 hover:bg-gray-200'
+                        : 'bg-white/10 hover:bg-white/20'
+                      } border ${isScrolled ? 'border-gray-200' : 'border-white/20'
+                      }`}>
+                      <User size={18} className={isScrolled ? 'text-gray-600' : 'text-white'} />
+                    </div>
+                    <span className={`font-medium text-sm ${isScrolled ? 'text-gray-700' : 'text-white'
+                      }`}>
+                      {profile?.name}
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''
+                        } ${isScrolled ? 'text-gray-600' : 'text-white'}`}
+                    />
+                  </button>
+                  {/* Dropdown Menu Box */}
+                  {isDropdownOpen && (
+                    <div
+                      className={`absolute right-0 top-full mt-2 w-48 rounded-lg shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 ${isScrolled ? 'bg-white' : 'bg-gray-800'
+                        }`}
+                    >
+                      {/* Menu items */}
+                      <Link
+                        to="/my-orders"
+                        className={`flex items-center gap-2 px-4 py-2 text-sm ${isScrolled
+                            ? 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                            : 'text-gray-200 hover:bg-gray-700 hover:text-white'
+                          } w-full`}
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <ShoppingBag size={16} />
+                        Orders
+                      </Link>
+
+                      {/* Account */}
+                      <Link
+                        to="/my-account"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black w-full"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <User size={16} />
+                        Account
+                      </Link>
+
+                      {/* Admin (Only if admin) */}
+                      {profile?.role === "admin" && (
+                        <Link
+                          to="/admin/templates"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black w-full"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          <LayoutDashboard size={16} />
+                          Admin
+                        </Link>
+                      )}
+
+                      <div className={`h-px my-1 mx-2 ${isScrolled ? 'bg-gray-200' : 'bg-gray-700'
+                        }`}></div>
+                        {/* Logout */}
+                      <button
+                        onClick={async () => {
+                          setIsDropdownOpen(false);
+                          await signOut();
+                          navigate("/");
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 text-sm ${isScrolled
+                            ? 'text-red-600 hover:bg-red-50'
+                            : 'text-red-400 hover:bg-red-900/20 hover:text-red-300'
+                          } w-full text-left`}
+                      >
+                        <LogOut size={16} />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <Link to="/login">
                   <Button className="bg-white text-black hover:bg-white/90 font-semibold">
@@ -150,6 +212,7 @@ const Index = () => {
               )}
             </div>
           </nav>
+
 
           {/* Mobile Menu Toggle */}
           <button
