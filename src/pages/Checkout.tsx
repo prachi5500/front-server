@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { apiFetch } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, ShieldCheck } from "lucide-react";
+import QRCode from 'qrcode';
 
 declare global {
   interface Window {
