@@ -1,5 +1,3 @@
-
-// src/lib/classicTemplates.ts
 export type LayoutKey =
   | "BadgeSplit"
   | "DiagonalSplit"

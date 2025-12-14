@@ -4,31 +4,38 @@ import { Sparkles, ArrowLeft, ArrowRight } from "lucide-react";
 // SLIDES
 const slides = [
   {
-    img: "https://media.istockphoto.com/id/2171403320/photo/blank-black-cards-on-abstract-background.jpg?s=612x612&w=0&k=20&c=cDVo103-D3Hr3sCr2LTy1rkwVAsd2NAH04W5Chu6uWs=",
+    // img: "https://media.istockphoto.com/id/2171403320/photo/blank-black-cards-on-abstract-background.jpg?s=612x612&w=0&k=20&c=cDVo103-D3Hr3sCr2LTy1rkwVAsd2NAH04W5Chu6uWs=",
+    img: "/Hero_image_1.jpg",
     text: "Create Stunning Business Cards With Ease",
   },
   {
-    img: "https://media.istockphoto.com/id/1137971080/photo/two-businessmen-exchanged-white-business-cards-on-a-wooden-table-in-office.jpg?s=612x612&w=0&k=20&c=y5Zc8NyyOnCAwg98Yf1-d-SHYZkOwKhP-ZrLb1tfTyU=",
+    // img: "https://media.istockphoto.com/id/1137971080/photo/two-businessmen-exchanged-white-business-cards-on-a-wooden-table-in-office.jpg?s=612x612&w=0&k=20&c=y5Zc8NyyOnCAwg98Yf1-d-SHYZkOwKhP-ZrLb1tfTyU=",
+    img: "/Hero_image_2.jpg",
     text: "Design Your Brand Identity Effortlessly",
   },
-  {
-    img:"https://media.istockphoto.com/id/984704774/photo/modern-office-interior.jpg?s=612x612&w=0&k=20&c=4kgy35WQx2nhnNxnsrd6_FofC9FP_A9ZG-akFQO4KLg="
-    // img: "https://plus.unsplash.com/premium_photo-1661661374846-23e8f44be169?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDh8fHxlbnwwfHx8fHw%3D",
-  },
-
   {
     img: "https://res.cloudinary.com/vistaprint/images/f_auto,q_auto/v1702621824/ideas-and-advice-prod/en-us/en-au-2/en-au-2.png?_i=AA",
     text: "Professional & Print-Ready Card Designs",
   },
   {
-    img: "https://media.istockphoto.com/id/1143163675/photo/gift-cards-over-a-wine-cork-background.jpg?s=612x612&w=0&k=20&c=73cwb8hjRC4brYrRpWtGboRdgCACe8R1XAJy5T28Px0=",
+    // img:"https://media.istockphoto.com/id/984704774/photo/modern-office-interior.jpg?s=612x612&w=0&k=20&c=4kgy35WQx2nhnNxnsrd6_FofC9FP_A9ZG-akFQO4KLg="
+    // img: "https://plus.unsplash.com/premium_photo-1661661374846-23e8f44be169?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDh8fHxlbnwwfHx8fHw%3D",
+    img: "/Hero_image_3.jpg",
+    text: "High-quality designs trusted by professionals and businesses",
+  },
+
+  {
+    // img: "https://media.istockphoto.com/id/1143163675/photo/gift-cards-over-a-wine-cork-background.jpg?s=612x612&w=0&k=20&c=73cwb8hjRC4brYrRpWtGboRdgCACe8R1XAJy5T28Px0=",
     // img: "https://plus.unsplash.com/premium_photo-1661385603150-e2317488f5fc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDEwMHx8fGVufDB8fHx8fA%3D%3D",
+    img: "/Hero_image_5.jpg",
     text: "Smart Digital Business Cards With QR Codes",
   },
 ];
 
-
-export const Hero = () => {
+interface HeroProps {
+  id?: string;  
+}
+export const Hero = ({ id }: HeroProps) => {
   const [index, setIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
@@ -52,7 +59,7 @@ export const Hero = () => {
   const prev = () => setIndex((i) => (i - 1 + slides.length) % slides.length);
 
   return (
-    <section className="relative w-full h-[89vh] md:h-[92vh] pt-20 overflow-hidden select-none"
+    <section id={id} className="relative w-full h-[89vh] md:h-[92vh] pt-20 overflow-hidden select-none"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}

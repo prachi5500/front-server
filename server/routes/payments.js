@@ -7,6 +7,16 @@ import Template from '../models/Template.js';
 import nodemailer from 'nodemailer';
 import { v2 as cloudinary } from 'cloudinary';
 import { PDFDocument } from 'pdf-lib';
+import { createCanvas, loadImage, registerFont } from 'canvas';
+import { writeFileSync } from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Node 18+ has global fetch; if running older Node, ensure `node-fetch` is available.
 
@@ -129,26 +139,25 @@ router.post('/verify', authRequired, async (req, res) => {
       const createdPayment = await Payment.create({
         user: req.user._id,
         email: req.user.email,
-        amount: amount || null,
+        amount: req.body.amount,
         currency: 'INR',
         razorpay_order_id,
         razorpay_payment_id,
-        status,
-        customer_name,
-        customer_phone,
-        live_location,
-        address_line1,
-        address_line2,
-        city,
-        state,
-        pincode,
+        status: paymentDetails.status || 'success',
+        customer_name: req.body.customer_name,
+      customer_phone: req.body.customer_phone,
+      address_line1: req.body.address_line1,
+      address_line2: req.body.address_line2,
+      city: req.body.city,
+      state: req.body.state,
+      pincode: req.body.pincode,
         payment_type,
-        payment_method: method,
+         payment_method: paymentDetails.method,
         bank_reference_id,
         card_last4,
         issuer_bank,
-        items,
-        payment_method_details: paymentDetails || null,
+         items: items || [], 
+        payment_method_details: paymentDetails ,
       });
 
       // After payment create: generate combined PDF for each item (front+back) asynchronously
@@ -332,6 +341,143 @@ router.get('/admin-list', authRequired, adminRequired, async (req, res) => {
   } catch (e) {
     console.error('Error fetching payments', e);
     res.status(500).json({ error: 'Failed to load payments' });
+  }
+});
+
+router.get('/download-card/:paymentId/:templateId', authRequired, adminRequired, async (req, res) => {
+  try {
+    const { paymentId, templateId } = req.params;
+    
+    // 1. Find the payment
+    const payment = await Payment.findById(paymentId);
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    // 2. Find the item inside the payment items array first
+    // This handles the "sb:..." IDs correctly by looking for the exact string stored during purchase
+    let targetItem = payment.items && payment.items.find(item => item.templateId === templateId);
+
+    // Prepare variables for PDF generation
+    let frontImageUrl, backImageUrl, title;
+
+    if (targetItem) {
+      // Found in purchased items
+      frontImageUrl = targetItem.frontImageUrl;
+      backImageUrl = targetItem.backImageUrl;
+      title = targetItem.title || 'design';
+    } else {
+      // Fallback: Try to find in the Template collection (only if ID is valid)
+      try {
+        let template;
+        // Check if templateId is a valid MongoDB ObjectId
+        if (templateId.match(/^[0-9a-fA-F]{24}$/)) {
+           template = await Template.findById(templateId);
+        } else if (templateId.includes(':')) {
+           // Clean up prefix if present (e.g. "sb:ID" -> "ID") to prevent DB crash
+           const cleanId = templateId.split(':')[1];
+           if (cleanId && cleanId.match(/^[0-9a-fA-F]{24}$/)) {
+             template = await Template.findById(cleanId);
+           }
+        }
+
+        if (template) {
+          frontImageUrl = template.frontImageUrl;
+          backImageUrl = template.backImageUrl;
+          title = template.title;
+        }
+      } catch (dbErr) {
+        console.error('Error looking up template fallback:', dbErr);
+      }
+    }
+
+    if (!frontImageUrl && !backImageUrl) {
+      return res.status(404).json({ error: 'Images not found for this card' });
+    }
+
+    // 3. Generate PDF
+    // Ensure temp directory exists
+    const tempDir = join(__dirname, '../../temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    const filename = `card-${uuidv4()}.pdf`;
+    const filePath = join(tempDir, filename);
+
+    try {
+      const doc = await PDFDocument.create();
+      doc.setTitle(`Business Card - ${title || 'Card'}`);
+      
+      // Helper to fetch and embed image
+      const addPageFromUrl = async (url) => {
+        if (!url) return false;
+        try {
+          const response = await fetch(url);
+          if (!response.ok) return false;
+          
+          const arrayBuffer = await response.arrayBuffer();
+          const imageBytes = new Uint8Array(arrayBuffer);
+          const contentType = response.headers.get('content-type') || '';
+          
+          let image;
+          if (contentType.includes('png')) {
+             image = await doc.embedPng(imageBytes);
+          } else {
+             // Fallback to JPG for other types
+             image = await doc.embedJpg(imageBytes);
+          }
+
+          const page = doc.addPage([image.width, image.height]);
+          page.drawImage(image, {
+            x: 0,
+            y: 0,
+            width: image.width,
+            height: image.height,
+          });
+          return true;
+        } catch (e) {
+          console.error('Image embedding error:', url, e.message);
+          return false;
+        }
+      };
+
+      const frontAdded = await addPageFromUrl(frontImageUrl);
+      const backAdded = await addPageFromUrl(backImageUrl);
+
+      if (!frontAdded && !backAdded) {
+        throw new Error('Could not download or embed any valid images');
+      }
+
+      const pdfBytes = await doc.save();
+      fs.writeFileSync(filePath, pdfBytes);
+
+      // Send file to client
+      res.download(filePath, `business-card-${(title || 'card').replace(/\s+/g, '-')}.pdf`, (err) => {
+        // Cleanup temp file after sending
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+        if (err) {
+          console.error('Error sending file:', err);
+        }
+      });
+
+    } catch (pdfError) {
+      console.error('PDF generation error:', pdfError);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath); // Cleanup
+      return res.status(500).json({ 
+        error: 'Failed to generate PDF', 
+        details: pdfError.message 
+      });
+    }
+
+  } catch (error) {
+    console.error('Download route error:', error);
+    return res.status(500).json({ 
+      error: 'Server error', 
+      details: error.message 
+    });
   }
 });
 

@@ -73,7 +73,7 @@ const SocialProof = () => {
                         className="flex"
                         animate={{ x: isHovered ? 0 : ["0%", "-50%"] }}
                         transition={{
-                            duration: 18,           // Bahut tez chalega
+                            duration: 12,           // Bahut tez chalega
                             ease: "linear",
                             repeat: Infinity,
                             repeatType: "loop",

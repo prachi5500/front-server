@@ -11,9 +11,9 @@ export interface BusinessCardData {
   phone: string;
   website: string;
   address: string;
-  logo?: string; // data URL for company logo
-  cardType?: string; // Type of business card (e.g., 'Premium', 'Standard')
-  paperType?: string; // Type of paper (e.g., 'Matte', 'Glossy')
+  logo?: string;
+  cardType?: string; 
+  paperType?: string; 
 }
 
 interface BusinessCardFormProps {

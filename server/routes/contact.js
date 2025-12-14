@@ -1,28 +1,3 @@
-// import express from 'express';
-
-// const router = express.Router();
-
-// router.post('/', async (req, res) => {
-//   try {
-//     const { name, email, message } = req.body || {};
-//     if (!name || !email || !message) {
-//       return res.status(400).json({ error: 'name, email and message are required' });
-//     }
-
-//     // In a real app you might persist this to DB or send an email.
-//     // For now we just log it and acknowledge receipt.
-//     console.log('[CONTACT] New inquiry', { name, email, message });
-
-//     return res.status(201).json({ ok: true });
-//   } catch (e) {
-//     return res.status(500).json({ error: 'Failed to submit message' });
-//   }
-// });
-
-// export default router;
-
-
-
 import express from 'express';
 import nodemailer from 'nodemailer';
 import ContactMessage from '../models/ContactMessage.js';

@@ -97,6 +97,40 @@ const PaymentsPage = () => {
     return name.includes(term) || email.includes(term);
   });
 
+  const handleDownloadCard = async (paymentId: string, templateId: string, title: string = 'card') => {
+    try {
+      const safeTitle = (title || 'card').toString();
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      console.log('Requesting URL:', `${apiUrl}/payments/download-card/${paymentId}/${templateId}`); // Debug log
+
+      const response = await fetch(`${apiUrl}/payments/download-card/${paymentId}/${templateId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Server Error:', errorData);
+        throw new Error(errorData.message || 'Failed to download card');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `business-card-${safeTitle.toLowerCase().replace(/\s+/g, '-')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download error:', error);
+      window.alert(error.message || 'Failed to download card. Please try again.');
+    }
+  };
+
   return (
     <div className="p-4">
       <h1 className="text-xl font-semibold mb-4">Payments</h1>
@@ -264,23 +298,25 @@ const PaymentsPage = () => {
                       {(p.items || []).map((item, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between text-xs md:text-sm"
+                          className="flex items-center justify-between text-xs md:text-sm border-b pb-2 mb-2"
                         >
                           <div>
-                            <span className="font-medium">
-                              Template ID:
-                            </span>{" "}
-                            {item.templateId}
-                            {item.title ? (
-                              <>
-                                {" "}
-                                - <span>{item.title}</span>
-                              </>
-                            ) : null}
+                            <div className="font-medium">
+                              {item.title || `Template ${idx + 1}`}
+                            </div>
+                            <div className="text-gray-500 text-xs">
+                              ID: {item.templateId}
+                            </div>
                           </div>
-                          <div>
-                            <span className="font-medium">Price:</span>{" "}
-                            {item.price != null ? `₹${item.price}` : "-"}
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{item.price != null ? `₹${item.price}` : "-"}</span>
+                            <button
+                              onClick={() => handleDownloadCard(p._id, item.templateId, item.title)}
+                              className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded hover:bg-blue-100 transition-colors"
+                              title="Download Print-Ready PDF"
+                            >
+                              Download PDF
+                            </button>
                           </div>
                         </div>
                       ))}

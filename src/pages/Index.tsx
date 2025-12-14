@@ -1,327 +1,3 @@
-// import { useState, useEffect } from "react";
-// import { Hero } from "@/components/Hero";
-// import { BusinessCardForm, BusinessCardData } from "@/components/BusinessCardForm";
-// import { TemplateSelector } from "@/components/TemplateSelector";
-// import { PaymentBanner } from "@/components/PaymentBanner";
-// import { PaymentFeatures } from "@/components/PaymentFeatures";
-// import { Button } from "@/components/ui/button";
-// import { Label } from "@/components/ui/label";
-// import { Input } from "@/components/ui/input";
-// import { Textarea } from "@/components/ui/textarea";
-// import { Search, Menu, X } from "lucide-react";
-// import { Link, useNavigate } from "react-router-dom";
-// import { useAuth } from "@/contexts/AuthContext";
-// import { apiFetch } from "@/services/api";
-// import { toast } from "@/components/ui/sonner";
-// import Footer from "@/components/Footer";
-
-// const Index = () => {
-//   const { user, profile, signOut } = useAuth();
-//   const navigate = useNavigate();
-
-//     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-//   const [isScrolled, setIsScrolled] = useState(false);
-
-//   useEffect(() => {
-//     const handleScroll = () => {
-//       setIsScrolled(window.scrollY > 10);
-//     };
-
-//     window.addEventListener('scroll', handleScroll);
-//     return () => window.removeEventListener('scroll', handleScroll);
-//   }, []);
-
-//   const [businessData, setBusinessData] = useState<BusinessCardData>({
-//     name: "",
-//     title: "",
-//     company: "",
-//     email: "",
-//     phone: "",
-//     website: "",
-//     address: "",
-//     logo: "",
-//   });
-
-//   // Contact form
-//   const [contactName, setContactName] = useState("");
-//   const [contactEmail, setContactEmail] = useState("");
-//   const [contactMessage, setContactMessage] = useState("");
-//   const [submitting, setSubmitting] = useState(false);
-
-//   const handleContactSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     if (!contactName || !contactEmail || !contactMessage) {
-//       toast("Please fill in all fields.");
-//       return;
-//     }
-//     try {
-//       setSubmitting(true);
-//       await apiFetch("/contact", {
-//         method: "POST",
-//         body: JSON.stringify({ name: contactName, email: contactEmail, message: contactMessage }),
-//       });
-//       toast("Thanks! We'll get back to you soon.");
-//       setContactName("");
-//       setContactEmail("");
-//       setContactMessage("");
-//     } catch (err: any) {
-//       toast(err?.message || "Failed to send message");
-//     } finally {
-//       setSubmitting(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-background">
-//       {/* Header */}
-//       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-white shadow-md' : 'bg-black/0'}`}>
-//         <div className="relative flex items-center justify-between px-4 py-2 md:px-8 lg:px-12">
-//           {/* Logo */}
-//           <Link to="/" className="flex items-center">
-//             <img
-//               src="/ChatGPT Image Nov 14, 2025, 10_52_55 AM.png"
-//               alt="BusinessCard"
-//               className="h-8 md:h-10 w-auto drop-shadow-lg"
-//             />
-//           </Link>
-
-//           {/* Desktop Nav */}
-//           <nav className="hidden md:flex items-center gap-1">
-//             <a 
-//               href="#services"
-//               onClick={(e) => {
-//                 e.preventDefault();
-//                 document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
-//                 setMobileMenuOpen(false);
-//               }}
-//               className={`px-5 py-2.5 ${isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white/90 hover:bg-white/10'} hover:text-gray-900 rounded-full transition-all text-sm font-medium cursor-pointer`}
-//             >
-//               Services
-//             </a>
-//             <a 
-//               href="#contact" 
-//               onClick={(e) => {
-//                 e.preventDefault();
-//                 document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-//                 setMobileMenuOpen(false);
-//               }}
-//               className={`px-5 py-2.5 ${isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white/90 hover:bg-white/10'} hover:text-gray-900 rounded-full transition-all text-sm font-medium cursor-pointer`}
-//             >
-//               Contact
-//             </a>
-//             <Link to="/cart" className={`px-5 py-2.5 ${isScrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white/90 hover:bg-white/10'} hover:text-gray-900 rounded-full transition-all text-sm font-medium cursor-pointer`}>
-//               Cart
-//             </Link>
-//             <div className="hidden md:flex flex-1 justify-center px-4">
-//               <div className="relative w-full max-w-md">
-//                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
-//                 <Input
-//                   type="search"
-//                   placeholder="Search templates..."
-//                   aria-label="Search"
-//                   className="pl-10 rounded-full bg-white/10 border-white/20 placeholder-white/60 focus-visible:ring-0 focus:bg-white/15"
-//                 />
-//               </div>
-//             </div>
-            
-//             {/* Desktop Menu */}
-//             <div className="hidden sm:flex items-center gap-2">
-//               <Link
-//                 to="/cart"
-//                 className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
-//               >
-//                 Cart
-//               </Link>
-//               {user && (
-//                 <Link
-//                   to="/my-account"
-//                   className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
-//                 >
-//                   My Account
-//                 </Link>
-//               )}
-//               {user ? (
-//                 <>
-//                   <Link
-//                     to="/my-orders"
-//                     className="rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md whitespace-nowrap"
-//                   >
-//                     Orders
-//                   </Link>
-//                 )}
-//                 <button
-//                   onClick={async () => {
-//                     await signOut();
-//                     navigate("/");
-//                   }}
-//                   className="px-6 py-2.5 bg-white text-black rounded-full font-semibold hover:bg-white/90 transition-all text-sm shadow-lg"
-//                 >
-//                   Logout
-//                 </button>
-//               </>
-//             ) : (
-//               <Link
-//                 to="/login"
-//                 className="px-6 py-2.5 bg-white text-black rounded-full font-semibold hover:bg-white/90 transition-all text-sm shadow-lg"
-//               >
-//                 Login
-//               </Link>
-//             )}
-//           </nav>
-          
-
-//           {/* Mobile Menu Button */}
-//           <button
-//             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-//             className="md:hidden p-3 rounded-xl bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all"
-//           >
-//             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-//           </button>
-//         </div>
-
-//         {/* Mobile Menu Dropdown */}
-//         {mobileMenuOpen && (
-//           <div className="md:hidden absolute top-full left-0 right-0 bg-black/70 backdrop-blur-2xl border-t border-white/10">
-//             <div className="px-6 py-6 space-y-3">
-//               <div className="flex flex-col gap-4 mt-6">
-//                 <a 
-//                   href="#services"
-//                   onClick={(e) => {
-//                     e.preventDefault();
-//                     document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
-//                     setMobileMenuOpen(false);
-//                   }}
-//                   className="text-white/90 hover:text-white text-lg py-2 block"
-//                 >
-//                   Services
-//                 </a>
-//                 <a 
-//                   href="#contact"
-//                   onClick={(e) => {
-//                     e.preventDefault();
-//                     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-//                     setMobileMenuOpen(false);
-//                   }}
-//                   className="text-white/90 hover:text-white text-lg py-2 block"
-//                 >
-//                   Contact
-//                 </a>
-//                 <Link to="/cart" className="text-white/90 hover:text-white text-lg py-2">
-//                   Cart
-//                 </Link>
-//               </div>
-//               {user && (
-//                 <>
-//                   <Link to="/my-orders" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white/90 hover:text-white text-lg">
-//                     Orders
-//                   </Link>
-//                   <Link
-//                     to="/my-account"
-//                     onClick={() => setMobileMenuOpen(false)}
-//                     className="block w-full px-4 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition-all text-center"
-//                   >
-//                     My Account
-//                   </Link>
-//                   {profile?.role === "admin" && (
-//                     <Link to="/admin/templates" onClick={() => setMobileMenuOpen(false)} className="block py-3 text-white/90 hover:text-white text-lg">
-//                       Admin
-//                     </Link>
-//                   )}
-//                   <button
-//                     onClick={async () => {
-//                       await signOut();
-//                       navigate("/");
-//                       setMobileMenuOpen(false);
-//                     }}
-//                     className="w-full py-3 bg-white text-black rounded-xl font-semibold"
-//                   >
-//                     Logout
-//                   </button>
-//                 </>
-//               )}
-//               {!user && (
-//                 <Link
-//                   to="/login"
-//                   onClick={() => setMobileMenuOpen(false)}
-//                   className="block w-full text-center py-3 bg-white text-black rounded-xl font-semibold"
-//                 >
-//                   Login
-//                 </Link>
-//               )}
-//             </div>
-//           </div>
-//         )}
-//       </header>
-
-//       <Hero />
-
-//       <PaymentBanner />
-
-//       <main className="container mx-auto max-w-7xl px-4 py-12">
-//         {/* Only Form - Full Width on Mobile, Single Column */}
-//         <div className="max-w-2xl mx-auto">
-//           <BusinessCardForm data={businessData} onChange={setBusinessData} />
-//         </div>
-
-//         {/* Templates */}
-//         <div id="classic-templates" className="mt-16">
-//           <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border">
-//             <TemplateSelector data={businessData} />
-//           </div>
-//         </div>
-//       </main>
-
-//       <PaymentFeatures />
-
-//       {/* Contact Section */}
-//       <section id="contact" className="border-t border-border bg-background">
-//         <div className="container mx-auto max-w-7xl px-4 py-16 grid md:grid-cols-2 gap-10">
-//           <div>
-//             <h2 className="text-3xl font-bold mb-2">Contact Us</h2>
-//             <p className="text-muted-foreground">
-//               Have questions or feature requests? Send us a message and we’ll respond shortly.
-//             </p>
-//           </div>
-//           <form onSubmit={handleContactSubmit} className="space-y-4 bg-card p-6 rounded-xl border border-border shadow-[var(--shadow-card)]">
-//             <div className="grid sm:grid-cols-2 gap-4">
-//               <div className="space-y-2">
-//                 <Label htmlFor="contact-name">Name</Label>
-//                 <Input id="contact-name" placeholder="Your name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
-//               </div>
-//               <div className="space-y-2">
-//                 <Label htmlFor="contact-email">Email</Label>
-//                 <Input id="contact-email" type="email" placeholder="you@example.com" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
-//               </div>
-//             </div>
-//             <div className="space-y-2">
-//               <Label htmlFor="contact-message">Message</Label>
-//               <Textarea
-//                 id="contact-message"
-//                 placeholder="How can we help?"
-//                 value={contactMessage}
-//                 onChange={(e) => setContactMessage(e.target.value)}
-//                 rows={5}
-//               />
-//             </div>
-//             <div className="flex justify-end">
-//               <Button type="submit" disabled={submitting}>
-//                 {submitting ? "Sending..." : "Send Message"}
-//               </Button>
-//             </div>
-//           </form>
-//         </div>
-//       </section>
-
-//       <Footer />
-//     </div>
-//   );
-// };
-
-
-// export default Index;
-
-
-
 import { useState, useEffect } from "react";
 import { Hero } from "@/components/Hero";
 import { BusinessCardForm, BusinessCardData } from "@/components/BusinessCardForm";
@@ -332,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, User, ChevronDown, ShoppingBag, LayoutDashboard, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/services/api";
@@ -345,6 +21,7 @@ const Index = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -393,9 +70,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled ? 'bg-white shadow-md' : 'bg-black/0'
-      }`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-white shadow-md' : 'bg-black/0'
+        }`}>
         <div className="flex items-center justify-between px-4 py-4 md:px-8 lg:px-12 h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
@@ -408,54 +84,125 @@ const Index = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#services" onClick={(e) => { e.preventDefault(); document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' }); }} className={navLinkClass}>
+            {/* Home, Services, Contact Links (Same as before) */}
+            <a
+              href="#hero"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className={navLinkClass}
+            >
+              Home
+            </a>
+            <a
+              href="#services"
+              onClick={(e) => { e.preventDefault(); document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' }); }}
+              className={navLinkClass}
+            >
               Services
             </a>
-            <a href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }} className={navLinkClass}>
+            <a
+              href="#contact"
+              onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}
+              className={navLinkClass}
+            >
               Contact
             </a>
 
-            {/* Search Bar - Only Desktop */}
-            {/* <div className="mx-4">
-              <div className="relative max-w-md w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
-                <Input
-                  type="search"
-                  placeholder="Search templates..."
-                  className="pl-10 rounded-full bg-white/10 border-white/20 placeholder-white/60 focus-visible:ring-0 focus:bg-white/15 text-white"
-                />
-              </div>
-            </div> */}
-
-            {/* Right Side Buttons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Link to="/cart" className={navLinkClass}>
                 Cart
               </Link>
 
               {user ? (
-                <>
-                  <Link to="/my-orders" className={navLinkClass}>
-                    Orders
-                  </Link>
-                  <Link to="/my-account" className={navLinkClass}>
-                    Account
-                  </Link>
-                  {profile?.role === "admin" && (
-                    <Link to="/admin/templates" className={navLinkClass}>
-                      Admin
-                    </Link>
-                  )}
-                  <Button
-                    onClick={async () => {
-                      await signOut();
-                      navigate("/");
-                    }}
-                    className="bg-white text-black hover:bg-white/90 font-semibold"
+                <div className="relative">
+                  {/* Dropdown Trigger Button (Icon + Name) */}
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className={`flex items-center gap-2 ${isScrolled
+                      ? 'text-gray-700 hover:text-gray-900'
+                      : 'text-white hover:text-white/80'
+                      } transition-colors focus:outline-none`}
                   >
-                    Logout
-                  </Button>
-                </>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isScrolled
+                      ? 'bg-gray-100 hover:bg-gray-200'
+                      : 'bg-white/10 hover:bg-white/20'
+                      } border ${isScrolled ? 'border-gray-200' : 'border-white/20'
+                      }`}>
+                      <User size={18} className={isScrolled ? 'text-gray-600' : 'text-white'} />
+                    </div>
+                    <span className={`font-medium text-sm ${isScrolled ? 'text-gray-700' : 'text-white'
+                      }`}>
+                      {profile?.name}
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''
+                        } ${isScrolled ? 'text-gray-600' : 'text-white'}`}
+                    />
+                  </button>
+                  {/* Dropdown Menu Box */}
+                  {isDropdownOpen && (
+                    <div
+                      className={`absolute right-0 top-full mt-2 w-48 rounded-lg shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 ${isScrolled ? 'bg-white' : 'bg-gray-800'
+                        }`}
+                    >
+                      {/* Menu items */}
+                      <Link
+                        to="/my-orders"
+                        className={`flex items-center gap-2 px-4 py-2 text-sm ${isScrolled
+                          ? 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                          : 'text-gray-200 hover:bg-gray-700 hover:text-white'
+                          } w-full`}
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <ShoppingBag size={16} />
+                        Orders
+                      </Link>
+
+                      {/* Account */}
+                      <Link
+                        to="/my-account"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black w-full"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <User size={16} />
+                        Account
+                      </Link>
+
+                      {/* Admin (Only if admin) */}
+                      {profile?.role === "admin" && (
+                        <Link
+                          to="/admin/templates"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-black w-full"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          <LayoutDashboard size={16} />
+                          Admin
+                        </Link>
+                      )}
+
+                      <div className={`h-px my-1 mx-2 ${isScrolled ? 'bg-gray-200' : 'bg-gray-700'
+                        }`}></div>
+                      {/* Logout */}
+                      <button
+                        onClick={async () => {
+                          setIsDropdownOpen(false);
+                          await signOut();
+                          navigate("/");
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 text-sm ${isScrolled
+                          ? 'text-red-600 hover:bg-red-50'
+                          : 'text-red-400 hover:bg-red-900/20 hover:text-red-300'
+                          } w-full text-left`}
+                      >
+                        <LogOut size={16} />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <Link to="/login">
                   <Button className="bg-white text-black hover:bg-white/90 font-semibold">
@@ -466,10 +213,14 @@ const Index = () => {
             </div>
           </nav>
 
+
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-3 mr-2 rounded-xl bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all"
+            className={`md:hidden p-3 mr-2 rounded-xl transition-all ${isScrolled
+                ? 'bg-white/70 hover:bg-white/90 text-gray-700'
+                : 'bg-transparent text-white/90 hover:bg-white/10'
+              }`}
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -477,41 +228,128 @@ const Index = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-black/90 backdrop-blur-2xl border-t border-white/10">
-            <div className="px-6 py-8 space-y-6">
-              <a href="#services" onClick={(e) => { e.preventDefault(); document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false); }} className="block text-white text-lg py-2">
-                Services
-              </a>
-              <a href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false); }} className="block text-white text-lg py-2">
-                Contact
-              </a>
-              <Link to="/cart" onClick={() => setMobileMenuOpen(false)} className="block text-white text-lg py-2">
-                Cart
-              </Link>
-              {user ? (
-                <>
-                  <Link to="/my-orders" onClick={() => setMobileMenuOpen(false)} className="block text-white text-lg py-2">Orders</Link>
-                  <Link to="/my-account" onClick={() => setMobileMenuOpen(false)} className="block text-white text-lg py-2">My Account</Link>
-                  {profile?.role === "admin" && (
-                    <Link to="/admin/templates" onClick={() => setMobileMenuOpen(false)} className="block text-white text-lg py-2">Admin Panel</Link>
+          <div className="fixed inset-0 z-50">
+            {/* Overlay */}
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setMobileMenuOpen(false)}
+            ></div>
+
+            {/* Mobile Menu */}
+            <div className="absolute inset-0 w-full bg-white shadow-2xl transform transition-transform duration-300 ease-in-out">
+              <div className="h-full flex flex-col">
+                {/* Header */}
+                <div className="flex justify-between items-center p-4 border-b">
+                  <h2 className="text-xl font-semibold">Menu</h2>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-full hover:bg-gray-100"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                {/* Menu Items */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  <a
+                    href="#services"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    Services
+                  </a>
+                  <a
+                    href="#contact"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    Contact
+                  </a>
+                  <Link
+                    to="/cart"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    Cart
+                  </Link>
+
+                  {user ? (
+                    <>
+                      <div className="border-t my-2"></div>
+                      <Link
+                        to="/my-orders"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        Orders
+                      </Link>
+                      <Link
+                        to="/my-account"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        My Account
+                      </Link>
+                      {profile?.role === "admin" && (
+                        <Link
+                          to="/admin/templates"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block text-gray-800 text-lg py-3 px-4 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                          Admin Panel
+                        </Link>
+                      )}
+                      <div className="mt-4">
+                        <Button
+                          onClick={async () => {
+                            await signOut();
+                            navigate("/");
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full bg-red-600 text-white hover:bg-red-700 py-6 text-lg"
+                        >
+                          Logout
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="mt-4 space-y-3">
+                      <Link
+                        to="/login"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block"
+                      >
+                        <Button className="w-full bg-blue-600 text-white hover:bg-blue-700 py-6 text-lg">
+                          Login
+                        </Button>
+                      </Link>
+                      <Link
+                        to="/signup"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block"
+                      >
+                        <Button variant="outline" className="w-full py-6 text-lg border-gray-300">
+                          Sign Up
+                        </Button>
+                      </Link>
+                    </div>
                   )}
-                  <Button onClick={async () => { await signOut(); navigate("/"); setMobileMenuOpen(false); }} className="w-full bg-white text-black hover:bg-gray-200">
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full bg-white text-black hover:bg-gray-200">
-                    Login
-                  </Button>
-                </Link>
-              )}
+                </div>
+              </div>
             </div>
           </div>
         )}
       </header>
 
-      <Hero />
+      <Hero id="hero" />
       <PaymentBanner />
 
       <main className="container mx-auto max-w-7xl px-4 py-12">

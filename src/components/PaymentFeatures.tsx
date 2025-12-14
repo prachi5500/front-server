@@ -70,7 +70,7 @@ export const PaymentFeatures = () => {
         ref={sectionRef}
         className="relative min-h-screen w-full py-20 "
         style={{
-          backgroundImage: `url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWbuB8lCQhWWFSrqy-lrvGLNnEnNOIn_3T7Q&s')`,
+          backgroundImage: `url('/Service_image.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed',
@@ -110,7 +110,7 @@ export const PaymentFeatures = () => {
             </div>
 
             {/* Right: Sticky Card */}
-            <div className="h-screen sticky top-0 flex items-center justify-center py-10">
+            {/* <div className="h-screen sticky top-0 flex items-center justify-center py-10">
               <div className="relative w-full max-w-2xl">
                 <div
                   ref={animatedCardRef}
@@ -146,7 +146,7 @@ export const PaymentFeatures = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
           </div>
         </div>

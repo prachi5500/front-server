@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";      // ⬅️ ADD THIS
+import ForgotPassword from "./pages/ForgotPassword";     
 import ResetPassword from "./pages/ResetPassword";  
 import ReturnPolicy from "./pages/ReturnPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
