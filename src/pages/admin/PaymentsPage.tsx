@@ -100,7 +100,8 @@ const PaymentsPage = () => {
   const handleDownloadCard = async (paymentId: string, templateId: string, title: string = 'card') => {
     try {
       const safeTitle = (title || 'card').toString();
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      // const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const apiUrl = import.meta.env.VITE_API_URL;
       console.log('Requesting URL:', `${apiUrl}/payments/download-card/${paymentId}/${templateId}`); // Debug log
 
       const response = await fetch(`${apiUrl}/payments/download-card/${paymentId}/${templateId}`, {
