@@ -33,7 +33,7 @@ const slides = [
 ];
 
 interface HeroProps {
-  id?: string;  
+  id?: string;
 }
 export const Hero = ({ id }: HeroProps) => {
   const [index, setIndex] = useState(0);
@@ -82,9 +82,21 @@ export const Hero = ({ id }: HeroProps) => {
 
       {/* FLOATING LOGO CLOUDS */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <img src="/logos/logo1.png" className="absolute top-10 left-10 w-14 animate-cloud-slow" />
-        <img src="/logos/logo2.png" className="absolute bottom-14 right-20 w-16 animate-cloud" />
-        <img src="/logos/logo3.png" className="absolute top-1/2 left-1/3 w-12 animate-cloud-fast" />
+        <img
+          src={`${process.env.PUBLIC_URL}/logos/logo1.png`}
+          alt="Floating Logo 1"
+          className="absolute top-10 left-10 w-14 animate-cloud-slow"
+        />
+        <img
+          src={`${process.env.PUBLIC_URL}/logos/logo2.png`}
+          alt="Floating Logo 2"
+          className="absolute bottom-14 right-20 w-16 animate-cloud"
+        />
+        <img
+          src={`${process.env.PUBLIC_URL}/logos/logo3.png`}
+          alt="Floating Logo 3"
+          className="absolute top-1/2 left-1/3 w-12 animate-cloud-fast"
+        />
       </div>
 
       {/* CONTENT */}
