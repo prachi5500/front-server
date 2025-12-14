@@ -217,7 +217,10 @@ const Index = () => {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-3 mr-2 rounded-xl bg-white/10 backdrop-blur-md text-white hover:bg-white/20 transition-all"
+            className={`md:hidden p-3 mr-2 rounded-xl transition-all ${isScrolled
+                ? 'bg-white/70 hover:bg-white/90 text-gray-700'
+                : 'bg-transparent text-white/90 hover:bg-white/10'
+              }`}
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
