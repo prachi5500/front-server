@@ -17,22 +17,26 @@ const app = express();
 // Allow requests from your specific Frontend URL
 app.use(cors({
   origin: [
-    'https://generate-card-delta.vercel.app',
+    'https://front-server-six.vercel.app',
+    'https://front-server-qchymqbei-prachi5500s-projects.vercel.app',
     'http://localhost:8080',
     'http://localhost:8081',
     'http://localhost:3000',
     'http://127.0.0.1:8080',
     'http://127.0.0.1:8081'
   ],
+ 
   credentials: true
 }));
+
+
+// IMPORTANT: preflight handle
+app.options("*", cors());
 
 // ✅ FIX: Payload limit settings ko sabse upar rakhein (Before morgan & routes)
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-// Body parser ki zarurat ab nahi hai kyunki express.json() upar use ho gaya hai, 
-// lekin safety ke liye agar aap rakhna chahein to rakh sakte hain:
-// app.use(bodyParser.json({ limit: '50mb' })); 
+
 
 app.use(morgan('dev'));
 app.disable('x-powered-by');
@@ -74,7 +78,7 @@ app.get('/', (req, res) => {
   res.send("Backend is running successfully. Please use the Frontend URL to view the application.");
 });
 
-const PORT = 3003; 
+const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
   console.log(`API listening on port ${PORT}`);
 });

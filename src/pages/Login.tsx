@@ -298,10 +298,11 @@ const Login = () => {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  // Navigate to forgot password page or show forgot password modal
-                  window.location.href = '/forgot-password';
-                }}
+                // onClick={() => {
+                //   // Navigate to forgot password page or show forgot password modal
+                //   window.location.href = '/forgot-password';
+                // }}
+                 onClick={() => navigate("/forgot-password")}
                 className="text-blue-600 hover:text-blue-700 hover:underline transition-colors"
               >
                 Forgot Password?
