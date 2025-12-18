@@ -1,3 +1,5 @@
+console.log("ForgotPassword component rendered");
+
 import { useState } from "react";
 import { apiFetch } from "@/services/api";
 
@@ -55,6 +57,9 @@ const ForgotPassword = () => {
 
             <button
               type="submit"
+                onClick={() => {
+    console.log("SEND RESET BUTTON CLICKED");
+  }}
               className="w-full bg-black text-white rounded py-2 mt-2"
             >
               Send Reset Link

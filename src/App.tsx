@@ -19,7 +19,7 @@ const App = () => (
       <AuthProvider>
         <CartProvider>
           <RouterProvider router={router} />
-              <AIChatbot />
+              {/* <AIChatbot /> */}
 
         </CartProvider>
       </AuthProvider>

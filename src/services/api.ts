@@ -1,14 +1,5 @@
 const BASE = import.meta.env.VITE_API_BASE as string;
 
-// ,,
- 
-console.log("API BASE URL:", BASE);
-
-if (!BASE) {
-  throw new Error("❌ API base URL is missing. Check Vercel env VITE_API_BASE_URL");
-}
-// ,,
-
 
 function getToken() {
   try {
