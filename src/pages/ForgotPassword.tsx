@@ -8,6 +8,7 @@ const ForgotPassword = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+     console.log("Forgot password submit clicked", email);
     setError("");
 
     try {
@@ -15,9 +16,12 @@ const ForgotPassword = () => {
         method: "POST",
         body: JSON.stringify({ email })
       });
+      
+    console.log("Reset link sent");
 
       setSent(true);
     } catch (e: any) {
+      console.error("Reset error:", e);
       setError(e.message ?? "Unable to send reset link");
     }
   };

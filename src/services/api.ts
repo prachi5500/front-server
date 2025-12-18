@@ -1,5 +1,15 @@
 const BASE = import.meta.env.VITE_API_BASE as string;
 
+// ,,
+ 
+console.log("API BASE URL:", BASE);
+
+if (!BASE) {
+  throw new Error("❌ API base URL is missing. Check Vercel env VITE_API_BASE_URL");
+}
+// ,,
+
+
 function getToken() {
   try {
     return localStorage.getItem('token');
@@ -17,9 +27,14 @@ export async function apiFetch(path: string, opts: RequestInit = {}) {
 
   // ⛔ Do NOT attach JWT for reset-password route
   const token = getToken();
-  if (token && !path.includes("reset-password")) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  if (
+  token &&
+  !path.includes("reset-password") &&
+  !path.includes("request-reset")
+) {
+  headers['Authorization'] = `Bearer ${token}`;
+}
+
 
   const res = await fetch(`${BASE}${path}`, { ...opts, headers });
 
