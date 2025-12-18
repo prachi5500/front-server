@@ -1,18 +1,97 @@
+// import { useState } from "react";
+// import { useSearchParams, useNavigate } from "react-router-dom";
+// import { apiFetch } from "@/services/api";
+
+// const ResetPassword = () => {
+//   const [password, setPassword] = useState("");
+//   const [message, setMessage] = useState("");
+//   const navigate = useNavigate();
+//   const [params] = useSearchParams();
+
+//   // const token = decodeURIComponent(params.get("token") || "");
+// const token = params.get("token") || "";
+
+
+
+//   const onSubmit = async (e: any) => {
+//     e.preventDefault();
+//     if (!token) return setMessage("Invalid link");
+
+//     try {
+//       const res = await apiFetch("/auth/reset-password", {
+//         method: "POST",
+//         body: JSON.stringify({ token, password })
+//       });
+
+//       setMessage("Password reset successful! Redirecting...");
+//       setTimeout(() => navigate("/login"), 2000);
+//     } catch (err: any) {
+//       setMessage(err.message || "Failed to reset");
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen flex items-center justify-center p-4">
+//       <form onSubmit={onSubmit} className="w-full max-w-sm border p-6 rounded-lg space-y-4">
+//         <h1 className="text-xl font-semibold">Reset Password</h1>
+
+//         {message && <p className="text-red-500">{message}</p>}
+
+//         <div className="space-y-1">
+//           <label className="text-sm">New Password</label>
+//           <input
+//             type="password"
+//             className="w-full border rounded px-3 py-2"
+//             required
+//             value={password}
+//             onChange={(e) => setPassword(e.target.value)}
+//           />
+//         </div>
+
+//         <button className="w-full bg-black text-white py-2 rounded">
+//           Reset Password
+//         </button>
+//       </form>
+//     </div>
+//   );
+// };
+
+// export default ResetPassword;
+
+
+
+
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { apiFetch } from "@/services/api";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // ✅ ADD THIS
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
-  const token = decodeURIComponent(params.get("token") || "");
+  const token = params.get("token") || ""; // ✅ SIMPLE TOKEN EXTRACTION
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    if (!token) return setMessage("Invalid link");
+    
+    // ✅ ADD VALIDATION
+    if (!token) {
+      setMessage("Invalid or expired reset link");
+      return;
+    }
+    
+    if (password.length < 6) {
+      setMessage("Password must be at least 6 characters");
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setMessage("Passwords do not match");
+      return;
+    }
 
     try {
       const res = await apiFetch("/auth/reset-password", {
@@ -20,10 +99,10 @@ const ResetPassword = () => {
         body: JSON.stringify({ token, password })
       });
 
-      setMessage("Password reset successful! Redirecting...");
+      setMessage("✅ Password reset successful! Redirecting...");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err: any) {
-      setMessage(err.message || "Failed to reset");
+      setMessage(err.message || "Failed to reset password");
     }
   };
 
@@ -32,25 +111,42 @@ const ResetPassword = () => {
       <form onSubmit={onSubmit} className="w-full max-w-sm border p-6 rounded-lg space-y-4">
         <h1 className="text-xl font-semibold">Reset Password</h1>
 
-        {message && <p className="text-red-500">{message}</p>}
+        {message && (
+          <p className={`text-sm ${message.includes('✅') ? 'text-green-600' : 'text-red-500'}`}>
+            {message}
+          </p>
+        )}
 
         <div className="space-y-1">
-          <label className="text-sm">New Password</label>
+          <label className="text-sm">New Password (min 6 characters)</label>
           <input
             type="password"
             className="w-full border rounded px-3 py-2"
             required
+            minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
-        <button className="w-full bg-black text-white py-2 rounded">
+        <div className="space-y-1"> {/* ✅ ADD CONFIRM PASSWORD FIELD */}
+          <label className="text-sm">Confirm Password</label>
+          <input
+            type="password"
+            className="w-full border rounded px-3 py-2"
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+        </div>
+
+        <button 
+          type="submit" 
+          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+        >
           Reset Password
         </button>
       </form>
     </div>
   );
 };
-
-export default ResetPassword;
